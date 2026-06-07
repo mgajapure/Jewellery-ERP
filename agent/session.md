@@ -1,0 +1,131 @@
+# Agent Session Log
+
+All future agent sessions must be recorded in this file. Append a new dated entry for each session, including the user goal, important decisions, files changed, verification performed, and any known issues or next steps.
+
+## 2026-06-08 - Auth Flow UI From Design Reference
+
+### Goal
+
+Build the authentication flow for the Jewellery ERP Flutter app based on the reference image at `app_design_screens/1-4.png`.
+
+Required flow:
+
+1. Splash screen
+2. Mobile number entry screen
+3. OTP verification screen
+4. Registration pending screen
+5. Dashboard
+
+### What Was Done
+
+- Added a new auth feature structure under `lib/src/features/auth/`.
+- Created separate page files instead of keeping all screens in one file:
+  - `lib/src/features/auth/pages/splash_page.dart`
+  - `lib/src/features/auth/pages/mobile_number_page.dart`
+  - `lib/src/features/auth/pages/otp_verification_page.dart`
+  - `lib/src/features/auth/pages/registration_pending_page.dart`
+- Created shared auth widgets:
+  - `auth_background.dart`
+  - `auth_divider_gem.dart`
+  - `auth_footer.dart`
+  - `auth_info_notice.dart`
+  - `auth_logo_mark.dart`
+  - `auth_round_icon.dart`
+  - `auth_top_bar.dart`
+  - `language_toggle.dart`
+  - `mobile_number_input.dart`
+  - `otp_boxes.dart`
+  - `primary_auth_button.dart`
+- Created shared auth colors:
+  - `lib/src/features/auth/theme/auth_colors.dart`
+- Created an auth barrel export:
+  - `lib/src/features/auth/auth.dart`
+- Updated `lib/src/app/app_router.dart` to start at `/splash` and route through the auth flow.
+- Removed the artificial phone mockup wrapper after clarification that the design image only showed mobile previews.
+- Converted the mobile number and OTP UI from static placeholders into editable `TextField` inputs.
+
+### Important Corrections
+
+- The auth screens should render as real full-device Flutter screens, not inside a simulated phone frame.
+- The splash background needed to expand to full width and height.
+- The mobile number and OTP screens need real interactive inputs, not visual-only boxes.
+- `dart format` was attempted but interrupted multiple times, so formatting and analyzer verification may still be pending.
+
+### Known Issue
+
+There is a compile error in `mobile_number_input.dart`:
+
+```dart
+inputFormatters: const [
+  FilteringTextInputFormatter.digitsOnly,
+],
+```
+
+`FilteringTextInputFormatter.digitsOnly` is not allowed in a constant expression.
+
+Fix:
+
+```dart
+inputFormatters: [
+  FilteringTextInputFormatter.digitsOnly,
+],
+```
+
+Check `otp_boxes.dart` for the same issue if it uses `const` around `FilteringTextInputFormatter.digitsOnly`.
+
+### Next Steps
+
+- Fix the `FilteringTextInputFormatter.digitsOnly` constant-expression error.
+- Run `dart format lib/src/features/auth lib/src/app/app_router.dart`.
+- Run `flutter analyze`.
+- Review the rendered UI on an emulator/device and tune spacing to match `1-4.png` more closely.
+
+## 2026-06-08 - Dashboard UI From `dashboard_o.png`
+
+### Goal
+
+Redesign the owner dashboard based on the new reference image at `app_design_screens/dashboard_o.png`, while avoiding the previous mistake of building inside a fake mobile frame.
+
+### What Was Done
+
+- Replaced the old chart-based dashboard in `lib/src/features/dashboard/dashboard_page.dart`.
+- Built a full-device dashboard screen matching the reference structure:
+  - Top toolbar with menu, title, and notification badge.
+  - Gold rate summary card with navy background and gold amount.
+  - Key metrics section with a two-column card grid.
+  - Quick actions row.
+  - Bottom navigation bar.
+- Kept the screen as a normal Flutter page, not inside any phone mockup wrapper.
+- Fixed the earlier `FilteringTextInputFormatter.digitsOnly` constant-expression issue in auth input widgets.
+- Ran formatting.
+- Ran `flutter analyze`.
+
+### Verification
+
+- `dart format lib/src/features/dashboard/dashboard_page.dart lib/src/features/auth lib/src/app/app_router.dart` completed successfully.
+- `flutter analyze` completed successfully with no issues.
+
+### Known Issues
+
+- No analyzer issues currently.
+- Visual tuning may still be needed after checking on a real emulator/device against the reference image.
+
+## 2026-06-08 - Dashboard Recent Payments
+
+### Goal
+
+Add a recent payment transactions list below Quick Actions on the dashboard, using bilingual Marathi and English labels consistent with the rest of the dashboard.
+
+### What Was Done
+
+- Updated `lib/src/features/dashboard/dashboard_page.dart`.
+- Added the section header `अलीकडील पेमेंट्स / Recent Payments`.
+- Added a `सर्व पहा / View All` trailing label.
+- Added a white transaction list card with three sample payment rows.
+- Each row includes customer name, English subtitle, payment type, amount, time, status, and a payment icon.
+- Rewrote dashboard labels with valid Marathi text where earlier console encoding had shown mojibake.
+
+### Verification
+
+- `dart format lib/src/features/dashboard/dashboard_page.dart` completed successfully.
+- `flutter analyze` completed successfully with no issues.

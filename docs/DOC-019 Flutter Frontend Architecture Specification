@@ -1,0 +1,1074 @@
+Jewellery ERP & Girvi Management Platform
+
+Flutter Frontend Architecture Specification v1.0
+
+Document Code: DOC-019
+Architecture Type: Frontend Architecture
+Framework: Flutter 3.29+
+Language: Dart 3+
+State Management: flutter_bloc
+Routing: go_router
+Local Database: Drift (SQLite)
+Offline Engine: Sync Queue Architecture
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official frontend architecture for the Jewellery ERP mobile application.
+
+This document acts as the source of truth for:
+
+* Flutter Architecture
+* UI Architecture
+* State Management
+* Navigation
+* Offline Strategy
+* Localization
+* Design System
+* Feature Structure
+* API Integration
+* Error Handling
+* Testing Standards
+
+Every AI agent and frontend developer must follow this document.
+
+⸻
+
+2. Architectural Principles
+
+AP-FE-001
+
+Feature First Architecture.
+
+⸻
+
+AP-FE-002
+
+Offline First.
+
+⸻
+
+AP-FE-003
+
+BLoC State Management Only.
+
+⸻
+
+AP-FE-004
+
+Reusable UI Components.
+
+⸻
+
+AP-FE-005
+
+Localization First.
+
+⸻
+
+AP-FE-006
+
+Strict Separation of Concerns.
+
+⸻
+
+AP-FE-007
+
+API Agnostic Business Logic.
+
+⸻
+
+AP-FE-008
+
+Enterprise Grade Scalability.
+
+⸻
+
+3. High Level Architecture
+
+Presentation Layer
+        |
+BLoC Layer
+        |
+Repository Layer
+        |
+Data Sources
+     /      \
+Remote     Local
+ API      SQLite
+
+⸻
+
+4. Project Structure
+
+lib/
+app/
+core/
+features/
+shared/
+l10n/
+main.dart
+
+⸻
+
+5. Core Folder Structure
+
+core/
+api/
+auth/
+database/
+network/
+storage/
+theme/
+navigation/
+localization/
+sync/
+errors/
+constants/
+utils/
+
+⸻
+
+6. Feature Structure Standard
+
+Every module must follow:
+
+features/
+module/
+presentation/
+bloc/
+pages/
+widgets/
+data/
+models/
+repositories/
+datasources/
+domain/
+entities/
+usecases/
+
+Example:
+
+features/
+customers/
+presentation/
+bloc/
+pages/
+widgets/
+data/
+repositories/
+
+⸻
+
+7. Complete Module Structure
+
+features/
+auth/
+dashboard/
+customers/
+girvi/
+interest/
+vault/
+compliance/
+staff/
+reports/
+inventory/
+purchase/
+sales/
+savings/
+settings/
+
+⸻
+
+8. Clean Architecture Rules
+
+Presentation Layer
+
+Contains:
+
+Pages
+Widgets
+Dialogs
+Bottom Sheets
+
+⸻
+
+BLoC Layer
+
+Contains:
+
+Events
+States
+Business UI Logic
+
+⸻
+
+Repository Layer
+
+Contains:
+
+Data Mapping
+Data Aggregation
+
+⸻
+
+Data Source Layer
+
+Contains:
+
+API Calls
+Database Queries
+
+⸻
+
+9. State Management Standard
+
+Framework
+
+flutter_bloc
+
+⸻
+
+Structure
+
+customer_bloc.dart
+customer_event.dart
+customer_state.dart
+
+⸻
+
+Rules
+
+One BLoC per screen group.
+
+⸻
+
+Never:
+
+One BLoC per widget.
+
+⸻
+
+10. Event Naming Convention
+
+Format:
+
+LoadCustomers
+CreateCustomer
+UpdateCustomer
+DeleteCustomer
+
+⸻
+
+Examples
+
+LoadGirviDetails
+RecordPayment
+RedeemGirvi
+LoadDashboard
+
+⸻
+
+11. State Naming Convention
+
+Initial
+Loading
+Loaded
+Error
+
+⸻
+
+Example:
+
+CustomerInitial
+CustomerLoading
+CustomerLoaded
+CustomerError
+
+⸻
+
+12. Routing Architecture
+
+Framework
+
+go_router
+
+⸻
+
+Route Structure
+
+/
+login
+dashboard
+customers
+customers/:id
+girvi
+girvi/:id
+sales
+inventory
+settings
+
+⸻
+
+Route Guards
+
+AuthGuard
+PermissionGuard
+DeviceGuard
+
+⸻
+
+13. Navigation Standards
+
+Mobile
+
+Bottom Navigation.
+
+Modules:
+
+Dashboard
+Customers
+Girvi
+Reports
+Settings
+
+⸻
+
+Deep Navigation
+
+go_router nested routes.
+
+⸻
+
+14. UI Design System
+
+Theme Source
+
+Settings Module.
+
+⸻
+
+Supported Modes
+
+Light
+Dark
+System
+
+⸻
+
+Colors
+
+Primary
+Secondary
+Success
+Warning
+Danger
+Info
+
+⸻
+
+Typography
+
+Display
+Headline
+Title
+Body
+Caption
+
+⸻
+
+15. Widget Architecture
+
+Shared Widgets Folder
+
+shared/widgets/
+
+⸻
+
+Examples
+
+AppButton
+AppTextField
+AppDropdown
+AppCard
+AppLoader
+AppEmptyState
+AppErrorState
+AppSearchBar
+
+⸻
+
+Rule
+
+Reusable widgets only.
+
+⸻
+
+16. Screen Development Standard
+
+Each screen must contain:
+
+Page
+Bloc
+Events
+States
+Repository
+API Integration
+
+⸻
+
+Example:
+
+CustomerListPage
+CustomerBloc
+LoadCustomers
+CustomerLoaded
+
+⸻
+
+17. Localization Architecture
+
+Languages
+
+English
+Marathi
+Hindi
+
+⸻
+
+Source
+
+ARB files.
+
+⸻
+
+Structure
+
+l10n/
+app_en.arb
+app_mr.arb
+app_hi.arb
+
+⸻
+
+Rules
+
+Never hardcode text.
+
+⸻
+
+Example
+
+Wrong:
+
+Text("Customer")
+
+⸻
+
+Correct:
+
+context.l10n.customer
+
+⸻
+
+18. Marathi Localization Rules
+
+Every label must support:
+
+English
+Marathi
+
+Example:
+
+Customer
+ग्राहक
+
+⸻
+
+Dynamic Switching
+
+Supported.
+
+⸻
+
+19. API Layer Architecture
+
+Framework
+
+Dio
+
+⸻
+
+Structure
+
+core/api/
+api_client.dart
+interceptors/
+auth_interceptor.dart
+
+⸻
+
+Responsibilities
+
+Authentication
+Retry
+Refresh Token
+Logging
+
+⸻
+
+20. API Repository Pattern
+
+Example:
+
+CustomerRepository
+
+Methods:
+
+getCustomers()
+getCustomer()
+createCustomer()
+
+⸻
+
+Rule
+
+UI never calls API directly.
+
+⸻
+
+21. Offline Architecture
+
+Local Database
+
+Drift SQLite
+
+⸻
+
+Cached Modules
+
+Customers
+Girvi
+Payments
+Vault
+Reports
+Settings
+
+⸻
+
+Sync States
+
+Pending
+Syncing
+Synced
+Failed
+Conflict
+
+⸻
+
+22. Sync Queue Structure
+
+sync_queue
+
+Fields:
+
+id
+entity
+action
+payload
+status
+
+⸻
+
+Sync Strategy
+
+Write Local
+Queue Sync
+Background Upload
+
+⸻
+
+23. File Upload Architecture
+
+Supported Files
+
+Images
+KYC Documents
+PDFs
+Reports
+
+⸻
+
+Upload Flow
+
+Capture
+    |
+Compress
+    |
+Store Local
+    |
+Upload Queue
+    |
+Server Sync
+
+⸻
+
+24. Error Handling Architecture
+
+Error Types
+
+Validation
+Network
+Authentication
+Authorization
+System
+
+⸻
+
+UI States
+
+Loading
+Empty
+Error
+Success
+
+⸻
+
+Global Error Widget
+
+Mandatory.
+
+⸻
+
+25. Authentication Flow
+
+Login
+   |
+OTP
+   |
+Device Approval
+   |
+JWT
+   |
+Dashboard
+
+⸻
+
+Local Storage
+
+Secure Storage.
+
+⸻
+
+Stored Data
+
+Access Token
+Refresh Token
+User Profile
+
+⸻
+
+26. Permission Architecture
+
+Source
+
+RBAC Module.
+
+⸻
+
+Usage
+
+PermissionWidget(
+ permission: "GIRVI_CREATE"
+)
+
+⸻
+
+Rules
+
+Hide unauthorized actions.
+
+⸻
+
+27. Dashboard Widget Architecture
+
+Dashboard composed of:
+
+KPI Widgets
+Chart Widgets
+Alert Widgets
+Task Widgets
+
+⸻
+
+Each widget independently refreshable.
+
+⸻
+
+28. Form Architecture
+
+Framework
+
+flutter_form_builder
+
+⸻
+
+Validation
+
+Real-time.
+
+⸻
+
+Standard Controls
+
+TextField
+Dropdown
+DatePicker
+ImagePicker
+Scanner
+SignaturePad
+
+⸻
+
+29. Search Architecture
+
+Global Search
+
+Supported Modules:
+
+Customers
+Girvi
+Inventory
+Sales
+Purchase
+
+⸻
+
+Search Types
+
+Text
+QR
+Barcode
+
+⸻
+
+30. Barcode & QR Architecture
+
+Framework
+
+mobile_scanner
+
+⸻
+
+Uses
+
+Inventory
+Customer QR
+Girvi QR
+Sales
+
+⸻
+
+31. Notification Architecture
+
+Types
+
+Push
+Local
+In-App
+
+⸻
+
+Providers
+
+Firebase Cloud Messaging.
+
+⸻
+
+Local Notifications
+
+flutter_local_notifications
+
+⸻
+
+32. Performance Standards
+
+App Launch:
+
+< 3 Seconds
+
+⸻
+
+Screen Load:
+
+< 2 Seconds
+
+⸻
+
+Search:
+
+< 1 Second
+
+⸻
+
+Barcode Scan:
+
+< 500 ms
+
+⸻
+
+33. Security Standards
+
+Storage
+
+flutter_secure_storage
+
+⸻
+
+Rules
+
+Never store:
+
+Passwords
+OTP
+Secrets
+
+⸻
+
+Encryption
+
+Sensitive local data encrypted.
+
+⸻
+
+34. Testing Architecture
+
+Unit Tests
+
+bloc_test
+
+⸻
+
+Widget Tests
+
+flutter_test
+
+⸻
+
+Integration Tests
+
+integration_test
+
+⸻
+
+Coverage
+
+Minimum:
+
+80%
+
+⸻
+
+35. Design System Structure
+
+shared/design_system/
+colors.dart
+typography.dart
+spacing.dart
+radius.dart
+icons.dart
+
+⸻
+
+Standard Spacing
+
+4
+8
+12
+16
+20
+24
+32
+
+⸻
+
+36. App Bootstrap Architecture
+
+main.dart
+    |
+AppBootstrap
+    |
+Dependency Injection
+    |
+Local DB Init
+    |
+API Init
+    |
+App Start
+
+⸻
+
+37. Dependency Injection
+
+Framework
+
+get_it
+
+⸻
+
+Registration
+
+Repositories
+Services
+Blocs
+
+⸻
+
+Rule
+
+No manual singleton creation.
+
+⸻
+
+38. Analytics Architecture
+
+Events
+
+Screen Viewed
+Button Clicked
+Search Executed
+Report Generated
+
+⸻
+
+Integration
+
+Firebase Analytics.
+
+⸻
+
+39. Frontend Development Workflow
+
+Create Feature
+      |
+Create Models
+      |
+Create Repository
+      |
+Create Bloc
+      |
+Create UI
+      |
+Create Tests
+      |
+Integrate API
+
+⸻
+
+40. AI Agent Development Rules
+
+AI MUST
+
+✓ Use BLoC
+
+✓ Use Repositories
+
+✓ Use Localization
+
+✓ Use Design System
+
+✓ Use Shared Widgets
+
+✓ Handle Offline State
+
+✓ Handle Loading State
+
+✓ Handle Error State
+
+✓ Write Tests
+
+⸻
+
+AI MUST NEVER
+
+✗ Call APIs from UI
+
+✗ Hardcode Strings
+
+✗ Hardcode Colors
+
+✗ Use setState for Business Logic
+
+✗ Bypass BLoC
+
+✗ Duplicate Widgets
+
+✗ Ignore Offline Support
+
+⸻
+
+41. Recommended Packages
+
+flutter_bloc
+go_router
+dio
+get_it
+drift
+sqlite3
+flutter_secure_storage
+firebase_messaging
+flutter_local_notifications
+mobile_scanner
+flutter_form_builder
+equatable
+freezed
+json_serializable
+
+⸻
+
+42. Frontend Source Tree (Final)
+
+lib/
+app/
+core/
+shared/
+features/
+auth/
+dashboard/
+customers/
+girvi/
+interest/
+vault/
+compliance/
+staff/
+reports/
+inventory/
+purchase/
+sales/
+savings/
+settings/
+l10n/
+main.dart
+
+⸻
+
+43. Future Architecture Evolution
+
+Phase 2:
+
+Micro Frontends
+Widget Marketplace
+AI Assisted Forms
+
+⸻
+
+Phase 3:
+
+Voice Commands
+AI Copilot
+Offline Analytics
+Smart Search
+
+END OF DOCUME

@@ -1,0 +1,761 @@
+Jewellery ERP & Girvi Management Platform
+
+Database Schema Specification v1.0
+
+Document Type: Database Architecture & Schema Specification
+Version: 1.0
+Status: Approved Architecture Baseline
+Database: PostgreSQL 16 (Cloud) + SQLCipher SQLite (Offline)
+ORM: Prisma ORM (Recommended)
+Backend: NestJS
+
+⸻
+
+1. Purpose
+
+This document defines:
+
+* Complete database architecture
+* Entity relationships
+* Table structures
+* Constraints
+* Indexes
+* Multi-tenancy strategy
+* Audit architecture
+* Offline sync architecture
+* Backup architecture
+
+This document acts as the single source of truth for database implementation.
+
+⸻
+
+2. Database Architecture
+
+Cloud Database
+
+Technology:
+
+PostgreSQL 16
+
+Responsibilities:
+
+* Master Data Store
+* Multi Tenant Isolation
+* Reporting
+* Compliance
+* Analytics
+* Backups
+
+⸻
+
+Local Database
+
+Technology:
+
+SQLite + SQLCipher
+
+Responsibilities:
+
+* Offline Operations
+* Local Cache
+* Sync Queue
+* Temporary Files
+
+⸻
+
+3. Multi Tenant Strategy
+
+Every business = Tenant
+
+Every transactional table contains:
+
+tenant_id UUID NOT NULL
+
+Rules:
+
+* No cross-tenant queries
+* Row level security enabled
+* Every API must filter tenant_id
+
+⸻
+
+4. Common Columns
+
+Every table includes:
+
+created_at TIMESTAMPTZ
+updated_at TIMESTAMPTZ
+created_by UUID
+updated_by UUID
+is_deleted BOOLEAN DEFAULT FALSE
+deleted_at TIMESTAMPTZ NULL
+
+⸻
+
+5. Master Entity Relationship
+
+Tenant
+ |
+ +--- Users
+ |
+ +--- Customers
+ |         |
+ |         +--- Documents
+ |         +--- QR Codes
+ |
+ +--- Girvi
+ |      |
+ |      +--- GirviItems
+ |      +--- Payments
+ |      +--- KFS
+ |      +--- Auction
+ |
+ +--- Vault
+ |      |
+ |      +--- Safe
+ |      +--- Tray
+ |      +--- Slot
+ |
+ +--- Inventory
+ |
+ +--- Sales
+ |
+ +--- Purchases
+ |
+ +--- Savings
+ |
+ +--- Reports
+ |
+ +--- Audit Logs
+
+⸻
+
+6. Tenant Table
+
+tenant
+
+tenant_id UUID PK
+business_name VARCHAR(200)
+owner_name VARCHAR(200)
+mobile VARCHAR(15)
+email VARCHAR(200)
+gst_number VARCHAR(20)
+money_lending_license VARCHAR(50)
+address TEXT
+city VARCHAR(100)
+state VARCHAR(100)
+pincode VARCHAR(10)
+subscription_tier ENUM
+subscription_expiry DATE
+is_active BOOLEAN
+created_at TIMESTAMPTZ
+
+Indexes:
+
+IDX_TENANT_MOBILE
+IDX_TENANT_SUBSCRIPTION
+
+⸻
+
+7. User Table
+
+users
+
+user_id UUID PK
+tenant_id UUID FK
+full_name VARCHAR(200)
+mobile VARCHAR(15)
+email VARCHAR(200)
+role ENUM(
+OWNER,
+MANAGER,
+STAFF,
+ACCOUNTANT
+)
+pin_hash TEXT
+is_biometric_enabled BOOLEAN
+status ENUM(
+ACTIVE,
+INACTIVE,
+SUSPENDED
+)
+last_login_at TIMESTAMPTZ
+created_at TIMESTAMPTZ
+
+Indexes:
+
+IDX_USER_MOBILE
+IDX_USER_ROLE
+IDX_USER_STATUS
+
+⸻
+
+8. Device Table
+
+devices
+
+device_id UUID PK
+tenant_id UUID FK
+user_id UUID FK
+device_fingerprint TEXT
+device_name VARCHAR(200)
+platform VARCHAR(50)
+app_version VARCHAR(50)
+approval_status ENUM(
+PENDING,
+APPROVED,
+REJECTED
+)
+approved_by UUID
+approved_at TIMESTAMPTZ
+last_seen_at TIMESTAMPTZ
+
+⸻
+
+9. Customer Table
+
+customers
+
+customer_id UUID PK
+tenant_id UUID FK
+digital_customer_id VARCHAR(30)
+name VARCHAR(200)
+mobile VARCHAR(15)
+alternate_mobile VARCHAR(15)
+gender ENUM
+date_of_birth DATE
+aadhaar_masked VARCHAR(20)
+pan_number VARCHAR(20)
+address TEXT
+photo_url TEXT
+qr_code_url TEXT
+risk_category ENUM(
+LOW,
+MEDIUM,
+HIGH
+)
+is_active BOOLEAN
+created_at TIMESTAMPTZ
+
+Constraints:
+
+UNIQUE(
+tenant_id,
+mobile
+)
+
+Indexes:
+
+IDX_CUSTOMER_NAME
+IDX_CUSTOMER_MOBILE
+IDX_CUSTOMER_QR
+
+⸻
+
+10. Customer Documents
+
+customer_documents
+
+document_id UUID PK
+tenant_id UUID FK
+customer_id UUID FK
+document_type ENUM(
+AADHAAR,
+PAN,
+DL,
+VOTER_ID,
+PHOTO
+)
+file_url TEXT
+file_hash TEXT
+uploaded_by UUID
+uploaded_at TIMESTAMPTZ
+
+⸻
+
+11. Girvi Table
+
+girvi
+
+girvi_id UUID PK
+tenant_id UUID FK
+customer_id UUID FK
+serial_asset_id VARCHAR(30)
+status ENUM(
+ACTIVE,
+PARTIAL_PAID,
+RENEWED,
+REDEEMED,
+AUCTIONED
+)
+interest_type ENUM(
+SIMPLE,
+KATMITI,
+DAILY
+)
+principal_amount DECIMAL(18,2)
+interest_rate DECIMAL(8,2)
+gold_rate_at_creation DECIMAL(18,2)
+ltv_percentage DECIMAL(8,2)
+start_date DATE
+due_date DATE
+renewal_count INTEGER
+vault_slot_id UUID
+kfs_id UUID
+created_by UUID
+created_at TIMESTAMPTZ
+
+Indexes:
+
+IDX_GIRVI_CUSTOMER
+IDX_GIRVI_STATUS
+IDX_GIRVI_DUE_DATE
+IDX_GIRVI_SERIAL
+
+⸻
+
+12. Girvi Items
+
+girvi_items
+
+item_id UUID PK
+girvi_id UUID FK
+item_type VARCHAR(100)
+metal_type ENUM(
+GOLD,
+SILVER
+)
+gross_weight_g DECIMAL(12,3)
+stone_weight_g DECIMAL(12,3)
+net_weight_g DECIMAL(12,3)
+carat DECIMAL(8,2)
+fine_gold_weight_g DECIMAL(12,3)
+valuation_amount DECIMAL(18,2)
+remarks TEXT
+
+⸻
+
+13. Girvi Photos
+
+girvi_item_photos
+
+photo_id UUID PK
+item_id UUID FK
+file_url TEXT
+sha256_hash TEXT
+captured_at TIMESTAMPTZ
+
+⸻
+
+14. Payment Table
+
+payments
+
+payment_id UUID PK
+tenant_id UUID FK
+girvi_id UUID FK
+amount DECIMAL(18,2)
+interest_covered DECIMAL(18,2)
+principal_reduced DECIMAL(18,2)
+payment_mode ENUM(
+CASH,
+UPI,
+BANK_TRANSFER,
+CHEQUE
+)
+payment_date DATE
+recorded_by UUID
+created_at TIMESTAMPTZ
+
+Indexes:
+
+IDX_PAYMENT_GIRVI
+IDX_PAYMENT_DATE
+
+⸻
+
+15. Interest Ledger
+
+interest_ledger
+
+ledger_id UUID PK
+tenant_id UUID FK
+girvi_id UUID FK
+calculation_date DATE
+principal DECIMAL(18,2)
+interest_amount DECIMAL(18,2)
+penalty_amount DECIMAL(18,2)
+calculation_type ENUM(
+SIMPLE,
+KATMITI,
+PENALTY
+)
+
+Purpose:
+
+Complete audit trail of interest calculations.
+
+⸻
+
+16. Vault Structure
+
+vaults
+
+vault_id UUID PK
+tenant_id UUID FK
+vault_code VARCHAR(50)
+vault_name VARCHAR(200)
+
+⸻
+
+safes
+
+safe_id UUID PK
+vault_id UUID FK
+safe_code VARCHAR(50)
+safe_name VARCHAR(200)
+
+⸻
+
+trays
+
+tray_id UUID PK
+safe_id UUID FK
+tray_number VARCHAR(50)
+
+⸻
+
+slots
+
+slot_id UUID PK
+tray_id UUID FK
+slot_code VARCHAR(50)
+status ENUM(
+AVAILABLE,
+OCCUPIED
+)
+current_girvi_id UUID
+
+⸻
+
+17. Auction Module
+
+auctions
+
+auction_id UUID PK
+tenant_id UUID FK
+girvi_id UUID FK
+notice_date DATE
+auction_date DATE
+buyer_name VARCHAR(200)
+buyer_mobile VARCHAR(15)
+sale_amount DECIMAL(18,2)
+borrower_surplus DECIMAL(18,2)
+status ENUM(
+NOTICE_SENT,
+AUCTIONED,
+SETTLED
+)
+
+⸻
+
+18. KFS Documents
+
+kfs_documents
+
+kfs_id UUID PK
+tenant_id UUID FK
+girvi_id UUID FK
+language ENUM(
+ENGLISH,
+MARATHI
+)
+pdf_url TEXT
+acknowledged BOOLEAN
+acknowledged_at TIMESTAMPTZ
+
+⸻
+
+19. Compliance Forms
+
+compliance_forms
+
+form_id UUID PK
+tenant_id UUID FK
+form_type ENUM(
+FORM_6,
+FORM_9,
+FORM_11,
+FORM_12,
+FORM_13
+)
+from_date DATE
+to_date DATE
+pdf_url TEXT
+generated_by UUID
+generated_at TIMESTAMPTZ
+
+⸻
+
+20. Inventory
+
+inventory_items
+
+inventory_id UUID PK
+tenant_id UUID FK
+barcode VARCHAR(100)
+item_name VARCHAR(200)
+metal_type ENUM
+weight DECIMAL(12,3)
+purity DECIMAL(8,2)
+cost_price DECIMAL(18,2)
+selling_price DECIMAL(18,2)
+quantity INTEGER
+status ENUM(
+ACTIVE,
+SOLD,
+RESERVED
+)
+
+⸻
+
+21. Sales
+
+sales
+
+sale_id UUID PK
+tenant_id UUID FK
+invoice_no VARCHAR(50)
+customer_name VARCHAR(200)
+subtotal DECIMAL(18,2)
+gst_amount DECIMAL(18,2)
+total_amount DECIMAL(18,2)
+payment_mode ENUM
+created_at TIMESTAMPTZ
+
+⸻
+
+22. Purchases
+
+purchases
+
+purchase_id UUID PK
+tenant_id UUID FK
+seller_name VARCHAR(200)
+seller_mobile VARCHAR(15)
+weight DECIMAL(12,3)
+purity DECIMAL(8,2)
+purchase_rate DECIMAL(18,2)
+amount_paid DECIMAL(18,2)
+created_at TIMESTAMPTZ
+
+⸻
+
+23. Savings Scheme
+
+savings_accounts
+
+scheme_id UUID PK
+tenant_id UUID FK
+customer_id UUID FK
+scheme_name VARCHAR(200)
+monthly_amount DECIMAL(18,2)
+start_date DATE
+maturity_date DATE
+status ENUM(
+ACTIVE,
+MATURED,
+CLOSED
+)
+
+⸻
+
+24. Notifications
+
+notifications
+
+notification_id UUID PK
+tenant_id UUID FK
+title VARCHAR(200)
+message TEXT
+channel ENUM(
+PUSH,
+WHATSAPP,
+IN_APP
+)
+status ENUM(
+PENDING,
+SENT,
+FAILED
+)
+created_at TIMESTAMPTZ
+
+⸻
+
+25. Audit Logs
+
+audit_logs
+
+log_id UUID PK
+tenant_id UUID FK
+user_id UUID FK
+device_id UUID FK
+entity_type VARCHAR(100)
+entity_id UUID
+action VARCHAR(100)
+old_value JSONB
+new_value JSONB
+ip_address VARCHAR(100)
+created_at TIMESTAMPTZ
+
+Important:
+
+Never update.
+
+Never delete.
+
+Append only.
+
+⸻
+
+26. Offline Sync Queue
+
+sync_queue
+
+sync_id UUID PK
+entity_type VARCHAR(100)
+entity_id UUID
+operation ENUM(
+CREATE,
+UPDATE,
+DELETE
+)
+payload JSONB
+sync_status ENUM(
+PENDING,
+SYNCING,
+SYNCED,
+FAILED,
+CONFLICT
+)
+retry_count INTEGER
+created_at TIMESTAMPTZ
+
+⸻
+
+27. Google Drive Backup
+
+backup_history
+
+backup_id UUID PK
+tenant_id UUID FK
+backup_file_name VARCHAR(500)
+backup_size BIGINT
+backup_status ENUM(
+SUCCESS,
+FAILED
+)
+created_at TIMESTAMPTZ
+
+⸻
+
+28. Index Strategy
+
+High Frequency Indexes:
+
+customers.mobile
+customers.name
+girvi.status
+girvi.due_date
+payments.payment_date
+audit_logs.created_at
+
+⸻
+
+29. Data Retention Policy
+
+Customer Records
+
+Never Delete
+
+Girvi Records
+
+Never Delete
+
+Audit Logs
+
+Never Delete
+
+Compliance Forms
+
+10 Years Minimum
+
+Backups
+
+30 Days Rolling
+
+⸻
+
+30. Migration Strategy
+
+Versioned migrations only.
+
+Never modify existing migration.
+
+Format:
+
+V001__Initial.sql
+V002__Customer.sql
+V003__Girvi.sql
+
+⸻
+
+31. Future Tables (Phase 2)
+
+* RFID Tags
+* Attendance
+* Payroll
+* Branches
+* Inter Branch Transfers
+* Gold Rate History
+* Voice Commands
+* AI Predictions
+* CKYC
+
+⸻
+
+32. Database Governance Rules
+
+DB-001
+
+Every table must contain tenant_id.
+
+DB-002
+
+All deletes are soft deletes.
+
+DB-003
+
+Financial records immutable.
+
+DB-004
+
+Audit logs append only.
+
+DB-005
+
+All financial amounts use DECIMAL.
+
+DB-006
+
+UUID primary keys everywhere.
+
+DB-007
+
+Every write operation audited.
+
+DB-008
+
+No cross-tenant joins allowed.
+
+END OF DOCUMENT

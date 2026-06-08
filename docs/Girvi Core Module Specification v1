@@ -1,0 +1,1009 @@
+Jewellery ERP & Girvi Management Platform
+
+Girvi Core Module Specification v1.0
+
+Module Code: MOD-GIRVI
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Customer Module, Interest Engine, Vault Module, Compliance Module, Notification Module, Audit Module, Sync Module
+
+⸻
+
+1. Module Purpose
+
+The Girvi Module is the primary revenue-generating module of the platform.
+
+It manages the complete lifecycle of a pledged jewellery loan from customer onboarding to redemption or auction.
+
+The module is responsible for:
+
+* Jewellery Evaluation
+* Gold/Silver Valuation
+* LTV Calculation
+* Girvi Contract Creation
+* KFS Generation
+* Vault Assignment
+* Partial Payments
+* Interest Calculation
+* Renewals
+* Redemption
+* Auction Management
+* RBI Compliance
+* Maharashtra Compliance
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Create a Girvi contract within 90 seconds.
+
+BO-002
+
+Enforce RBI LTV compliance automatically.
+
+BO-003
+
+Track every pledged item precisely.
+
+BO-004
+
+Prevent fraud through photo verification.
+
+BO-005
+
+Maintain complete financial auditability.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-017	Girvi List
+SCR-018	Create Girvi Wizard
+SCR-019	Customer Selection
+SCR-020	Jewellery Entry
+SCR-021	Item Photo Capture
+SCR-022	Valuation & LTV
+SCR-023	Loan Terms
+SCR-024	KFS Preview
+SCR-025	Vault Assignment
+SCR-026	Girvi Success
+SCR-027	Girvi Details
+SCR-028	Partial Payment
+SCR-029	Renewal
+SCR-030	Redemption
+SCR-031	Auction Workflow
+SCR-073	Due & Overdue Management
+
+⸻
+
+4. Girvi Lifecycle State Machine
+
+DRAFT
+   |
+ACTIVE
+   |
++----------------------+
+|                      |
+PARTIAL_PAID       RENEWED
+|                      |
++-----------+----------+
+            |
+       REDEEMED
+            |
+          CLOSED
+ACTIVE/PARTIAL_PAID
+            |
+       AUCTIONED
+            |
+          CLOSED
+
+⸻
+
+5. Core Business Rules
+
+BR-GIRVI-001
+
+Customer must exist before Girvi creation.
+
+BR-GIRVI-002
+
+At least one item mandatory.
+
+BR-GIRVI-003
+
+At least one photo per item mandatory.
+
+BR-GIRVI-004
+
+Vault assignment mandatory before activation.
+
+BR-GIRVI-005
+
+KFS acknowledgement mandatory before disbursement.
+
+BR-GIRVI-006
+
+Redeemed Girvi cannot be edited.
+
+BR-GIRVI-007
+
+Auctioned Girvi cannot be edited.
+
+BR-GIRVI-008
+
+MCX Rate becomes immutable after contract creation.
+
+⸻
+
+6. Module Navigation Flow
+
+Customer
+    |
+Create Girvi
+    |
+Customer Selection
+    |
+Jewellery Entry
+    |
+Photo Capture
+    |
+Valuation
+    |
+Loan Terms
+    |
+KFS
+    |
+Vault Assignment
+    |
+Contract Creation
+    |
+Girvi Details
+    |
++----------------------+
+|                      |
+Payment            Renewal
+|                      |
++----------------------+
+|
+Redemption
+|
+Close
+OR
+Auction
+|
+Close
+
+⸻
+
+7. Screen Specifications
+
+SCR-017 Girvi List
+
+Purpose
+
+Display all Girvi contracts.
+
+⸻
+
+Filters
+
+All
+Active
+Partial Paid
+Renewed
+Redeemed
+Auctioned
+Overdue
+
+⸻
+
+Search Options
+
+Customer Name
+Mobile
+Serial Asset ID
+QR Scan
+
+⸻
+
+API
+
+GET /girvi
+
+⸻
+
+SCR-018 Create Girvi Wizard
+
+Purpose
+
+Guided multi-step Girvi creation.
+
+⸻
+
+Steps
+
+Step 1 Customer
+Step 2 Jewellery
+Step 3 Photos
+Step 4 Valuation
+Step 5 Loan Terms
+Step 6 KFS
+Step 7 Vault
+Step 8 Submit
+
+⸻
+
+Save Draft
+
+Supported Offline.
+
+⸻
+
+SCR-019 Customer Selection
+
+Purpose
+
+Select borrower.
+
+⸻
+
+Methods
+
+Customer Search
+QR Scan
+Recent Customers
+
+⸻
+
+Validation
+
+Customer Required
+Customer Must Be Active
+
+⸻
+
+SCR-020 Jewellery Entry
+
+Purpose
+
+Capture pledged items.
+
+⸻
+
+Item Types
+
+Ring
+Chain
+Necklace
+Mangalsutra
+Bangle
+Bracelet
+Pendant
+Coin
+Bar
+Custom
+
+⸻
+
+Metal Types
+
+Gold
+Silver
+
+⸻
+
+Fields
+
+Basic
+
+Item Type
+Description
+Quantity
+
+Weight
+
+Gross Weight
+Stone Weight
+Net Weight
+
+Purity
+
+18K
+20K
+22K
+24K
+
+⸻
+
+Formula
+
+Net Weight:
+
+Net\ Weight = Gross\ Weight - Stone\ Weight
+
+⸻
+
+SCR-021 Item Photo Capture
+
+Purpose
+
+Capture proof of pledged item.
+
+⸻
+
+Requirements
+
+Minimum 1 Photo
+Maximum 10 Photos
+
+⸻
+
+Compression
+
+400 KB Max
+
+⸻
+
+Security
+
+Generate SHA256 hash.
+
+Store hash in database.
+
+⸻
+
+Validation
+
+Cannot proceed without photo.
+
+⸻
+
+SCR-022 Valuation & LTV
+
+Purpose
+
+Calculate loan eligibility.
+
+⸻
+
+Inputs
+
+Net Weight
+Purity
+Gold Rate
+Silver Rate
+
+⸻
+
+Valuation Formula
+
+Fine Gold Weight:
+
+Fine\ Gold\ Weight = Net\ Weight \times \frac{Carat}{24}
+
+⸻
+
+Valuation:
+
+Valuation = Fine\ Gold\ Weight \times Gold\ Rate
+
+⸻
+
+LTV Formula
+
+LTV = \frac{Loan\ Amount}{Valuation} \times 100
+
+⸻
+
+RBI Rules
+
+Loan Amount	Max LTV
+≤ ₹2.5L	85%
+₹2.5L–₹5L	80%
+> ₹5L	75%
+
+⸻
+
+Validation
+
+Hard block above limit.
+
+Owner override required.
+
+⸻
+
+SCR-023 Loan Terms
+
+Purpose
+
+Configure loan.
+
+⸻
+
+Fields
+
+Loan Amount
+Interest Type
+Interest Rate
+Start Date
+Due Date
+Penalty Rate
+
+⸻
+
+Interest Types
+
+Simple
+Katmiti
+Daily
+
+⸻
+
+Validation
+
+Loan Amount <= LTV
+
+⸻
+
+SCR-024 KFS Preview
+
+Purpose
+
+Generate RBI KFS.
+
+⸻
+
+Displays
+
+Principal
+Interest Rate
+APR
+Total Payable
+Auction Rules
+Gold Return Rules
+
+⸻
+
+Actions
+
+Preview
+Download PDF
+Share
+Acknowledge
+
+⸻
+
+Validation
+
+Cannot continue without acknowledgement.
+
+⸻
+
+SCR-025 Vault Assignment
+
+Purpose
+
+Assign physical storage.
+
+⸻
+
+Structure
+
+Vault
+  |
+Safe
+  |
+Tray
+  |
+Slot
+
+⸻
+
+Validation
+
+Slot Available
+Unique Assignment
+
+⸻
+
+API
+
+POST /vaults/assign
+
+⸻
+
+SCR-026 Girvi Success
+
+Purpose
+
+Completion screen.
+
+⸻
+
+Displays
+
+Serial Asset ID
+Customer Name
+Loan Amount
+Due Date
+Vault Location
+
+⸻
+
+Actions
+
+Print Receipt
+Share Receipt
+View Girvi
+
+⸻
+
+SCR-027 Girvi Details
+
+Purpose
+
+Master Girvi profile.
+
+⸻
+
+Sections
+
+Summary
+
+Status
+Customer
+Outstanding
+Interest
+
+Items
+
+Photos
+
+Payments
+
+Timeline
+
+Vault
+
+⸻
+
+Actions
+
+Record Payment
+Renew
+Redeem
+Auction
+
+⸻
+
+SCR-028 Partial Payment
+
+Purpose
+
+Record payments.
+
+⸻
+
+Fields
+
+Amount
+Payment Mode
+Remarks
+
+⸻
+
+Payment Modes
+
+Cash
+UPI
+Bank Transfer
+Cheque
+
+⸻
+
+Validation
+
+Amount <= Outstanding
+
+⸻
+
+Workflow
+
+Calculate Interest
+Apply Interest
+Reduce Principal
+Generate Receipt
+Audit Log
+
+⸻
+
+SCR-029 Renewal
+
+Purpose
+
+Extend contract.
+
+⸻
+
+Workflow
+
+Revaluation
+Recalculate LTV
+Generate New Contract
+Link Old Contract
+Generate Receipt
+
+⸻
+
+Validation
+
+RBI
+
+Max 12 Months
+
+⸻
+
+SCR-030 Redemption
+
+Purpose
+
+Close Girvi.
+
+⸻
+
+Validation
+
+Required
+
+Full Payment
+Photo Verification
+Vault Release
+
+⸻
+
+Workflow
+
+Receive Payment
+Verify Item Photos
+Release Vault
+Generate Receipt
+Status Redeemed
+
+⸻
+
+Gold Return Timer
+
+Automatically starts.
+
+7 Working Days
+
+⸻
+
+SCR-031 Auction Workflow
+
+Purpose
+
+Manage defaulted loans.
+
+⸻
+
+Preconditions
+
+Overdue Threshold Crossed
+14 Day Notice Sent
+
+⸻
+
+Steps
+
+Generate Notice
+
+Notify Borrower
+
+Schedule Auction
+
+Record Sale
+
+Calculate Surplus
+
+Close Contract
+
+⸻
+
+Outputs
+
+Auction Notice
+Auction Ledger
+Buyer Details
+Surplus Refund
+
+⸻
+
+SCR-073 Due & Overdue Management
+
+Purpose
+
+Collection management.
+
+⸻
+
+Categories
+
+Due Today
+
+Due This Week
+
+Overdue
+
+⸻
+
+Actions
+
+Call Customer
+Send WhatsApp
+Record Follow-Up
+Create Reminder
+
+⸻
+
+8. Serial Asset ID Engine
+
+Format
+
+GRV-2026-000001
+
+⸻
+
+Generation Rule
+
+Year + Running Counter
+
+⸻
+
+Immutable
+
+Never changes.
+
+⸻
+
+9. Valuation Engine
+
+Gold
+
+Uses:
+
+MCX Rate
+IBJA Rate
+
+⸻
+
+Silver
+
+Uses:
+
+Daily Silver Rate
+
+⸻
+
+Rate Lock
+
+Locked at creation.
+
+Immutable thereafter.
+
+⸻
+
+10. Compliance Engine
+
+RBI Rules
+
+LTV
+
+KFS
+
+1 KG Cap
+
+Gold Return Timer
+
+Insurance Coverage
+
+⸻
+
+Maharashtra Rules
+
+Form 11
+
+Form 12
+
+Auction Notice
+
+⸻
+
+11. Integration Matrix
+
+Module	Usage
+Customer	Borrower
+Interest	Calculations
+Vault	Storage
+Compliance	KFS/Forms
+Notification	Reminders
+Reports	Analytics
+Audit	Logging
+
+⸻
+
+12. Offline Behaviour
+
+Supported:
+
+Create Girvi
+Draft Girvi
+Payments
+Search
+Vault Assignment
+Receipt Printing
+
+⸻
+
+Sync Queue
+
+PENDING
+SYNCING
+SYNCED
+CONFLICT
+
+⸻
+
+13. Audit Logging
+
+Log:
+
+Girvi Created
+Payment Recorded
+Renewal
+Redemption
+Auction
+KFS Acknowledged
+Vault Assigned
+
+⸻
+
+14. Analytics Events
+
+girvi_created
+girvi_viewed
+payment_recorded
+girvi_renewed
+girvi_redeemed
+auction_initiated
+auction_completed
+
+⸻
+
+15. Error Catalogue
+
+GIRVI-001
+
+LTV Exceeded
+
+GIRVI-002
+
+Vault Missing
+
+GIRVI-003
+
+Photo Missing
+
+GIRVI-004
+
+KFS Required
+
+GIRVI-005
+
+Outstanding Mismatch
+
+GIRVI-006
+
+Invalid Redemption
+
+GIRVI-007
+
+Auction Not Allowed
+
+GIRVI-008
+
+Weight Limit Exceeded
+
+⸻
+
+16. Backend Structure
+
+girvi/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+events/
+workflows/
+
+⸻
+
+17. Frontend Structure
+
+features/girvi/
+girvi_list/
+create_girvi/
+item_entry/
+photo_capture/
+valuation/
+loan_terms/
+kfs/
+vault_assignment/
+girvi_details/
+payment/
+renewal/
+redemption/
+auction/
+due_management/
+
+⸻
+
+18. Testing Checklist
+
+✓ Create Girvi
+
+✓ LTV Validation
+
+✓ Photo Validation
+
+✓ KFS Generation
+
+✓ Vault Assignment
+
+✓ Payment Recording
+
+✓ Renewal
+
+✓ Redemption
+
+✓ Auction Workflow
+
+✓ Due Tracking
+
+✓ Overdue Tracking
+
+✓ Offline Creation
+
+✓ Sync
+
+✓ Audit Logs
+
+✓ RBI Compliance
+
+✓ Maharashtra Compliance
+
+⸻
+
+19. Development Sequence
+
+1. Girvi Database
+2. Valuation Engine
+3. Create Girvi Wizard
+4. KFS
+5. Vault Integration
+6. Payment Engine
+7. Renewal
+8. Redemption
+9. Due Management
+10. Auction Workflow
+11. Compliance Integration
+12. Reporting Integration
+
+END OF DOCUMENT

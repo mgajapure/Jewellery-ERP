@@ -1,0 +1,738 @@
+Jewellery ERP & Girvi Management Platform
+
+System Architecture Specification v1.0
+
+Document Type: Master Architecture Specification
+Version: 1.0
+Status: Architecture Baseline
+Product: Jewellery ERP & Girvi Management Platform
+Technology Stack: Flutter + NestJS + PostgreSQL + Firebase Auth + SQLCipher
+Target Market: Jewellery Shops & Girvi Businesses (Maharashtra, India)
+
+⸻
+
+1. Purpose
+
+This document serves as the master architectural source of truth for the Jewellery ERP & Girvi Management Platform.
+
+All future documents including:
+
+* Database Specification
+* API Contracts
+* Module Specifications
+* Screen Specifications
+* Development Tasks
+* AI Agent Instructions
+
+must conform to this architecture.
+
+⸻
+
+2. Architectural Principles
+
+AP-001 Offline First
+
+Application must remain fully operational without internet.
+
+Supported Offline Operations:
+
+* Customer Creation
+* Customer Search
+* Girvi Creation
+* Girvi Payment
+* Girvi Renewal
+* Girvi Redemption
+* Vault Assignment
+* Receipt Printing
+* Dashboard Viewing
+
+Cloud connectivity enhances system functionality but is never mandatory for core operations.
+
+⸻
+
+AP-002 Mobile First
+
+Primary Device:
+
+* Android Tablet
+* Android Smartphone
+
+Secondary Device:
+
+* iOS
+
+Desktop browser is not a target platform.
+
+⸻
+
+AP-003 Compliance First
+
+All workflows must automatically enforce:
+
+Maharashtra Money Lending Act 2014
+
+* Form 6
+* Form 9
+* Form 11
+* Form 12
+* Form 13
+
+RBI 2025/2026
+
+* LTV Rules
+* KFS Generation
+* Insurance Tracking
+* Gold Return Tracking
+* Auction Rules
+* Pledge Weight Limits
+
+⸻
+
+AP-004 Minimal Typing
+
+Preferred Input Methods:
+
+1. Camera OCR
+2. QR Scan
+3. Barcode Scan
+4. Dropdown
+5. Voice (Future)
+6. Keyboard (Last Resort)
+
+⸻
+
+AP-005 Auditability
+
+Every critical action must generate immutable audit logs.
+
+⸻
+
+3. High-Level System Architecture
+
+Flutter Mobile App
+        |
+        |
+API Gateway
+        |
+NestJS Backend
+        |
+--------------------------------
+|              |               |
+PostgreSQL   File Storage   Redis
+        |
+Analytics Engine
+        |
+Notification Engine
+
+⸻
+
+4. Bounded Context Architecture
+
+System divided into 16 bounded contexts.
+
+Core Contexts
+
+Authentication
+
+Responsibilities:
+
+* OTP Login
+* PIN
+* Biometrics
+* Device Approval
+
+⸻
+
+Customer
+
+Responsibilities:
+
+* Customer Profiles
+* Aadhaar OCR
+* PAN Management
+* QR IDs
+* Document Vault
+
+⸻
+
+Girvi
+
+Responsibilities:
+
+* Loan Creation
+* Valuation
+* KFS
+* Payments
+* Renewal
+* Redemption
+* Auction
+
+⸻
+
+Vault
+
+Responsibilities:
+
+* Locker Tracking
+* Location Mapping
+* Occupancy
+
+⸻
+
+Interest Engine
+
+Responsibilities:
+
+* Simple Interest
+* Katmiti
+* Daily Interest
+* Penalties
+
+⸻
+
+Compliance
+
+Responsibilities:
+
+* RBI Rules
+* Maharashtra Forms
+* Annual Statements
+
+⸻
+
+Dashboard
+
+Responsibilities:
+
+* KPIs
+* Alerts
+* Exposure Metrics
+
+⸻
+
+Staff & RBAC
+
+Responsibilities:
+
+* Users
+* Permissions
+* Roles
+
+⸻
+
+Inventory
+
+Responsibilities:
+
+* Jewellery Inventory
+* Barcode Tracking
+
+⸻
+
+Sales
+
+Responsibilities:
+
+* GST Billing
+* Retail Sales
+
+⸻
+
+Purchase
+
+Responsibilities:
+
+* Scrap Gold Purchase
+
+⸻
+
+Savings Scheme
+
+Responsibilities:
+
+* Gold Savings Schemes
+
+⸻
+
+Reporting
+
+Responsibilities:
+
+* Financial Reports
+* Compliance Reports
+
+⸻
+
+Settings
+
+Responsibilities:
+
+* Configuration
+* Interest Setup
+* Business Setup
+
+⸻
+
+Notifications
+
+Responsibilities:
+
+* Push Notifications
+* WhatsApp
+
+⸻
+
+Backup & Sync
+
+Responsibilities:
+
+* Offline Sync
+* Google Drive Backup
+
+⸻
+
+5. Frontend Architecture
+
+Pattern
+
+Flutter Feature-First Architecture
+
+lib/
+core/
+features/
+authentication/
+customer/
+girvi/
+vault/
+dashboard/
+reports/
+shared/
+
+⸻
+
+6. State Management
+
+Architecture:
+
+BLoC Pattern
+
+Each screen contains:
+
+Screen
+Bloc
+Event
+State
+Repository
+Datasource
+
+Example:
+
+CreateGirviScreen
+CreateGirviBloc
+CreateGirviEvent
+CreateGirviState
+GirviRepository
+GirviRemoteDatasource
+GirviLocalDatasource
+
+⸻
+
+7. Data Layer Architecture
+
+Every repository uses:
+
+Repository
+       |
+------------------
+|                |
+Remote         Local
+Datasource     Datasource
+
+Priority:
+
+Read
+Local First
+Write
+Local First
+Sync
+Background
+
+⸻
+
+8. Offline Architecture
+
+Local Database:
+
+SQLCipher SQLite
+
+⸻
+
+Sync States
+
+PENDING
+SYNCING
+SYNCED
+CONFLICT
+FAILED
+
+⸻
+
+Sync Strategy
+
+Write:
+
+Device
+   ->
+Local DB
+   ->
+Sync Queue
+   ->
+Server
+
+⸻
+
+Conflict Strategy
+
+Default:
+
+Last Write Wins
+
+Exception:
+
+Financial Transactions
+
+Must create Conflict Cards for Owner review.
+
+⸻
+
+9. Backend Architecture
+
+Framework:
+
+NestJS
+
+Pattern:
+
+Controller
+Service
+Repository
+Database
+
+⸻
+
+10. NestJS Module Structure
+
+src/
+auth/
+customer/
+girvi/
+vault/
+staff/
+compliance/
+reports/
+dashboard/
+settings/
+notifications/
+sync/
+
+⸻
+
+11. Multi-Tenant Architecture
+
+Every table contains:
+
+tenant_id
+
+Mandatory filter:
+
+WHERE tenant_id = ?
+
+No cross-tenant access allowed.
+
+⸻
+
+12. Security Architecture
+
+Authentication Layers:
+
+Layer 1
+
+Firebase OTP
+
+Layer 2
+
+Device Binding
+
+Layer 3
+
+PIN
+
+Layer 4
+
+Biometric
+
+⸻
+
+13. Authorization Architecture
+
+Roles:
+
+Owner
+
+Manager
+
+Staff
+
+Accountant
+
+⸻
+
+Permission Model:
+
+Role
+   ->
+Permission
+      ->
+Action
+
+Example:
+
+GIRVI_CREATE
+CUSTOMER_CREATE
+PAYMENT_RECORD
+
+⸻
+
+14. Audit Architecture
+
+Every transaction logs:
+
+User
+Device
+Timestamp
+Action
+Entity
+Previous Value
+New Value
+
+Audit logs are immutable.
+
+⸻
+
+15. Notification Architecture
+
+Channels:
+
+Push
+
+Firebase FCM
+
+WhatsApp
+
+Meta WABA
+
+In-App
+
+Notification Center
+
+⸻
+
+16. File Architecture
+
+Storage Categories
+
+Customer Documents
+Customer Photos
+Jewellery Photos
+KFS PDFs
+Compliance PDFs
+Receipts
+Backups
+
+⸻
+
+17. Reporting Architecture
+
+Report Types
+
+Operational
+
+Financial
+
+Compliance
+
+Audit
+
+Business Intelligence
+
+⸻
+
+18. Dashboard Architecture
+
+Widgets
+
+Active Girvi
+
+Due Today
+
+Overdue
+
+Loan Exposure
+
+Collections
+
+Gold Rate
+
+Staff Activity
+
+Vault Occupancy
+
+⸻
+
+19. Event Architecture
+
+Example:
+
+Girvi Created
+
+Triggers:
+
+1. Audit Log
+2. KFS Generation
+3. Form 12 Generation
+4. Notification
+5. Dashboard Update
+6. Sync Queue Update
+
+⸻
+
+20. Screen Navigation Architecture
+
+Splash
+Login
+PIN
+Dashboard
+--------------------------------
+Customer
+Girvi
+Vault
+Reports
+Settings
+
+All navigation controlled by RBAC.
+
+⸻
+
+21. Performance Targets
+
+App Startup
+
+≤ 3 Seconds
+
+Customer Search
+
+≤ 1 Second
+
+Dashboard Load
+
+≤ 2 Seconds
+
+Girvi Creation
+
+≤ 90 Seconds
+
+Sync
+
+≤ 30 Seconds
+
+⸻
+
+22. Scalability Targets
+
+Tenants
+
+10,000+
+
+Users
+
+100,000+
+
+Transactions
+
+10 Million+
+
+Storage
+
+Unlimited Cloud Scale
+
+⸻
+
+23. Disaster Recovery
+
+Layers:
+
+1. SQLCipher Local Database
+2. Cloud PostgreSQL
+3. Nightly Google Drive Backup
+4. Device Rebinding
+5. Restore Wizard
+
+⸻
+
+24. Future Architecture
+
+Planned Extensions
+
+Phase 2
+
+* Retail ERP
+* GST Billing
+* Barcode Inventory
+* WhatsApp Payments
+
+Phase 3
+
+* AI OCR
+* Voice Commands
+* Multi Branch
+* Weighing Scale Integration
+* Predictive Analytics
+* CKYC Integration
+
+⸻
+
+25. Development Order
+
+1. Core Infrastructure
+2. Authentication
+3. Customer
+4. Girvi
+5. Interest Engine
+6. Vault
+7. Compliance
+8. Dashboard
+9. Reports
+10. Staff
+11. Notifications
+12. Inventory
+13. Sales
+14. Purchase
+15. Savings
+16. Advanced Features
+
+⸻
+
+26. Source of Truth Hierarchy
+
+Priority Order:
+
+1. System Architecture Specification
+2. Database Specification
+3. API Contract Specification
+4. Module Specification
+5. Screen Specification
+6. UI Design System
+
+Any conflict must be resolved in favor of the higher-priority document.
+
+END OF DOCUMENT

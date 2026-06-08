@@ -1,0 +1,866 @@
+Jewellery ERP & Girvi Management Platform
+
+Authentication Module Specification v1.0
+
+Module Code: MOD-AUTH
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Firebase Auth, Device Management, RBAC, Audit Module
+
+⸻
+
+1. Module Purpose
+
+Authentication Module is the security gateway for the entire platform.
+
+Responsibilities:
+
+* OTP Authentication
+* Device Registration
+* Device Approval
+* PIN Login
+* Biometric Login
+* Session Management
+* Token Management
+* Logout
+* Security Enforcement
+
+No module can be accessed before successful authentication.
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Prevent unauthorized access.
+
+BO-002
+
+Ensure only approved devices access tenant data.
+
+BO-003
+
+Minimize login time for counter staff.
+
+BO-004
+
+Support offline counter operations.
+
+BO-005
+
+Maintain complete auditability.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-001	Splash Screen
+SCR-002	Mobile Number Login
+SCR-003	OTP Verification
+SCR-004	Device Approval Pending
+SCR-005	Create PIN
+SCR-006	PIN / Biometric Login
+
+⸻
+
+4. Screen Flow
+
+App Launch
+    |
+SCR-001 Splash
+    |
+Token Exists?
+    |
+    +-- NO --> SCR-002 Login
+    |
+    +-- YES
+          |
+          PIN Enabled?
+          |
+          +-- YES --> SCR-006
+          |
+          +-- NO --> Dashboard
+SCR-002
+    |
+Request OTP
+    |
+SCR-003
+    |
+Verify OTP
+    |
+Device Approved?
+    |
+    +-- NO --> SCR-004
+    |
+    +-- YES
+           |
+Create PIN?
+           |
+           +-- YES --> SCR-005
+           |
+           +-- NO --> Dashboard
+SCR-005
+    |
+Create PIN
+    |
+SCR-006
+    |
+Dashboard
+
+⸻
+
+5. RBAC Requirements
+
+Authentication module available to:
+
+Owner
+Manager
+Staff
+Accountant
+
+Device approval:
+
+Owner Only
+
+⸻
+
+6. Screen Specification
+
+⸻
+
+SCR-001 Splash Screen
+
+Purpose
+
+Initialize application.
+
+Validate:
+
+* JWT
+* Refresh Token
+* Device Status
+* Tenant Status
+* App Version
+
+⸻
+
+UI Components
+
+Logo
+
+Jewellery ERP Logo
+
+Tagline
+
+Digital Girvi Management
+
+Loader
+
+Animated Progress Indicator
+
+⸻
+
+Startup Sequence
+
+Load Secure Storage
+Validate JWT
+Validate Device Token
+Check App Version
+Load Settings
+Navigate
+
+⸻
+
+Frontend BLoC
+
+Events
+
+AppStarted
+TokenValidationRequested
+
+States
+
+SplashInitial
+SplashLoading
+TokenValid
+TokenInvalid
+
+⸻
+
+Backend APIs
+
+None
+
+Uses cached session.
+
+⸻
+
+Acceptance Criteria
+
+* Load < 2 seconds
+* No visible UI lag
+* Proper redirection
+
+⸻
+
+SCR-002 Mobile Number Login
+
+Purpose
+
+Collect mobile number.
+
+Request OTP.
+
+⸻
+
+UI Layout
+
+Header
+
+Welcome Back
+
+Input
+
+Mobile Number
+
+Button
+
+Send OTP
+
+⸻
+
+Validation
+
+Required
+10 Digits
+Indian Number
+No Alphabets
+
+⸻
+
+Frontend BLoC
+
+Events
+
+MobileChanged
+SendOtpPressed
+
+States
+
+LoginInitial
+LoginLoading
+OtpSent
+LoginError
+
+⸻
+
+API Mapping
+
+AUTH-001
+
+POST /auth/otp/request
+
+⸻
+
+Request DTO
+
+{
+  "mobile": "9876543210"
+}
+
+⸻
+
+Error Cases
+
+Invalid Mobile
+Rate Limited
+Server Error
+Network Error
+
+⸻
+
+Acceptance Criteria
+
+OTP generated within 5 seconds.
+
+⸻
+
+SCR-003 OTP Verification
+
+Purpose
+
+Verify user identity.
+
+⸻
+
+UI Layout
+
+OTP Input
+
+6 Boxes
+
+Countdown
+
+05:00
+
+Resend OTP
+
+Enabled after timeout.
+
+Verify Button
+
+Primary CTA
+
+⸻
+
+Validation
+
+6 Digits
+Numeric Only
+
+⸻
+
+Frontend BLoC
+
+Events
+
+OtpChanged
+VerifyOtpPressed
+ResendOtpPressed
+
+States
+
+OtpInitial
+OtpLoading
+OtpVerified
+OtpFailed
+
+⸻
+
+API Mapping
+
+AUTH-002
+
+POST /auth/otp/verify
+
+⸻
+
+Request DTO
+
+{
+  "mobile": "9876543210",
+  "otp": "123456",
+  "deviceFingerprint": ""
+}
+
+⸻
+
+Success Flow
+
+JWT Saved
+Refresh Token Saved
+Check Device Status
+
+⸻
+
+Error Cases
+
+Invalid OTP
+Expired OTP
+Too Many Attempts
+Device Error
+
+⸻
+
+Acceptance Criteria
+
+Verification < 3 seconds.
+
+⸻
+
+SCR-004 Device Approval Pending
+
+Purpose
+
+Block unauthorized devices.
+
+⸻
+
+UI Layout
+
+Illustration
+
+Device Pending
+
+Message
+
+Waiting For Owner Approval
+
+Device Details
+
+Device Name
+
+Platform
+
+Version
+
+Refresh Button
+
+Check Approval Status
+
+⸻
+
+API Mapping
+
+DEV-001
+
+POST /devices/register
+
+DEV-004
+
+GET /devices
+
+⸻
+
+Refresh Logic
+
+Every:
+
+30 Seconds
+
+⸻
+
+Acceptance Criteria
+
+No access until approval.
+
+⸻
+
+SCR-005 Create PIN
+
+Purpose
+
+Enable quick login.
+
+⸻
+
+UI Layout
+
+Step 1
+
+Enter PIN
+
+Step 2
+
+Confirm PIN
+
+⸻
+
+PIN Options
+
+4 Digits
+6 Digits
+
+⸻
+
+Validation
+
+PIN Match
+Not Sequential
+Not Repeating
+
+Examples blocked:
+
+1111
+1234
+0000
+
+⸻
+
+Frontend BLoC
+
+Events
+
+PinEntered
+PinConfirmed
+PinSaved
+
+States
+
+PinInitial
+PinValidationFailed
+PinSavedSuccessfully
+
+⸻
+
+API Mapping
+
+Local Only
+
+Stored in SQLCipher.
+
+⸻
+
+Security
+
+Stored as:
+
+bcrypt Hash
+
+⸻
+
+Acceptance Criteria
+
+PIN setup < 10 seconds.
+
+⸻
+
+SCR-006 PIN / Biometric Login
+
+Purpose
+
+Quick session unlock.
+
+⸻
+
+UI Layout
+
+Welcome Message
+
+Good Morning Mayur
+
+PIN Pad
+
+Custom Numeric Keypad
+
+Biometric Button
+
+Fingerprint Icon
+
+Logout
+
+Use Different Account
+
+⸻
+
+Biometric Support
+
+Android
+
+Fingerprint
+
+Face Unlock
+
+iOS
+
+Face ID
+
+Touch ID
+
+⸻
+
+Authentication Flow
+
+User Opens App
+PIN OR Biometrics
+Session Restored
+Dashboard
+
+⸻
+
+Frontend BLoC
+
+Events
+
+PinSubmitted
+BiometricRequested
+LogoutPressed
+
+States
+
+AuthInitial
+PinValid
+PinInvalid
+BiometricSuccess
+BiometricFailure
+
+⸻
+
+Validation Rules
+
+Max 5 Wrong Attempts
+
+After 5:
+
+OTP Login Required
+
+⸻
+
+Acceptance Criteria
+
+Unlock < 1 second.
+
+⸻
+
+7. Device Approval Workflow
+
+New Device Registration
+
+OTP Verified
+Register Device
+Create Approval Request
+Notify Owner
+Block Access
+
+⸻
+
+Owner Approval
+
+Owner Opens Device Requests
+Approve
+Generate Device Token
+Store Securely
+Activate Device
+
+⸻
+
+Rejection
+
+Reject
+Invalidate Token
+Show Unauthorized Device Screen
+
+⸻
+
+8. Session Management
+
+JWT
+
+Validity:
+
+24 Hours
+
+⸻
+
+Refresh Token
+
+Validity:
+
+30 Days
+
+⸻
+
+Auto Refresh
+
+Trigger:
+
+15 Minutes Before Expiry
+
+⸻
+
+9. Offline Behaviour
+
+Supported
+
+PIN Login
+
+Biometric Login
+
+Session Restore
+
+⸻
+
+Not Supported
+
+OTP
+
+Device Approval
+
+⸻
+
+10. Local Storage
+
+Secure Storage
+
+Stores:
+
+JWT
+Refresh Token
+User ID
+Tenant ID
+Role
+Device Token
+
+⸻
+
+SQLCipher
+
+Stores:
+
+PIN Hash
+User Cache
+Settings
+
+⸻
+
+11. Audit Logging
+
+Log Every:
+
+OTP Request
+OTP Verify
+PIN Create
+PIN Change
+Login
+Logout
+Biometric Success
+Biometric Failure
+Device Approval
+Device Rejection
+
+⸻
+
+12. Security Requirements
+
+Layer 1
+
+Firebase OTP
+
+Layer 2
+
+JWT
+
+Layer 3
+
+Device Token
+
+Layer 4
+
+PIN
+
+Layer 5
+
+Biometric
+
+⸻
+
+13. Analytics Events
+
+login_started
+otp_requested
+otp_verified
+pin_created
+biometric_success
+biometric_failure
+logout_completed
+
+⸻
+
+14. Error Catalogue
+
+AUTH-001
+
+Invalid OTP
+
+AUTH-002
+
+OTP Expired
+
+AUTH-003
+
+Too Many Attempts
+
+AUTH-004
+
+Unauthorized Device
+
+AUTH-005
+
+PIN Mismatch
+
+AUTH-006
+
+Biometric Failed
+
+AUTH-007
+
+Session Expired
+
+⸻
+
+15. Backend Module Structure
+
+auth/
+controllers/
+services/
+repositories/
+dto/
+entities/
+guards/
+strategies/
+events/
+
+⸻
+
+16. Frontend Folder Structure
+
+features/auth/
+screens/
+splash/
+login/
+otp/
+device_pending/
+create_pin/
+pin_login/
+bloc/
+repository/
+models/
+
+⸻
+
+17. Testing Checklist
+
+✓ OTP Login
+
+✓ OTP Expiry
+
+✓ Resend OTP
+
+✓ Device Approval
+
+✓ Device Rejection
+
+✓ PIN Creation
+
+✓ PIN Login
+
+✓ Biometric Login
+
+✓ Logout
+
+✓ Session Restore
+
+✓ Offline PIN Login
+
+✓ Audit Logs
+
+⸻
+
+18. Dependencies
+
+Required Before Build:
+
+* System Architecture Spec
+* Database Spec
+* API Contract Spec
+
+Required After Build:
+
+* Customer Module
+* Dashboard Module
+
+END OF DOCUMENT

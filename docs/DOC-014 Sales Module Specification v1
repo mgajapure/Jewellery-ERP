@@ -1,0 +1,860 @@
+Jewellery ERP & Girvi Management Platform
+
+Sales Module Specification v1.0
+
+Module Code: MOD-SALES
+Priority: High
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Inventory Module, Customer Module, Reports Module, Audit Module, GST Engine, Barcode Engine
+
+⸻
+
+1. Module Purpose
+
+The Sales Module manages retail jewellery sales, bullion sales, invoicing, GST compliance, inventory deduction, customer purchase history, and revenue tracking.
+
+This module is the primary revenue generation module for the Jewellery ERP.
+
+Responsibilities:
+
+* Jewellery Sales
+* Bullion Sales
+* GST Billing
+* Barcode Sales
+* Customer Billing
+* Invoice Generation
+* Sales Returns
+* Inventory Deduction
+* Payment Collection
+* Revenue Analytics
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Generate invoice within 60 seconds.
+
+BO-002
+
+Automatically deduct inventory.
+
+BO-003
+
+Support GST-compliant invoicing.
+
+BO-004
+
+Maintain complete sales traceability.
+
+BO-005
+
+Provide real-time revenue visibility.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-051	Sales Dashboard
+SCR-053	New Sale
+SCR-054	Invoice Preview
+SCR-055	Sales Details
+SCR-056	Sales Return
+SCR-057	Sales Ledger
+SCR-081	Barcode Sales Screen
+
+⸻
+
+4. Sales Architecture
+
+Customer
+    |
+Inventory Selection
+    |
+Pricing Engine
+    |
+GST Engine
+    |
+Invoice
+    |
+Payment
+    |
+Inventory Deduction
+    |
+Reports
+
+⸻
+
+5. Sales Lifecycle
+
+Draft
+   |
+Invoice Generated
+   |
+Payment Received
+   |
+Completed
+   |
++-------------+
+|             |
+Return      Exchange
+
+⸻
+
+6. Core Business Rules
+
+BR-SALE-001
+
+Every sold item must exist in inventory.
+
+BR-SALE-002
+
+Sold inventory cannot be sold again.
+
+BR-SALE-003
+
+Invoice number must be unique.
+
+BR-SALE-004
+
+GST calculation automatic.
+
+BR-SALE-005
+
+Inventory deduction automatic.
+
+BR-SALE-006
+
+Sales returns require approval.
+
+BR-SALE-007
+
+Cancelled invoices remain auditable.
+
+BR-SALE-008
+
+All invoices stored permanently.
+
+⸻
+
+7. Screen Specifications
+
+SCR-051 Sales Dashboard
+
+Purpose
+
+Sales overview and quick actions.
+
+⸻
+
+Dashboard Cards
+
+Today’s Sales
+
+Today’s Revenue
+
+Monthly Revenue
+
+Average Invoice Value
+
+Top Selling Categories
+
+Pending Returns
+
+⸻
+
+Quick Actions
+
+New Sale
+Barcode Sale
+Sales Ledger
+Returns
+
+⸻
+
+API Mapping
+
+GET /sales/dashboard
+
+⸻
+
+SCR-053 New Sale
+
+Purpose
+
+Create customer invoice.
+
+⸻
+
+Customer Section
+
+Existing Customer
+
+Walk-in Customer
+
+New Customer
+
+⸻
+
+Item Selection
+
+Methods:
+
+Inventory Search
+Barcode Scan
+Category Browse
+
+⸻
+
+Item Details
+
+Barcode
+Item Name
+Weight
+Purity
+Making Charges
+Selling Price
+
+⸻
+
+Pricing Components
+
+Metal Value
+Making Charges
+Stone Charges
+GST
+Discount
+
+⸻
+
+Payment Modes
+
+Cash
+UPI
+Bank Transfer
+Card
+Split Payment
+
+⸻
+
+API Mapping
+
+POST /sales
+
+⸻
+
+Request DTO
+
+{
+  "customerId": "",
+  "items": [],
+  "discount": 0,
+  "paymentMode": "UPI"
+}
+
+⸻
+
+SCR-054 Invoice Preview
+
+Purpose
+
+Preview GST invoice before finalization.
+
+⸻
+
+Invoice Sections
+
+Business Information
+
+Customer Information
+
+Item Breakdown
+
+Tax Summary
+
+Payment Summary
+
+⸻
+
+Actions
+
+Print
+Share PDF
+Download
+Finalize Sale
+
+⸻
+
+GST Summary
+
+Displays:
+
+Taxable Amount
+CGST
+SGST
+IGST
+Total Invoice
+
+⸻
+
+API Mapping
+
+GET /sales/{saleId}/invoice
+
+⸻
+
+SCR-055 Sales Details
+
+Purpose
+
+View completed sale.
+
+⸻
+
+Sections
+
+Invoice
+
+Customer
+
+Items
+
+Payments
+
+Audit Trail
+
+⸻
+
+Actions
+
+Print Invoice
+Share Invoice
+Initiate Return
+View Customer
+
+⸻
+
+API Mapping
+
+GET /sales/{saleId}
+
+⸻
+
+SCR-056 Sales Return
+
+Purpose
+
+Process returns and exchanges.
+
+⸻
+
+Return Types
+
+Full Return
+Partial Return
+Exchange
+
+⸻
+
+Inputs
+
+Invoice Number
+Barcode
+Return Reason
+
+⸻
+
+Return Workflow
+
+Find Invoice
+      |
+Validate Return
+      |
+Approve
+      |
+Update Inventory
+      |
+Issue Refund
+
+⸻
+
+API Mapping
+
+POST /sales/return
+
+⸻
+
+Validation
+
+Item must belong to invoice.
+
+⸻
+
+SCR-057 Sales Ledger
+
+Purpose
+
+Complete sales history.
+
+⸻
+
+Filters
+
+Date Range
+Customer
+Invoice
+Staff
+Category
+
+⸻
+
+Ledger Columns
+
+Invoice Number
+Date
+Customer
+Items
+Tax
+Amount
+Status
+
+⸻
+
+Export
+
+PDF
+Excel
+CSV
+
+⸻
+
+API Mapping
+
+GET /sales/ledger
+
+⸻
+
+SCR-081 Barcode Sales Screen
+
+Purpose
+
+Fast counter sales.
+
+⸻
+
+Workflow
+
+Scan Barcode
+      |
+Load Item
+      |
+Add To Cart
+      |
+Generate Invoice
+      |
+Payment
+      |
+Complete
+
+⸻
+
+Features
+
+Rapid Scanning
+Multiple Items
+Instant Billing
+Thermal Print
+
+⸻
+
+Performance
+
+Barcode Lookup < 500 ms
+
+⸻
+
+8. Pricing Engine
+
+Purpose
+
+Calculate final sale amount.
+
+⸻
+
+Formula
+
+Subtotal:
+
+Subtotal = Metal\ Value + Making\ Charges + Stone\ Charges
+
+⸻
+
+Discounted Amount:
+
+Discounted\ Amount = Subtotal - Discount
+
+⸻
+
+Final Amount:
+
+Final\ Amount = Discounted\ Amount + GST
+
+⸻
+
+9. GST Engine
+
+Purpose
+
+Tax calculation.
+
+⸻
+
+Tax Components
+
+CGST
+
+SGST
+
+IGST
+
+⸻
+
+GST Formula
+
+GST = Taxable\ Amount \times GST\ Rate
+
+⸻
+
+Configuration
+
+GST rates configurable.
+
+⸻
+
+Compliance
+
+GST breakdown mandatory on invoice.
+
+⸻
+
+10. Invoice Engine
+
+Invoice Number Format
+
+INV-2026-000001
+
+⸻
+
+Generation Rule
+
+Year + Running Counter
+
+⸻
+
+Invoice Storage
+
+PDF
+Database Record
+Audit Entry
+
+⸻
+
+Immutable
+
+Invoice cannot be deleted.
+
+⸻
+
+11. Inventory Deduction Engine
+
+Trigger
+
+Sale Completed
+
+⸻
+
+Workflow
+
+Sale Completed
+      |
+Deduct Inventory
+      |
+Mark Sold
+      |
+Update Valuation
+      |
+Refresh Reports
+
+⸻
+
+Validation
+
+Inventory must be available.
+
+⸻
+
+12. Sales Return Engine
+
+Supported Actions
+
+Refund
+
+Exchange
+
+Store Credit
+
+⸻
+
+Inventory Handling
+
+Returned inventory:
+
+Available
+Damaged
+Repair
+
+⸻
+
+Approval Rules
+
+Above configured threshold:
+
+Manager Approval Required
+
+⸻
+
+13. Customer Purchase History
+
+Purpose
+
+Track purchases.
+
+⸻
+
+Metrics
+
+Total Purchases
+Lifetime Value
+Last Purchase
+Average Invoice
+
+⸻
+
+Displayed In
+
+Customer Details Screen.
+
+⸻
+
+14. Revenue Analytics
+
+Metrics
+
+Daily Revenue
+
+Monthly Revenue
+
+Category Revenue
+
+Staff Revenue
+
+GST Collected
+
+⸻
+
+Average Invoice Formula
+
+Average\ Invoice = \frac{Total\ Revenue}{Total\ Invoices}
+
+⸻
+
+15. Integration Matrix
+
+Module	Purpose
+Inventory	Stock Consumption
+Customer	Purchase History
+Reports	Revenue Reports
+Dashboard	KPIs
+Audit	Tracking
+GST Engine	Tax Calculation
+
+⸻
+
+16. Offline Behaviour
+
+Supported:
+
+Create Draft Sale
+Barcode Scan
+Invoice Preview
+
+⸻
+
+Not Supported:
+
+GST Filing
+Large Exports
+Bulk Invoicing
+
+⸻
+
+17. Audit Logging
+
+Log:
+
+Sale Created
+Invoice Generated
+Invoice Printed
+Return Processed
+Refund Issued
+Inventory Deducted
+
+⸻
+
+18. Analytics Events
+
+sale_created
+invoice_generated
+barcode_sale
+return_processed
+refund_issued
+
+⸻
+
+19. Error Catalogue
+
+SALE-001
+
+Inventory Not Available
+
+SALE-002
+
+Invoice Not Found
+
+SALE-003
+
+GST Calculation Failed
+
+SALE-004
+
+Return Not Allowed
+
+SALE-005
+
+Payment Failed
+
+SALE-006
+
+Barcode Not Found
+
+SALE-007
+
+Inventory Deduction Failed
+
+⸻
+
+20. Database Entities
+
+sales
+sale_items
+sale_payments
+sale_returns
+sale_invoices
+sale_ledger
+
+⸻
+
+21. Backend Structure
+
+sales/
+controllers/
+services/
+repositories/
+dto/
+entities/
+invoice/
+gst/
+returns/
+barcode/
+
+⸻
+
+22. Frontend Structure
+
+features/sales/
+dashboard/
+new_sale/
+invoice/
+sales_details/
+returns/
+ledger/
+barcode_sales/
+bloc/
+repository/
+models/
+
+⸻
+
+23. Testing Checklist
+
+✓ New Sale
+
+✓ Barcode Sale
+
+✓ GST Calculation
+
+✓ Invoice Generation
+
+✓ Inventory Deduction
+
+✓ Customer Linking
+
+✓ Sales Return
+
+✓ Exchange
+
+✓ Refund
+
+✓ PDF Invoice
+
+✓ Audit Logs
+
+⸻
+
+24. Performance Requirements
+
+Barcode Lookup:
+
+< 500 ms
+
+Invoice Generation:
+
+< 2 Seconds
+
+Sale Completion:
+
+< 3 Seconds
+
+Ledger Load:
+
+< 3 Seconds
+
+⸻
+
+25. Development Sequence
+
+1. Pricing Engine
+2. GST Engine
+3. Invoice Engine
+4. New Sale Flow
+5. Barcode Sales
+6. Inventory Deduction
+7. Return Engine
+8. Revenue Analytics
+9. Reports Integration
+
+END OF DOCUMENT

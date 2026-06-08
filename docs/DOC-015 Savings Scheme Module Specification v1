@@ -1,0 +1,813 @@
+Jewellery ERP & Girvi Management Platform
+
+Savings Scheme Module Specification v1.0
+
+Module Code: MOD-SAVINGS
+Priority: High
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Customer Module, Sales Module, Reports Module, Notification Module, Audit Module
+
+⸻
+
+1. Module Purpose
+
+The Savings Scheme Module manages recurring jewellery savings plans offered to customers.
+
+Customers deposit a fixed monthly amount and receive benefits such as bonus installments, discounts, or redemption privileges at maturity.
+
+Responsibilities:
+
+* Scheme Configuration
+* Customer Enrollment
+* Monthly Deposits
+* Missed Installment Tracking
+* Maturity Calculation
+* Bonus Calculation
+* Redemption Management
+* Scheme Ledger
+* Notifications
+* Scheme Analytics
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Enroll customer within 60 seconds.
+
+BO-002
+
+Track all installments accurately.
+
+BO-003
+
+Automate maturity calculations.
+
+BO-004
+
+Improve customer retention.
+
+BO-005
+
+Provide complete financial traceability.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-064	Scheme Enrollment
+SCR-065	Scheme Account Details
+SCR-066	Deposit & Maturity Management
+
+⸻
+
+4. Savings Architecture
+
+Customer
+    |
+Scheme Enrollment
+    |
+Monthly Deposits
+    |
+Installment Ledger
+    |
+Maturity Engine
+    |
+Redemption
+    |
+Sales Integration
+
+⸻
+
+5. Scheme Lifecycle
+
+Draft
+  |
+Active
+  |
+Installments Paid
+  |
+Matured
+  |
+Redeemed
+  |
+Closed
+
+⸻
+
+6. Supported Scheme Types
+
+Monthly Savings Scheme
+
+Customer deposits fixed amount monthly.
+
+⸻
+
+Gold Savings Scheme
+
+Deposit value linked to gold rate.
+
+⸻
+
+Advance Booking Scheme
+
+Customer locks future purchase value.
+
+⸻
+
+Festival Scheme
+
+Special seasonal promotional plans.
+
+⸻
+
+Custom Scheme
+
+Tenant configurable.
+
+⸻
+
+7. Core Business Rules
+
+BR-SCH-001
+
+Customer required for enrollment.
+
+BR-SCH-002
+
+Scheme cannot start without first installment.
+
+BR-SCH-003
+
+Installments immutable after posting.
+
+BR-SCH-004
+
+Matured schemes cannot accept deposits.
+
+BR-SCH-005
+
+Redemption allowed only after maturity.
+
+BR-SCH-006
+
+Bonus rules determined by scheme configuration.
+
+BR-SCH-007
+
+Every deposit generates receipt.
+
+BR-SCH-008
+
+Scheme ledger is immutable.
+
+⸻
+
+8. Screen Specifications
+
+SCR-064 Scheme Enrollment
+
+Purpose
+
+Enroll customer into scheme.
+
+⸻
+
+Customer Section
+
+Existing Customer
+
+New Customer
+
+QR Customer Search
+
+⸻
+
+Scheme Selection
+
+Displays:
+
+Scheme Name
+Duration
+Installment Amount
+Bonus Benefits
+Maturity Value
+
+⸻
+
+Enrollment Fields
+
+Enrollment Date
+Start Date
+Installment Amount
+Duration
+Nominee Name
+Nominee Mobile
+
+⸻
+
+Actions
+
+Enroll
+Generate Account
+Print Receipt
+
+⸻
+
+API Mapping
+
+POST /schemes/enroll
+
+⸻
+
+Request DTO
+
+{
+  "customerId": "",
+  "schemeId": "",
+  "installmentAmount": 1000,
+  "durationMonths": 11
+}
+
+⸻
+
+SCR-065 Scheme Account Details
+
+Purpose
+
+View scheme profile.
+
+⸻
+
+Summary Section
+
+Displays:
+
+Scheme Number
+Customer Name
+Start Date
+Maturity Date
+Status
+
+⸻
+
+Financial Summary
+
+Displays:
+
+Total Deposited
+Pending Installments
+Bonus Amount
+Expected Maturity
+
+⸻
+
+Installment Timeline
+
+Shows:
+
+Installment Number
+Due Date
+Paid Date
+Status
+
+⸻
+
+Actions
+
+Record Deposit
+Print Statement
+Send Reminder
+Redeem
+
+⸻
+
+API Mapping
+
+GET /schemes/{schemeId}
+
+⸻
+
+SCR-066 Deposit & Maturity Management
+
+Purpose
+
+Manage deposits and maturity.
+
+⸻
+
+Deposit Entry
+
+Fields:
+
+Installment Number
+Amount
+Payment Mode
+Remarks
+
+⸻
+
+Payment Modes
+
+Cash
+UPI
+Bank Transfer
+Cheque
+
+⸻
+
+Deposit Workflow
+
+Receive Deposit
+      |
+Validate Account
+      |
+Post Installment
+      |
+Update Ledger
+      |
+Generate Receipt
+
+⸻
+
+Maturity Section
+
+Displays:
+
+Total Deposits
+Bonus
+Maturity Value
+Redemption Eligibility
+
+⸻
+
+Actions
+
+Post Deposit
+Generate Receipt
+Maturity Preview
+Redeem
+
+⸻
+
+API Mapping
+
+POST /schemes/deposit
+POST /schemes/redeem
+
+⸻
+
+9. Scheme Configuration Engine
+
+Purpose
+
+Create scheme products.
+
+⸻
+
+Fields
+
+Scheme Name
+Duration
+Installment Amount
+Bonus Type
+Bonus Value
+Grace Days
+
+⸻
+
+Bonus Types
+
+Fixed Bonus
+Last Installment Free
+Percentage Bonus
+Discount Voucher
+
+⸻
+
+Example
+
+11 Months Paid
+12th Installment Free
+
+⸻
+
+10. Installment Engine
+
+Purpose
+
+Manage recurring deposits.
+
+⸻
+
+Installment Formula
+
+Total Deposited:
+
+Total\ Deposited = Monthly\ Installment \times Paid\ Installments
+
+⸻
+
+Due Date Logic
+
+Monthly Recurrence
+
+⸻
+
+Grace Period
+
+Configurable.
+
+Default:
+
+7 Days
+
+⸻
+
+11. Maturity Engine
+
+Purpose
+
+Calculate maturity benefits.
+
+⸻
+
+Formula
+
+Maturity Value:
+
+Maturity\ Value = Deposits + Bonus
+
+⸻
+
+Example
+
+Monthly Installment = ₹5,000
+Duration = 11 Months
+Bonus = ₹5,000
+
+⸻
+
+Result
+
+Maturity Value = ₹60,000
+
+⸻
+
+12. Redemption Engine
+
+Purpose
+
+Convert scheme balance into jewellery purchase.
+
+⸻
+
+Workflow
+
+Scheme Matured
+      |
+Calculate Value
+      |
+Create Redemption Voucher
+      |
+Apply To Sale
+      |
+Close Scheme
+
+⸻
+
+Integration
+
+Direct integration with Sales Module.
+
+⸻
+
+Outputs
+
+Voucher
+Redemption Receipt
+Sales Link
+
+⸻
+
+13. Reminder Engine
+
+Purpose
+
+Reduce missed installments.
+
+⸻
+
+Reminder Triggers
+
+5 Days Before Due
+
+Due Date
+
+7 Days Overdue
+
+30 Days Overdue
+
+⸻
+
+Channels
+
+Push
+WhatsApp
+SMS
+
+⸻
+
+14. Missed Installment Engine
+
+Statuses
+
+Pending
+Paid
+Overdue
+Skipped
+
+⸻
+
+Penalty Support
+
+Tenant configurable.
+
+⸻
+
+Suspension Rule
+
+3 Consecutive Missed Installments
+
+Triggers review.
+
+⸻
+
+15. Scheme Analytics
+
+Metrics
+
+Active Schemes
+
+Matured Schemes
+
+Total Deposits
+
+Pending Installments
+
+Redemption Value
+
+Customer Retention Rate
+
+⸻
+
+Completion Rate Formula
+
+Completion\ Rate = \frac{Completed\ Schemes}{Total\ Schemes} \times 100
+
+⸻
+
+16. Customer Integration
+
+Customer Profile Displays
+
+Active Schemes
+
+Total Deposits
+
+Maturity Dates
+
+Redemption History
+
+⸻
+
+Search Support
+
+Customer ID
+
+Mobile
+
+QR Code
+
+⸻
+
+17. Compliance Rules
+
+Receipt Generation
+
+Mandatory.
+
+⸻
+
+Ledger Maintenance
+
+Mandatory.
+
+⸻
+
+Bonus Disclosure
+
+Mandatory.
+
+⸻
+
+Audit Trail
+
+Mandatory.
+
+⸻
+
+18. Integration Matrix
+
+Module	Purpose
+Customer	Account Holder
+Sales	Redemption
+Reports	Analytics
+Dashboard	KPIs
+Notifications	Reminders
+Audit	Tracking
+
+⸻
+
+19. Offline Behaviour
+
+Supported:
+
+Enroll Customer
+Record Deposit
+View Scheme
+Generate Receipt
+
+⸻
+
+Not Supported:
+
+Bulk Notifications
+Mass Exports
+
+⸻
+
+20. Audit Logging
+
+Log:
+
+Scheme Created
+Customer Enrolled
+Deposit Recorded
+Reminder Sent
+Scheme Matured
+Scheme Redeemed
+
+⸻
+
+21. Analytics Events
+
+scheme_created
+scheme_enrolled
+deposit_recorded
+scheme_matured
+scheme_redeemed
+
+⸻
+
+22. Error Catalogue
+
+SCH-001
+
+Customer Not Found
+
+SCH-002
+
+Scheme Not Found
+
+SCH-003
+
+Deposit Amount Invalid
+
+SCH-004
+
+Scheme Already Matured
+
+SCH-005
+
+Redemption Not Allowed
+
+SCH-006
+
+Installment Already Posted
+
+SCH-007
+
+Bonus Calculation Failed
+
+⸻
+
+23. Database Entities
+
+schemes
+scheme_accounts
+scheme_installments
+scheme_deposits
+scheme_redemptions
+scheme_reminders
+
+⸻
+
+24. Backend Structure
+
+savings/
+controllers/
+services/
+repositories/
+dto/
+entities/
+enrollment/
+installments/
+maturity/
+redemption/
+notifications/
+
+⸻
+
+25. Frontend Structure
+
+features/savings/
+enrollment/
+scheme_details/
+deposit_management/
+bloc/
+repository/
+models/
+
+⸻
+
+26. Testing Checklist
+
+✓ Scheme Enrollment
+
+✓ Installment Posting
+
+✓ Deposit Receipt
+
+✓ Bonus Calculation
+
+✓ Maturity Calculation
+
+✓ Redemption Workflow
+
+✓ Sales Integration
+
+✓ Reminder Engine
+
+✓ Missed Installment Handling
+
+✓ Audit Logs
+
+✓ Offline Deposits
+
+⸻
+
+27. Performance Requirements
+
+Enrollment:
+
+< 2 Seconds
+
+⸻
+
+Deposit Posting:
+
+< 1 Second
+
+⸻
+
+Maturity Calculation:
+
+< 500 ms
+
+⸻
+
+Account Details Load:
+
+< 2 Seconds
+
+⸻
+
+28. Development Sequence
+
+1. Scheme Configuration Engine
+2. Enrollment Module
+3. Installment Engine
+4. Deposit Engine
+5. Reminder Engine
+6. Maturity Engine
+7. Redemption Engine
+8. Sales Integration
+9. Reports Integration
+10. Dashboard Integration
+
+END OF DOCUMENT

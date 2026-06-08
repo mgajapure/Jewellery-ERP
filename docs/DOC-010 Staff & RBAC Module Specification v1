@@ -1,0 +1,905 @@
+Jewellery ERP & Girvi Management Platform
+
+Staff & RBAC Module Specification v1.0
+
+Module Code: MOD-STAFF
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Authentication Module, Audit Module, Notification Module, Device Management Module
+
+⸻
+
+1. Module Purpose
+
+The Staff & RBAC (Role-Based Access Control) Module governs who can access what within the Jewellery ERP system.
+
+This module is responsible for:
+
+* Staff Management
+* User Creation
+* Role Management
+* Permission Management
+* Device Approval
+* Session Monitoring
+* Staff Activity Tracking
+* Login History
+* Access Control Enforcement
+* Security Governance
+
+All modules depend on this module.
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Prevent unauthorized access.
+
+BO-002
+
+Support granular permissions.
+
+BO-003
+
+Track every staff action.
+
+BO-004
+
+Support secure multi-user operation.
+
+BO-005
+
+Enable owner-level oversight.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-040	Staff List
+SCR-041	Create/Edit Staff
+SCR-042	Role & Permission Matrix
+SCR-043	Device Approval Center
+SCR-080	Staff Activity Monitor
+SCR-089	Session & Login History
+
+⸻
+
+4. Module Architecture
+
+Owner
+   |
+Roles
+   |
+Permissions
+   |
+Users
+   |
+Devices
+   |
+Sessions
+   |
+Activity Logs
+
+⸻
+
+5. Default Roles
+
+OWNER
+
+Full system access.
+
+Cannot be deleted.
+
+⸻
+
+MANAGER
+
+Operational control.
+
+Cannot modify owner.
+
+⸻
+
+STAFF
+
+Day-to-day operations.
+
+Restricted access.
+
+⸻
+
+ACCOUNTANT
+
+Financial operations.
+
+Read-heavy permissions.
+
+⸻
+
+6. Permission Architecture
+
+Structure
+
+Module
+   |
+Feature
+   |
+Action
+
+Example:
+
+GIRVI
+   |
+PAYMENT
+   |
+CREATE
+
+⸻
+
+Permission Format
+
+CUSTOMER_CREATE
+CUSTOMER_EDIT
+CUSTOMER_VIEW
+GIRVI_CREATE
+GIRVI_PAYMENT
+GIRVI_REDEEM
+VAULT_ASSIGN
+REPORT_VIEW
+STAFF_MANAGE
+
+⸻
+
+7. Core Business Rules
+
+BR-RBAC-001
+
+Every user must have at least one role.
+
+BR-RBAC-002
+
+Owner account cannot be deleted.
+
+BR-RBAC-003
+
+Permission changes require audit logs.
+
+BR-RBAC-004
+
+Device approval requires Owner permission.
+
+BR-RBAC-005
+
+Session termination available only to Owner.
+
+BR-RBAC-006
+
+Permission checks executed on backend and frontend.
+
+BR-RBAC-007
+
+Every API must validate permissions.
+
+BR-RBAC-008
+
+Permission denial must be logged.
+
+⸻
+
+8. Screen Specifications
+
+SCR-040 Staff List
+
+Purpose
+
+Display all staff members.
+
+⸻
+
+UI Components
+
+Search
+
+Name
+Mobile
+Role
+
+⸻
+
+Filters
+
+All
+Active
+Inactive
+Suspended
+
+⸻
+
+Staff Card
+
+Displays:
+
+Name
+Role
+Mobile
+Last Login
+Status
+
+⸻
+
+Actions
+
+View
+Edit
+Deactivate
+Reset PIN
+
+⸻
+
+API Mapping
+
+GET /staff
+
+⸻
+
+SCR-041 Create/Edit Staff
+
+Purpose
+
+Create or update users.
+
+⸻
+
+Fields
+
+Personal
+
+Full Name
+Mobile
+Email
+
+⸻
+
+Security
+
+Role
+Status
+PIN Reset
+
+⸻
+
+Access
+
+Assigned Permissions
+
+⸻
+
+Validation
+
+Mobile
+
+Unique per tenant.
+
+⸻
+
+Role
+
+Mandatory.
+
+⸻
+
+API Mapping
+
+POST /staff
+PUT /staff/{id}
+
+⸻
+
+Request DTO
+
+{
+  "name": "",
+  "mobile": "",
+  "email": "",
+  "role": "STAFF"
+}
+
+⸻
+
+SCR-042 Role & Permission Matrix
+
+Purpose
+
+Manage permissions.
+
+⸻
+
+UI Layout
+
+Role Selector
+
+Owner
+Manager
+Staff
+Accountant
+
+⸻
+
+Permission Matrix
+
+Module	View	Create	Edit	Delete	Approve
+
+⸻
+
+Modules Covered
+
+Customers
+Girvi
+Interest
+Vault
+Compliance
+Reports
+Inventory
+Sales
+Purchase
+Savings
+Settings
+
+⸻
+
+Actions
+
+Grant
+Revoke
+Clone Role
+Save
+
+⸻
+
+API Mapping
+
+GET /roles
+PUT /roles/{roleId}/permissions
+
+⸻
+
+Validation
+
+Owner permissions cannot be revoked.
+
+⸻
+
+SCR-043 Device Approval Center
+
+Purpose
+
+Approve or reject devices.
+
+⸻
+
+Device Card
+
+Displays:
+
+Device Name
+Platform
+Version
+User
+Request Date
+
+⸻
+
+Actions
+
+Approve
+Reject
+View Details
+
+⸻
+
+Workflow
+
+OTP Login
+      |
+Device Registered
+      |
+Approval Request
+      |
+Owner Review
+      |
+Approve/Reject
+
+⸻
+
+API Mapping
+
+GET /devices
+POST /devices/{id}/approve
+POST /devices/{id}/reject
+
+⸻
+
+SCR-080 Staff Activity Monitor
+
+Purpose
+
+Monitor staff actions.
+
+⸻
+
+Filters
+
+User
+Action
+Module
+Date Range
+
+⸻
+
+Activity Feed
+
+Displays:
+
+User
+Action
+Entity
+Timestamp
+Device
+
+⸻
+
+Examples
+
+Customer Created
+Girvi Created
+Payment Recorded
+Report Exported
+
+⸻
+
+API Mapping
+
+GET /staff/activity
+
+⸻
+
+Export Options
+
+PDF
+Excel
+
+⸻
+
+SCR-089 Session & Login History
+
+Purpose
+
+Track authentication activity.
+
+⸻
+
+Displays
+
+Login Events
+
+Login
+Logout
+PIN Unlock
+Biometric Unlock
+
+⸻
+
+Device Information
+
+Device
+IP
+Platform
+Version
+
+⸻
+
+Session Status
+
+Active
+Expired
+Revoked
+
+⸻
+
+Actions
+
+Terminate Session
+Logout All Devices
+
+⸻
+
+API Mapping
+
+GET /sessions
+POST /sessions/{id}/terminate
+
+⸻
+
+9. RBAC Engine
+
+Evaluation Flow
+
+User
+   |
+Role
+   |
+Permissions
+   |
+API Access
+
+⸻
+
+Permission Check
+
+JWT
+   |
+Role Lookup
+   |
+Permission Validation
+   |
+Allow / Deny
+
+⸻
+
+Enforcement
+
+Backend
+
+Mandatory.
+
+Frontend
+
+For UI visibility only.
+
+⸻
+
+10. Device Approval Engine
+
+States
+
+PENDING
+APPROVED
+REJECTED
+
+⸻
+
+Approval Flow
+
+Device Request
+      |
+Owner Notification
+      |
+Approve
+      |
+Generate Device Token
+      |
+Activate Access
+
+⸻
+
+Rejection Flow
+
+Reject
+      |
+Invalidate Request
+      |
+Notify User
+
+⸻
+
+11. Session Management Engine
+
+Session Types
+
+JWT Session
+PIN Session
+Biometric Session
+
+⸻
+
+Session Expiry
+
+JWT
+
+24 Hours
+
+⸻
+
+Refresh Token
+
+30 Days
+
+⸻
+
+Forced Logout
+
+Supported.
+
+⸻
+
+12. Activity Monitoring Engine
+
+Tracked Events
+
+Customer Operations
+Girvi Operations
+Payments
+Redemptions
+Settings Changes
+Permission Changes
+Exports
+
+⸻
+
+Storage
+
+audit_logs
+
+⸻
+
+Immutable
+
+Append-only.
+
+⸻
+
+13. Security Rules
+
+Mandatory Checks
+
+Tenant Validation
+
+Device Validation
+
+JWT Validation
+
+Permission Validation
+
+Session Validation
+
+⸻
+
+High Risk Actions
+
+Require Owner approval:
+
+Permission Changes
+Role Changes
+Interest Recalculation
+Backup Restore
+Auction Completion
+
+⸻
+
+14. Notification Integration
+
+Triggers
+
+New Device Request
+
+Failed Login Attempts
+
+Permission Changes
+
+Session Revocation
+
+Staff Deactivation
+
+⸻
+
+Channels
+
+Push
+WhatsApp
+In-App
+
+⸻
+
+15. Integration Matrix
+
+Module	Purpose
+Auth	Users
+Girvi	Permissions
+Customer	Permissions
+Compliance	Access Control
+Reports	Export Rights
+Audit	Activity Tracking
+Notifications	Alerts
+
+⸻
+
+16. Offline Behaviour
+
+Supported:
+
+Role Lookup
+Permission Cache
+Session Validation
+
+⸻
+
+Not Supported:
+
+Permission Updates
+Device Approval
+Session Revocation
+
+⸻
+
+17. Audit Logging
+
+Log:
+
+Staff Created
+Staff Updated
+Staff Deactivated
+Role Updated
+Permission Updated
+Device Approved
+Device Rejected
+Session Terminated
+
+⸻
+
+18. Analytics Events
+
+staff_created
+role_updated
+permission_changed
+device_approved
+device_rejected
+session_terminated
+activity_viewed
+
+⸻
+
+19. Error Catalogue
+
+RBAC-001
+
+Permission Denied
+
+RBAC-002
+
+Role Not Found
+
+RBAC-003
+
+User Not Found
+
+RBAC-004
+
+Owner Modification Blocked
+
+RBAC-005
+
+Device Approval Failed
+
+RBAC-006
+
+Session Termination Failed
+
+RBAC-007
+
+Duplicate Mobile
+
+RBAC-008
+
+Permission Assignment Failed
+
+⸻
+
+20. Database Entities
+
+users
+roles
+permissions
+role_permissions
+user_roles
+devices
+sessions
+audit_logs
+
+⸻
+
+21. Backend Structure
+
+staff/
+controllers/
+services/
+repositories/
+dto/
+entities/
+roles/
+permissions/
+devices/
+sessions/
+
+⸻
+
+22. Frontend Structure
+
+features/staff/
+staff_list/
+staff_form/
+permission_matrix/
+device_approval/
+activity_monitor/
+session_history/
+bloc/
+repository/
+models/
+
+⸻
+
+23. Testing Checklist
+
+✓ Create Staff
+
+✓ Edit Staff
+
+✓ Deactivate Staff
+
+✓ Role Assignment
+
+✓ Permission Assignment
+
+✓ Device Approval
+
+✓ Device Rejection
+
+✓ Session Monitoring
+
+✓ Session Termination
+
+✓ Activity Tracking
+
+✓ Audit Logs
+
+✓ Permission Enforcement
+
+✓ Offline Cache
+
+⸻
+
+24. Performance Requirements
+
+Staff List:
+
+< 1 Second
+
+Permission Matrix:
+
+< 2 Seconds
+
+Device Approval:
+
+< 3 Seconds
+
+Activity Feed:
+
+< 2 Seconds
+
+⸻
+
+25. Development Sequence
+
+1. Role Engine
+2. Permission Engine
+3. Staff Management
+4. Device Approval
+5. Session Management
+6. Activity Monitoring
+7. Audit Integration
+8. Notification Integration
+
+END OF DOCUMENT

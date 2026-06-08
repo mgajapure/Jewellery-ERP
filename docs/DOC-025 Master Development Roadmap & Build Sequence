@@ -1,0 +1,1249 @@
+Jewellery ERP & Girvi Management Platform
+
+Master Development Roadmap & Build Sequence v1.0
+
+Document Code: DOC-025
+Document Type: Master Development Execution Plan
+Applies To: Product Owners, Architects, Developers, AI Coding Agents, QA Team, DevOps Team
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official build sequence, sprint roadmap, implementation order, dependency graph, release strategy, and execution methodology for the Jewellery ERP platform.
+
+This document is the final governing document that converts all previous specifications into an executable implementation roadmap.
+
+⸻
+
+2. Project Vision
+
+Build a production-grade Jewellery ERP and Girvi Management Platform that supports:
+
+* Girvi Operations
+* Jewellery Sales
+* Jewellery Purchase
+* Savings Schemes
+* Vault Management
+* Compliance Management
+* Staff Management
+* Multi-Branch Operations
+* Offline-First Operations
+* Enterprise Reporting
+
+⸻
+
+3. Project Success Criteria
+
+Platform is considered complete only when:
+
+✓ All Modules Implemented
+
+✓ Offline Sync Operational
+
+✓ Security Compliance Achieved
+
+✓ Automated Testing Implemented
+
+✓ Production Deployment Ready
+
+✓ Documentation Complete
+
+✓ Audit Coverage Complete
+
+✓ Performance Targets Met
+
+⸻
+
+4. Development Philosophy
+
+Principle 1
+
+Database First
+
+⸻
+
+Principle 2
+
+Backend Before Frontend
+
+⸻
+
+Principle 3
+
+Core Business Before Reports
+
+⸻
+
+Principle 4
+
+Security By Default
+
+⸻
+
+Principle 5
+
+Offline Support From Day One
+
+⸻
+
+5. Master Dependency Graph
+
+Infrastructure
+      |
+Database
+      |
+Authentication
+      |
+Customer
+      |
+Girvi
+      |
+Interest
+      |
+Vault
+      |
+Compliance
+      |
+Payments
+      |
+Reports
+      |
+Dashboard
+
+⸻
+
+6. Build Order (High Level)
+
+Phase 0
+
+Foundation
+
+⸻
+
+Phase 1
+
+Core Platform
+
+⸻
+
+Phase 2
+
+Girvi Operations
+
+⸻
+
+Phase 3
+
+Retail ERP
+
+⸻
+
+Phase 4
+
+Savings & Advanced Features
+
+⸻
+
+Phase 5
+
+Analytics & Dashboard
+
+⸻
+
+Phase 6
+
+Production Hardening
+
+⸻
+
+7. Phase 0 – Foundation
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Deliverables
+
+PostgreSQL
+
+Prisma
+
+NestJS Skeleton
+
+Flutter Skeleton
+
+CI/CD
+
+Docker
+
+Monitoring
+
+Logging
+
+Environment Setup
+
+⸻
+
+Documents Used
+
+DOC-018
+
+DOC-019
+
+DOC-022
+
+⸻
+
+Output
+
+Working application shell.
+
+⸻
+
+8. Sprint 01 – Database Foundation
+
+Duration:
+
+1 Week
+
+⸻
+
+Build
+
+Base Tables
+
+Audit Tables
+
+RBAC Tables
+
+Device Tables
+
+Sync Tables
+
+Configuration Tables
+
+⸻
+
+Deliverables
+
+Users
+Roles
+Permissions
+Devices
+Audit Logs
+Settings
+Sync Queue
+
+⸻
+
+Dependencies
+
+None.
+
+⸻
+
+9. Sprint 02 – Authentication Module
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+MOD-AUTH
+
+⸻
+
+Features
+
+Login
+
+OTP
+
+Device Approval
+
+JWT
+
+Refresh Tokens
+
+Logout
+
+⸻
+
+Documents
+
+DOC-004
+
+DOC-021
+
+⸻
+
+Milestone
+
+Users can log in securely.
+
+⸻
+
+10. Sprint 03 – Staff & RBAC
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+MOD-STAFF
+
+⸻
+
+Features
+
+Staff
+
+Roles
+
+Permissions
+
+Device Approval
+
+⸻
+
+Dependency
+
+Authentication.
+
+⸻
+
+11. Sprint 04 – Settings Foundation
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+Core Settings
+
+⸻
+
+Features
+
+Business Settings
+
+Number Series
+
+Interest Config
+
+GST Config
+
+⸻
+
+Dependency
+
+Authentication.
+
+⸻
+
+12. Sprint 05 – Customer Module
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-CUSTOMER
+
+⸻
+
+Features
+
+Customer Registration
+
+KYC
+
+Search
+
+QR Generation
+
+Customer Ledger
+
+⸻
+
+Dependency
+
+Authentication
+
+Settings
+
+RBAC
+
+⸻
+
+13. Sprint 06 – Offline Sync Engine
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+DOC-020
+
+⸻
+
+Features
+
+SQLite
+
+Sync Queue
+
+Delta Sync
+
+Retry Engine
+
+Conflict Handling
+
+⸻
+
+Milestone
+
+Offline operations enabled.
+
+⸻
+
+14. Sprint 07 – Vault Management
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+MOD-VAULT
+
+⸻
+
+Features
+
+Vaults
+
+Compartments
+
+Assignments
+
+Transfers
+
+⸻
+
+15. Sprint 08 – Girvi Core
+
+Duration:
+
+3 Weeks
+
+⸻
+
+Implement
+
+MOD-GIRVI
+
+⸻
+
+Features
+
+New Girvi
+
+Valuation
+
+Loan Creation
+
+QR
+
+Receipts
+
+Document Generation
+
+⸻
+
+Dependency
+
+Customer
+
+Vault
+
+Settings
+
+⸻
+
+Critical Milestone
+
+First complete business workflow.
+
+⸻
+
+16. Sprint 09 – Interest Engine
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-INTEREST
+
+⸻
+
+Features
+
+Simple Interest
+
+Katmiti
+
+Renewals
+
+Penalties
+
+⸻
+
+Dependency
+
+Girvi
+
+⸻
+
+17. Sprint 10 – Compliance Module
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+MOD-COMPLIANCE
+
+⸻
+
+Features
+
+KFS
+
+Pledge Forms
+
+Consent
+
+Alerts
+
+⸻
+
+18. Sprint 11 – Reports Foundation
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+Core Reports
+
+⸻
+
+Reports
+
+Customer
+
+Girvi
+
+Collections
+
+Vault
+
+⸻
+
+19. Sprint 12 – Inventory Module
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-INVENTORY
+
+⸻
+
+Features
+
+Stock
+
+Barcode
+
+Categories
+
+Purity
+
+⸻
+
+20. Sprint 13 – Purchase Module
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-PURCHASE
+
+⸻
+
+Features
+
+Supplier
+
+Purchase Entry
+
+Inventory Integration
+
+⸻
+
+21. Sprint 14 – Sales Module
+
+Duration:
+
+3 Weeks
+
+⸻
+
+Implement
+
+MOD-SALES
+
+⸻
+
+Features
+
+POS
+
+Billing
+
+GST
+
+Inventory Deduction
+
+⸻
+
+22. Sprint 15 – Savings Scheme Module
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-SAVINGS
+
+⸻
+
+Features
+
+Enrollment
+
+Deposits
+
+Maturity
+
+Redemption
+
+⸻
+
+23. Sprint 16 – Dashboard Module
+
+Duration:
+
+1 Week
+
+⸻
+
+Implement
+
+MOD-DASHBOARD
+
+⸻
+
+Features
+
+KPIs
+
+Alerts
+
+Quick Actions
+
+⸻
+
+24. Sprint 17 – Advanced Reports
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Implement
+
+MOD-REPORTS Advanced
+
+⸻
+
+Features
+
+Profitability
+
+Compliance
+
+Savings
+
+Inventory Analytics
+
+⸻
+
+25. Sprint 18 – Notification Engine
+
+Duration:
+
+1 Week
+
+⸻
+
+Features
+
+Push
+
+SMS
+
+WhatsApp
+
+Email
+
+⸻
+
+26. Sprint 19 – Security Hardening
+
+Duration:
+
+1 Week
+
+⸻
+
+Validate
+
+RBAC
+
+Encryption
+
+Audit
+
+Device Controls
+
+⸻
+
+Document
+
+DOC-021
+
+⸻
+
+27. Sprint 20 – Performance Optimization
+
+Duration:
+
+1 Week
+
+⸻
+
+Targets
+
+API:
+
+< 500 ms
+
+⸻
+
+Dashboard:
+
+< 2 Seconds
+
+⸻
+
+Search:
+
+< 1 Second
+
+⸻
+
+28. Sprint 21 – Full QA Cycle
+
+Duration:
+
+2 Weeks
+
+⸻
+
+Activities
+
+Regression
+
+Security
+
+Offline
+
+Load Testing
+
+UAT
+
+⸻
+
+Documents
+
+DOC-023
+
+⸻
+
+29. Sprint 22 – Production Readiness
+
+Duration:
+
+1 Week
+
+⸻
+
+Validate
+
+Backups
+
+Monitoring
+
+CI/CD
+
+DR Testing
+
+Logging
+
+⸻
+
+30. Sprint 23 – Production Launch
+
+Duration:
+
+3 Days
+
+⸻
+
+Activities
+
+Deploy
+
+Smoke Test
+
+User Training
+
+Hypercare
+
+⸻
+
+31. Backend Implementation Order
+
+Auth
+RBAC
+Settings
+Customer
+Vault
+Girvi
+Interest
+Compliance
+Reports
+Inventory
+Purchase
+Sales
+Savings
+Dashboard
+
+⸻
+
+32. Frontend Implementation Order
+
+Authentication
+Dashboard
+Customer
+Girvi
+Vault
+Interest
+Compliance
+Inventory
+Purchase
+Sales
+Savings
+Reports
+Settings
+
+⸻
+
+33. Database Migration Order
+
+Core Tables
+RBAC
+Devices
+Settings
+Customers
+Vault
+Girvi
+Interest
+Compliance
+Inventory
+Purchase
+Sales
+Savings
+Reports
+
+⸻
+
+34. API Implementation Order
+
+Priority 1
+
+Authentication APIs
+
+⸻
+
+Priority 2
+
+Customer APIs
+
+⸻
+
+Priority 3
+
+Girvi APIs
+
+⸻
+
+Priority 4
+
+Financial APIs
+
+⸻
+
+Priority 5
+
+Reporting APIs
+
+⸻
+
+35. Mobile Screen Implementation Sequence
+
+Wave 1
+
+Login
+Device Approval
+Dashboard
+
+⸻
+
+Wave 2
+
+Customer
+KYC
+QR
+
+⸻
+
+Wave 3
+
+Girvi
+Payments
+Vault
+
+⸻
+
+Wave 4
+
+Inventory
+Purchase
+Sales
+
+⸻
+
+Wave 5
+
+Savings
+Reports
+Settings
+
+⸻
+
+36. Testing Milestones
+
+Milestone 1
+
+Authentication Complete
+
+⸻
+
+Milestone 2
+
+Customer Complete
+
+⸻
+
+Milestone 3
+
+Girvi Complete
+
+⸻
+
+Milestone 4
+
+Retail ERP Complete
+
+⸻
+
+Milestone 5
+
+Full Platform Complete
+
+⸻
+
+37. Release Strategy
+
+Alpha
+
+Internal Team
+
+⸻
+
+Beta
+
+Selected Shops
+
+⸻
+
+RC
+
+Production Candidate
+
+⸻
+
+GA
+
+General Availability
+
+⸻
+
+38. Production Launch Checklist
+
+✓ Database Backups
+
+✓ SSL
+
+✓ Monitoring
+
+✓ Logging
+
+✓ Audit
+
+✓ RBAC
+
+✓ Offline Sync
+
+✓ Notifications
+
+✓ Reports
+
+✓ UAT Sign-Off
+
+⸻
+
+39. AI Agent Build Sequence
+
+Step 1
+
+Database Schema
+
+⸻
+
+Step 2
+
+Backend APIs
+
+⸻
+
+Step 3
+
+Frontend Screens
+
+⸻
+
+Step 4
+
+Offline Support
+
+⸻
+
+Step 5
+
+Testing
+
+⸻
+
+Step 6
+
+Documentation
+
+⸻
+
+Step 7
+
+Deployment
+
+⸻
+
+40. Resource Planning
+
+Recommended Team
+
+1 Product Owner
+
+1 Solution Architect
+
+2 Backend Developers
+
+2 Flutter Developers
+
+1 QA Engineer
+
+1 DevOps Engineer
+
+⸻
+
+AI Assisted Team
+
+Can reduce team size significantly.
+
+⸻
+
+41. Estimated Timeline
+
+Foundation:
+
+4 Weeks
+
+⸻
+
+Core Girvi Platform:
+
+8 Weeks
+
+⸻
+
+Retail ERP:
+
+8 Weeks
+
+⸻
+
+Hardening & Launch:
+
+4 Weeks
+
+⸻
+
+Total
+
+20–24 Weeks
+
+Enterprise-grade release.
+
+⸻
+
+42. Project Completion Criteria
+
+Platform is complete when:
+
+✓ All DOC Specifications Implemented
+
+✓ All Modules Delivered
+
+✓ Test Coverage Targets Met
+
+✓ Security Controls Verified
+
+✓ Offline Engine Verified
+
+✓ Performance Targets Achieved
+
+✓ Production Deployment Successful
+
+✓ Documentation Complete
+
+⸻
+
+43. Final Governance Rule
+
+All future implementation work must follow:
+
+DOC-001 → DOC-025
+
+in order of authority.
+
+No feature, API, screen, database change, or infrastructure change may violate any approved specification.
+
+⸻
+
+44. Final Program Outcome
+
+The Jewellery ERP platform produced through this roadmap will be:
+
+✓ Offline First
+
+✓ Multi Branch Ready
+
+✓ Secure
+
+✓ Auditable
+
+✓ Scalable
+
+✓ AI Maintainable
+
+✓ Enterprise Grade
+
+✓ Production Ready
+
+END OF DOCUMENT

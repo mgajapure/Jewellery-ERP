@@ -1,0 +1,790 @@
+Jewellery ERP & Girvi Management Platform
+
+Interest Engine Module Specification v1.0
+
+Module Code: MOD-INTEREST
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Girvi Module, Compliance Module, Audit Module, Reporting Module
+
+⸻
+
+1. Module Purpose
+
+The Interest Engine is the financial calculation core of the platform.
+
+Every Girvi transaction, payment, renewal, redemption, report, compliance document, and customer statement depends on this module.
+
+The module is responsible for:
+
+* Simple Interest Calculation
+* Katmiti Interest Calculation
+* Daily Interest Calculation
+* Overdue Penalty Calculation
+* Minimum Billing Rule Enforcement
+* Interest Ledger Management
+* Future Interest Forecasting
+* Interest Recalculation
+* RBI Compliance
+* Financial Audit Trail
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+100% calculation accuracy.
+
+BO-002
+
+Support traditional Maharashtra Katmiti methodology.
+
+BO-003
+
+Prevent manual interest manipulation.
+
+BO-004
+
+Maintain immutable financial records.
+
+BO-005
+
+Provide complete audit traceability.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-032	Interest Calculator
+SCR-033	Interest Ledger & Breakdown
+
+⸻
+
+4. Module Flow
+
+Girvi Created
+      |
+Interest Configuration
+      |
+Daily Accrual Engine
+      |
++--------------------+
+|                    |
+Partial Payment      Renewal
+|                    |
+Recalculate          Recalculate
+|                    |
+Outstanding Updated
+      |
+Redemption
+      |
+Final Interest Settlement
+      |
+Ledger Closed
+
+⸻
+
+5. Interest Types Supported
+
+Type	Code
+Simple Interest	SIMPLE
+Katmiti	KATMITI
+Daily Interest	DAILY
+Penalty Interest	PENALTY
+
+⸻
+
+6. Core Business Rules
+
+BR-INT-001
+
+Interest can never be negative.
+
+BR-INT-002
+
+Historical calculations are immutable.
+
+BR-INT-003
+
+Interest rate changes affect future accrual only.
+
+BR-INT-004
+
+Katmiti payments cover interest first.
+
+BR-INT-005
+
+Penalty interest displayed separately.
+
+BR-INT-006
+
+Interest ledger cannot be deleted.
+
+BR-INT-007
+
+Every calculation must be auditable.
+
+BR-INT-008
+
+Calculation engine runs server-side.
+
+⸻
+
+7. Screen Specification
+
+SCR-032 Interest Calculator
+
+Purpose
+
+Calculate real-time interest.
+
+Used during:
+
+* Girvi Creation
+* Payment
+* Renewal
+* Redemption
+* Reports
+
+⸻
+
+UI Components
+
+Loan Information
+
+Principal Amount
+Interest Type
+Interest Rate
+Start Date
+Calculation Date
+
+⸻
+
+Results Section
+
+Accrued Interest
+Penalty
+Outstanding Principal
+Total Due
+
+⸻
+
+Actions
+
+Calculate
+Save Snapshot
+Print
+
+⸻
+
+API Mapping
+
+POST /interest/calculate
+
+⸻
+
+Request DTO
+
+{
+  "girviId": "",
+  "calculationDate": "2026-06-08"
+}
+
+⸻
+
+Acceptance Criteria
+
+Calculation < 500 ms.
+
+⸻
+
+SCR-033 Interest Ledger & Breakdown
+
+Purpose
+
+Complete financial audit trail.
+
+⸻
+
+Displays
+
+Ledger Header
+
+Girvi ID
+Customer
+Principal
+Interest Type
+Interest Rate
+
+⸻
+
+Ledger Rows
+
+Date
+Opening Principal
+Interest
+Penalty
+Payment
+Closing Principal
+
+⸻
+
+Summary
+
+Total Principal
+Total Interest
+Total Penalty
+Outstanding
+
+⸻
+
+API Mapping
+
+GET /interest/{girviId}
+
+⸻
+
+8. Simple Interest Engine
+
+Formula
+
+Interest = Principal \times Rate \times \frac{Days}{365}
+
+⸻
+
+Inputs
+
+Principal
+Annual Rate
+Start Date
+Calculation Date
+
+⸻
+
+Example
+
+Principal = ₹100,000
+Rate = 12%
+Days = 180
+
+Result:
+
+Interest = ₹5,917.81
+
+⸻
+
+Rules
+
+Actual Calendar Days
+
+Used for calculation.
+
+Rounding
+
+2 Decimal Places
+
+⸻
+
+9. Katmiti Interest Engine
+
+Purpose
+
+Traditional Maharashtra Girvi method.
+
+⸻
+
+Core Principle
+
+Partial payments:
+
+Interest First
+Principal Second
+
+⸻
+
+Katmiti Workflow
+
+Month Start
+      |
+Interest Accrued
+      |
+Partial Payment
+      |
+Interest Settled
+      |
+Remaining Amount
+      |
+Principal Reduced
+      |
+New Base Principal
+      |
+Next Cycle Starts
+
+⸻
+
+Formula
+
+Monthly Interest:
+
+Monthly\ Interest = Principal \times Monthly\ Rate
+
+⸻
+
+Example
+
+Month 1
+
+Principal = ₹100,000
+Rate = 2%
+
+Interest:
+
+₹2,000
+
+⸻
+
+Payment
+
+₹5,000
+
+Allocation:
+
+₹2,000 Interest
+₹3,000 Principal
+
+⸻
+
+New Principal
+
+₹97,000
+
+⸻
+
+Next Cycle Base
+
+₹97,000
+
+⸻
+
+Rules
+
+Payment Order
+
+Interest First
+Principal Second
+
+Mandatory.
+
+⸻
+
+Cycle
+
+Configurable:
+
+Monthly
+Quarterly
+
+⸻
+
+10. Daily Interest Engine
+
+Formula
+
+Daily\ Interest = Principal \times \frac{Annual\ Rate}{365}
+
+⸻
+
+Use Cases
+
+Short Term Loans
+Custom Products
+Special Schemes
+
+⸻
+
+11. Minimum Billing Engine
+
+Purpose
+
+Prevent early settlement abuse.
+
+⸻
+
+Rule
+
+Settlement between:
+
+Day 1
+Day 15
+
+Requires:
+
+Minimum One Month Interest
+
+⸻
+
+Formula
+
+Minimum\ Charge = One\ Full\ Month\ Interest
+
+⸻
+
+Configuration
+
+Tenant configurable.
+
+⸻
+
+12. Overdue Penalty Engine
+
+Trigger
+
+Due date crossed.
+
+⸻
+
+Formula
+
+Penalty = Outstanding \times Penalty\ Rate \times \frac{Overdue\ Days}{365}
+
+⸻
+
+Inputs
+
+Outstanding Principal
+Penalty Rate
+Overdue Days
+
+⸻
+
+Rules
+
+Separate Ledger
+
+Penalty never merged into regular interest.
+
+⸻
+
+Separate Display
+
+Visible in all reports.
+
+⸻
+
+13. Recalculation Engine
+
+Purpose
+
+Handle future rate changes.
+
+⸻
+
+Trigger
+
+Owner updates rate configuration.
+
+⸻
+
+Rule
+
+Historical data:
+
+Never Recalculated
+
+Future accrual:
+
+Use New Rate
+
+⸻
+
+Audit
+
+Mandatory.
+
+⸻
+
+14. Interest Ledger Architecture
+
+Table
+
+interest_ledger
+
+⸻
+
+Ledger Entry Types
+
+ACCRUAL
+PAYMENT
+PENALTY
+ADJUSTMENT
+RENEWAL
+REDEMPTION
+
+⸻
+
+Immutable
+
+Append only.
+
+⸻
+
+15. Outstanding Calculation Engine
+
+Formula
+
+Outstanding = Principal + Interest + Penalty - Payments
+
+⸻
+
+Displayed In
+
+Dashboard
+Girvi Details
+Receipts
+Reports
+
+⸻
+
+16. Forecast Engine
+
+Purpose
+
+Future payable estimation.
+
+⸻
+
+Inputs
+
+Future Date
+Principal
+Interest Type
+
+⸻
+
+Output
+
+Estimated Interest
+Estimated Total Due
+
+⸻
+
+17. Compliance Rules
+
+RBI
+
+Transparent Interest Disclosure
+
+Mandatory.
+
+⸻
+
+KFS
+
+Interest calculation included.
+
+⸻
+
+Maharashtra
+
+Ledger Reporting
+
+Form 9 support.
+
+⸻
+
+Annual Statements
+
+Interest breakdown mandatory.
+
+⸻
+
+18. Integration Matrix
+
+Module	Purpose
+Girvi	Main Consumer
+Dashboard	KPIs
+Reports	Statements
+Compliance	Forms
+Notifications	Due Alerts
+Audit	Traceability
+
+⸻
+
+19. Offline Behaviour
+
+Supported:
+
+Interest Calculation
+Interest Lookup
+Ledger View
+
+⸻
+
+Sync
+
+Interest snapshots stored locally.
+
+PENDING
+SYNCING
+SYNCED
+CONFLICT
+
+⸻
+
+20. Audit Logging
+
+Log:
+
+Interest Calculated
+Rate Changed
+Penalty Applied
+Payment Allocation
+Renewal Calculation
+Redemption Calculation
+
+⸻
+
+21. Analytics Events
+
+interest_calculated
+interest_viewed
+penalty_applied
+rate_changed
+ledger_viewed
+forecast_generated
+
+⸻
+
+22. Error Catalogue
+
+INT-001
+
+Invalid Principal
+
+INT-002
+
+Invalid Rate
+
+INT-003
+
+Calculation Failed
+
+INT-004
+
+Negative Interest
+
+INT-005
+
+Ledger Corruption
+
+INT-006
+
+Rate Configuration Missing
+
+INT-007
+
+Penalty Configuration Missing
+
+⸻
+
+23. Backend Structure
+
+interest/
+controllers/
+services/
+repositories/
+dto/
+entities/
+calculators/
+simple/
+katmiti/
+daily/
+penalty/
+forecast/
+
+⸻
+
+24. Frontend Structure
+
+features/interest/
+calculator/
+ledger/
+bloc/
+repository/
+models/
+
+⸻
+
+25. Testing Checklist
+
+✓ Simple Interest
+
+✓ Katmiti Interest
+
+✓ Daily Interest
+
+✓ Minimum Billing
+
+✓ Penalty Interest
+
+✓ Partial Payment Allocation
+
+✓ Renewal Recalculation
+
+✓ Redemption Calculation
+
+✓ Future Forecast
+
+✓ Ledger Generation
+
+✓ Audit Logs
+
+✓ Offline Calculations
+
+✓ Sync
+
+✓ RBI Compliance
+
+✓ Maharashtra Compliance
+
+⸻
+
+26. Performance Requirements
+
+Interest Calculation:
+
+< 500 ms
+
+⸻
+
+Ledger Load:
+
+< 2 Seconds
+
+⸻
+
+Forecast:
+
+< 1 Second
+
+⸻
+
+27. Development Sequence
+
+1. Interest Database
+2. Simple Calculator
+3. Katmiti Calculator
+4. Daily Calculator
+5. Penalty Calculator
+6. Ledger Engine
+7. Forecast Engine
+8. API Layer
+9. UI Layer
+10. Reporting Integration
+11. Compliance Integration
+
+END OF DOCUMENT

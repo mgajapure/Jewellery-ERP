@@ -1,0 +1,1097 @@
+Jewellery ERP & Girvi Management Platform
+
+Security & Compliance Architecture Specification v1.0
+
+Document Code: DOC-021
+Architecture Type: Enterprise Security & Compliance Architecture
+Applies To: Backend, Mobile App, Database, APIs, Infrastructure, Offline Engine
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official security and compliance architecture for the Jewellery ERP & Girvi Management Platform.
+
+This document serves as the source of truth for:
+
+* Authentication Security
+* Authorization Security
+* Device Security
+* Data Security
+* Document Security
+* Infrastructure Security
+* Compliance Controls
+* Audit Controls
+* Incident Management
+* Data Retention
+
+All modules must comply with this document.
+
+⸻
+
+2. Security Objectives
+
+SEC-001
+
+Prevent unauthorized access.
+
+SEC-002
+
+Protect customer and financial data.
+
+SEC-003
+
+Maintain complete auditability.
+
+SEC-004
+
+Support regulatory compliance.
+
+SEC-005
+
+Ensure business continuity.
+
+⸻
+
+3. Security Principles
+
+Principle 1
+
+Least Privilege Access
+
+⸻
+
+Principle 2
+
+Zero Trust Validation
+
+⸻
+
+Principle 3
+
+Defense In Depth
+
+⸻
+
+Principle 4
+
+Secure By Default
+
+⸻
+
+Principle 5
+
+Audit Everything
+
+⸻
+
+Principle 6
+
+Encrypt Sensitive Data
+
+⸻
+
+Principle 7
+
+Never Trust Client Data
+
+⸻
+
+Principle 8
+
+Fail Securely
+
+⸻
+
+4. Security Architecture Overview
+
+Mobile Device
+      |
+Device Validation
+      |
+JWT Authentication
+      |
+RBAC Validation
+      |
+API Gateway
+      |
+NestJS Services
+      |
+Database Security Layer
+      |
+Encrypted Storage
+
+⸻
+
+5. Authentication Security Architecture
+
+Authentication Factors
+
+Factor 1
+
+Registered Mobile Number
+
+⸻
+
+Factor 2
+
+OTP Verification
+
+⸻
+
+Factor 3
+
+Approved Device
+
+⸻
+
+Authentication Flow
+
+Mobile Number
+      |
+OTP
+      |
+Device Verification
+      |
+JWT
+      |
+Access Granted
+
+⸻
+
+6. OTP Security Standards
+
+OTP Length
+
+6 Digits
+
+⸻
+
+OTP Expiry
+
+5 Minutes
+
+⸻
+
+OTP Attempts
+
+Maximum 5 Attempts
+
+⸻
+
+Lockout
+
+30 Minutes
+
+After repeated failures.
+
+⸻
+
+7. JWT Security Architecture
+
+Access Token
+
+Validity:
+
+24 Hours
+
+⸻
+
+Refresh Token
+
+Validity:
+
+30 Days
+
+⸻
+
+Token Storage
+
+Mobile:
+
+flutter_secure_storage
+
+⸻
+
+Backend:
+
+Hashed Refresh Token
+
+⸻
+
+JWT Claims
+
+{
+  "tenant_id": "",
+  "user_id": "",
+  "role_id": "",
+  "device_id": ""
+}
+
+⸻
+
+8. Device Security Architecture
+
+Purpose
+
+Prevent unauthorized device access.
+
+⸻
+
+Device Registration
+
+Collect:
+
+Device ID
+Platform
+App Version
+Device Name
+
+⸻
+
+Device States
+
+PENDING
+APPROVED
+BLOCKED
+REVOKED
+
+⸻
+
+Device Approval
+
+Owner approval mandatory.
+
+⸻
+
+Device Revocation
+
+Immediate session termination.
+
+⸻
+
+9. Session Security
+
+Session Types
+
+JWT Session
+PIN Session
+Biometric Session
+
+⸻
+
+Concurrent Sessions
+
+Configurable.
+
+Default:
+
+5 Devices
+
+⸻
+
+Session Revocation
+
+Supported.
+
+⸻
+
+Forced Logout
+
+Supported.
+
+⸻
+
+10. Authorization Security
+
+Model
+
+RBAC
+
+⸻
+
+Flow
+
+User
+  |
+Role
+  |
+Permissions
+  |
+API Access
+
+⸻
+
+Validation
+
+Every API call.
+
+⸻
+
+Frontend
+
+UI visibility only.
+
+⸻
+
+Backend
+
+Final authority.
+
+⸻
+
+11. API Security Standards
+
+Mandatory Controls
+
+JWT Validation
+
+Tenant Validation
+
+Device Validation
+
+Permission Validation
+
+Request Validation
+
+⸻
+
+API Versioning
+
+/api/v1/
+
+⸻
+
+Content Type
+
+application/json
+
+Only.
+
+⸻
+
+12. Rate Limiting
+
+OTP APIs
+
+5 Requests / Hour
+
+⸻
+
+Login APIs
+
+20 Requests / Hour
+
+⸻
+
+General APIs
+
+100 Requests / Minute
+
+⸻
+
+Enforcement
+
+Redis Rate Limiter.
+
+⸻
+
+13. Input Security
+
+Validation Layer
+
+DTO Validation.
+
+⸻
+
+Mandatory Checks
+
+Type Validation
+
+Length Validation
+
+Format Validation
+
+Business Validation
+
+⸻
+
+Protection Against
+
+SQL Injection
+XSS
+Command Injection
+Path Traversal
+
+⸻
+
+14. Database Security Architecture
+
+Database
+
+PostgreSQL
+
+⸻
+
+Access
+
+Application Only.
+
+⸻
+
+Direct Access
+
+Restricted.
+
+⸻
+
+Production Access
+
+VPN Required.
+
+⸻
+
+15. Data Classification
+
+Public
+
+Business Name
+Categories
+
+⸻
+
+Internal
+
+Reports
+Analytics
+
+⸻
+
+Confidential
+
+Customer Data
+Financial Data
+KYC Data
+
+⸻
+
+Restricted
+
+Aadhaar
+PAN
+Bank Details
+
+⸻
+
+16. Encryption Standards
+
+Data In Transit
+
+TLS 1.3
+
+Mandatory.
+
+⸻
+
+Data At Rest
+
+AES-256
+
+Mandatory.
+
+⸻
+
+Local Device Storage
+
+Encrypted.
+
+⸻
+
+Backup Encryption
+
+Mandatory.
+
+⸻
+
+17. KYC Document Security
+
+Documents
+
+Aadhaar
+PAN
+Photographs
+Signatures
+
+⸻
+
+Storage
+
+Encrypted Object Storage.
+
+⸻
+
+Access Control
+
+Permission based.
+
+⸻
+
+Download Control
+
+Audit logged.
+
+⸻
+
+18. File Security Architecture
+
+File Types
+
+PDF
+JPEG
+PNG
+WEBP
+
+⸻
+
+File Validation
+
+MIME Validation
+
+Size Validation
+
+Malware Scan
+
+⸻
+
+Maximum Size
+
+25 MB
+
+⸻
+
+19. Audit Architecture
+
+Purpose
+
+Immutable activity history.
+
+⸻
+
+Log Events
+
+Login
+Logout
+Create
+Update
+Delete
+Approve
+Reject
+Export
+Print
+
+⸻
+
+Audit Fields
+
+User
+Device
+Timestamp
+Action
+Entity
+Old Value
+New Value
+
+⸻
+
+Retention
+
+Permanent.
+
+⸻
+
+20. Financial Security Controls
+
+Applies To
+
+Payments
+Redemptions
+Sales
+Purchases
+Interest Adjustments
+
+⸻
+
+Requirements
+
+Transaction Audit
+
+Approval Workflow
+
+Dual Verification
+
+Immutable Ledger
+
+⸻
+
+21. Compliance Controls
+
+Mandatory Documents
+
+KFS
+
+Pledge Forms
+
+Customer Consent
+
+Auction Notices
+
+⸻
+
+Compliance Validation
+
+Automated.
+
+⸻
+
+Missing Compliance
+
+Generates alerts.
+
+⸻
+
+22. RBI-Oriented Lending Controls
+
+Required
+
+Customer Identification
+
+Loan Documentation
+
+Interest Disclosure
+
+Audit Trail
+
+⸻
+
+Restrictions
+
+No undocumented loan issuance.
+
+⸻
+
+23. Multi-Tenant Security
+
+Tenant Isolation
+
+Mandatory.
+
+⸻
+
+Database Field
+
+tenant_id
+
+⸻
+
+Validation
+
+Every query filtered.
+
+⸻
+
+Cross Tenant Access
+
+Forbidden.
+
+⸻
+
+24. Offline Security
+
+Local Database
+
+Encrypted.
+
+⸻
+
+Sync Queue
+
+Encrypted.
+
+⸻
+
+Device Validation
+
+Maintained offline.
+
+⸻
+
+Data Exposure
+
+Prevented.
+
+⸻
+
+25. Backup Security
+
+Backup Types
+
+Local
+Cloud
+Scheduled
+
+⸻
+
+Encryption
+
+AES-256.
+
+⸻
+
+Restore Permissions
+
+Owner Only.
+
+⸻
+
+Restore Audit
+
+Mandatory.
+
+⸻
+
+26. Incident Response Architecture
+
+Incident Categories
+
+Security Breach
+
+Data Leak
+
+Device Compromise
+
+Unauthorized Access
+
+Malware
+
+⸻
+
+Workflow
+
+Detect
+   |
+Contain
+   |
+Investigate
+   |
+Recover
+   |
+Audit
+
+⸻
+
+27. Security Monitoring
+
+Monitor
+
+Failed Logins
+Blocked Devices
+Permission Violations
+API Abuse
+Sync Failures
+
+⸻
+
+Alerts
+
+Real-Time.
+
+⸻
+
+28. Data Retention Policy
+
+Customer Data
+
+10 Years
+
+⸻
+
+Financial Records
+
+10 Years
+
+⸻
+
+Audit Logs
+
+Permanent
+
+⸻
+
+Notifications
+
+2 Years
+
+⸻
+
+29. Data Deletion Policy
+
+Soft Delete
+
+Mandatory.
+
+⸻
+
+Hard Delete
+
+Restricted.
+
+⸻
+
+Legal Records
+
+Cannot be hard deleted.
+
+⸻
+
+30. Export Security
+
+Supported Formats
+
+PDF
+Excel
+CSV
+
+⸻
+
+Controls
+
+Permission Validation
+
+Watermark
+
+Audit Log
+
+Download Tracking
+
+⸻
+
+31. Printer Security
+
+Printed Documents
+
+Invoices
+KFS
+Receipts
+Reports
+
+⸻
+
+Requirements
+
+Watermark Support
+
+Print Audit
+
+Reprint Tracking
+
+⸻
+
+32. Notification Security
+
+Channels
+
+Push
+WhatsApp
+SMS
+Email
+
+⸻
+
+Sensitive Data
+
+Never include:
+
+OTP
+Aadhaar Number
+PAN Number
+Bank Account
+
+⸻
+
+33. Infrastructure Security
+
+Environment Separation
+
+Development
+Staging
+Production
+
+⸻
+
+Secrets
+
+Stored in:
+
+Secret Manager
+
+⸻
+
+Source Code
+
+Never contains secrets.
+
+⸻
+
+34. Security Testing Requirements
+
+Mandatory Tests
+
+Authentication Tests
+
+Authorization Tests
+
+API Security Tests
+
+Penetration Tests
+
+Vulnerability Scans
+
+Device Security Tests
+
+⸻
+
+Frequency
+
+Before every major release.
+
+⸻
+
+35. Compliance Audit Requirements
+
+Quarterly
+
+Permission Review
+
+Device Review
+
+Security Review
+
+⸻
+
+Annual
+
+Full Compliance Audit
+
+Penetration Testing
+
+⸻
+
+36. Security Metrics
+
+Track
+
+Failed Login Rate
+Blocked Device Count
+Permission Denials
+Security Incidents
+Audit Coverage
+
+⸻
+
+37. Security Database Entities
+
+devices
+sessions
+audit_logs
+security_events
+security_incidents
+blocked_ips
+permission_violations
+
+⸻
+
+38. Backend Security Modules
+
+auth/
+rbac/
+devices/
+audit/
+security/
+encryption/
+rate_limit/
+incident_response/
+
+⸻
+
+39. Frontend Security Components
+
+secure_storage/
+device_validation/
+biometric_auth/
+offline_encryption/
+session_manager/
+
+⸻
+
+40. AI Development Rules
+
+AI MUST
+
+✓ Validate all inputs
+
+✓ Use DTO validation
+
+✓ Enforce RBAC
+
+✓ Enforce Tenant Isolation
+
+✓ Create Audit Logs
+
+✓ Encrypt Sensitive Data
+
+✓ Use Secure Storage
+
+✓ Validate Devices
+
+✓ Log Security Events
+
+⸻
+
+AI MUST NEVER
+
+✗ Store secrets in code
+
+✗ Bypass RBAC
+
+✗ Expose KYC data
+
+✗ Log sensitive documents
+
+✗ Store tokens in plain text
+
+✗ Skip audit logging
+
+✗ Trust client-side permissions
+
+⸻
+
+41. Future Security Roadmap
+
+Phase 2:
+
+Hardware Security Keys
+Advanced Device Fingerprinting
+Behavioral Analytics
+Security Score Dashboard
+
+⸻
+
+Phase 3:
+
+AI Fraud Detection
+Real-Time Threat Intelligence
+Zero Trust Network Access
+Continuous Risk Assessment
+
+END OF DOCUMENT

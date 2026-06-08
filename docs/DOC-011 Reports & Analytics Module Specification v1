@@ -1,0 +1,837 @@
+Jewellery ERP & Girvi Management Platform
+
+Reports & Analytics Module Specification v1.0
+
+Module Code: MOD-REPORTS
+Priority: High
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Customer Module, Girvi Module, Interest Module, Vault Module, Compliance Module, Staff Module, Dashboard Module
+
+⸻
+
+1. Module Purpose
+
+The Reports & Analytics Module provides operational, financial, compliance, audit, and business intelligence reporting for the entire Jewellery ERP.
+
+This module acts as the central data intelligence layer of the platform.
+
+Responsibilities:
+
+* Financial Reports
+* Girvi Reports
+* Interest Reports
+* Collection Reports
+* Vault Reports
+* Customer Reports
+* Staff Activity Reports
+* Compliance Reports
+* Audit Reports
+* Business Analytics
+* Export Engine
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Provide real-time business visibility.
+
+BO-002
+
+Reduce manual reporting effort.
+
+BO-003
+
+Enable compliance audits.
+
+BO-004
+
+Support business decision making.
+
+BO-005
+
+Generate reports within seconds.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-044	Reports Dashboard
+SCR-045	Financial Reports
+SCR-046	Operational Reports
+SCR-047	Audit Reports
+SCR-077	Analytics & KPIs
+
+⸻
+
+4. Reporting Architecture
+
+Operational Modules
+        |
+Aggregation Engine
+        |
+Reporting Database Views
+        |
+Report Engine
+        |
+Dashboard / Export / Analytics
+
+⸻
+
+5. Report Categories
+
+Financial
+
+* Loan Book
+* Collections
+* Outstanding
+* Interest Earned
+* Revenue
+
+⸻
+
+Operational
+
+* Active Girvi
+* Redeemed Girvi
+* Auctioned Girvi
+* Vault Occupancy
+* Staff Productivity
+
+⸻
+
+Compliance
+
+* Form Reports
+* KFS Reports
+* LTV Reports
+* Insurance Reports
+
+⸻
+
+Audit
+
+* User Activity
+* Permission Changes
+* Device Approvals
+* Financial Changes
+
+⸻
+
+Analytics
+
+* Trend Analysis
+* Growth Metrics
+* Risk Analysis
+* Recovery Metrics
+
+⸻
+
+6. Core Business Rules
+
+BR-REP-001
+
+Reports must be read-only.
+
+BR-REP-002
+
+Exports must include audit metadata.
+
+BR-REP-003
+
+Tenant data isolation mandatory.
+
+BR-REP-004
+
+Financial reports must reconcile with ledger.
+
+BR-REP-005
+
+Report generation logged.
+
+BR-REP-006
+
+Sensitive reports restricted by RBAC.
+
+BR-REP-007
+
+Historical reports immutable.
+
+BR-REP-008
+
+Exports watermark with tenant details.
+
+⸻
+
+7. Screen Specifications
+
+SCR-044 Reports Dashboard
+
+Purpose
+
+Central entry point for all reports.
+
+⸻
+
+Dashboard Sections
+
+Financial
+
+Operational
+
+Compliance
+
+Audit
+
+Analytics
+
+⸻
+
+Quick Cards
+
+Displays:
+
+Today's Collections
+Active Girvi
+Overdue Accounts
+Interest Earned
+Vault Occupancy
+Compliance Score
+
+⸻
+
+Actions
+
+Generate Report
+Export
+Schedule Report
+Share
+
+⸻
+
+API Mapping
+
+GET /reports/dashboard
+
+⸻
+
+SCR-045 Financial Reports
+
+Purpose
+
+Financial reporting.
+
+⸻
+
+Available Reports
+
+Loan Book Report
+
+Displays:
+
+Total Principal
+Outstanding Principal
+Active Accounts
+Average Ticket Size
+
+⸻
+
+Collection Report
+
+Displays:
+
+Daily Collection
+Weekly Collection
+Monthly Collection
+Collection Trend
+
+⸻
+
+Interest Report
+
+Displays:
+
+Interest Accrued
+Interest Collected
+Interest Outstanding
+
+⸻
+
+Revenue Report
+
+Displays:
+
+Interest Revenue
+Penalty Revenue
+Service Revenue
+
+⸻
+
+Filters
+
+Date Range
+Branch
+Staff
+Customer
+
+⸻
+
+Export Formats
+
+PDF
+Excel
+CSV
+
+⸻
+
+API Mapping
+
+GET /reports/financial
+
+⸻
+
+SCR-046 Operational Reports
+
+Purpose
+
+Operational visibility.
+
+⸻
+
+Available Reports
+
+Active Girvi Report
+
+Due Report
+
+Overdue Report
+
+Redemption Report
+
+Auction Report
+
+Vault Occupancy Report
+
+Customer Activity Report
+
+⸻
+
+Due Aging Buckets
+
+0-30 Days
+31-60 Days
+61-90 Days
+90+ Days
+
+⸻
+
+API Mapping
+
+GET /reports/operational
+
+⸻
+
+SCR-047 Audit Reports
+
+Purpose
+
+Track all critical actions.
+
+⸻
+
+Available Reports
+
+User Activity
+
+Login History
+
+Device Approvals
+
+Permission Changes
+
+Financial Adjustments
+
+Interest Recalculations
+
+Compliance Actions
+
+⸻
+
+Audit Record
+
+Displays:
+
+User
+Action
+Module
+Timestamp
+Device
+IP Address
+
+⸻
+
+API Mapping
+
+GET /reports/audit
+
+⸻
+
+SCR-077 Analytics & KPIs
+
+Purpose
+
+Business intelligence dashboard.
+
+⸻
+
+KPI Cards
+
+Total Loan Exposure
+
+Collection Efficiency
+
+Average Loan Size
+
+Customer Growth
+
+Redemption Rate
+
+Auction Rate
+
+Vault Utilization
+
+⸻
+
+Collection Efficiency Formula
+
+Collection\ Efficiency = \frac{Collected\ Amount}{Due\ Amount} \times 100
+
+⸻
+
+Redemption Rate Formula
+
+Redemption\ Rate = \frac{Redeemed\ Accounts}{Total\ Accounts} \times 100
+
+⸻
+
+Vault Utilization Formula
+
+Vault\ Utilization = \frac{Occupied\ Slots}{Total\ Slots} \times 100
+
+⸻
+
+Trend Analysis
+
+Daily
+
+Weekly
+
+Monthly
+
+Yearly
+
+⸻
+
+API Mapping
+
+GET /reports/analytics
+
+⸻
+
+8. Report Engine
+
+Purpose
+
+Generate report datasets.
+
+⸻
+
+Workflow
+
+User Request
+      |
+Validate Permissions
+      |
+Apply Filters
+      |
+Query Aggregation Views
+      |
+Generate Dataset
+      |
+Render Report
+      |
+Export
+
+⸻
+
+Optimization
+
+Pre-aggregated views used for large datasets.
+
+⸻
+
+9. Export Engine
+
+Supported Formats
+
+PDF
+
+Excel
+
+CSV
+
+⸻
+
+Export Metadata
+
+Included:
+
+Generated By
+Generated At
+Tenant
+Filters Applied
+
+⸻
+
+Watermark
+
+Confidential
+
+⸻
+
+10. Scheduled Reports Engine
+
+Purpose
+
+Automated reporting.
+
+⸻
+
+Frequencies
+
+Daily
+Weekly
+Monthly
+
+⸻
+
+Delivery Channels
+
+Email
+WhatsApp PDF
+Download Center
+
+⸻
+
+11. Analytics Engine
+
+Data Sources
+
+Girvi
+
+Interest
+
+Payments
+
+Vault
+
+Staff
+
+Compliance
+
+⸻
+
+Metrics
+
+Growth
+
+Risk
+
+Recovery
+
+Productivity
+
+Utilization
+
+⸻
+
+12. Risk Analytics
+
+High Risk Customers
+
+Criteria:
+
+Multiple Overdues
+Auction History
+High Outstanding
+
+⸻
+
+Risk Score Formula
+
+Risk\ Score = Overdue\ Weight + Auction\ Weight + Outstanding\ Weight
+
+⸻
+
+Categories
+
+Low
+Medium
+High
+
+⸻
+
+13. Staff Productivity Analytics
+
+Metrics
+
+Customers Created
+
+Girvi Created
+
+Collections Recorded
+
+Redemptions Processed
+
+⸻
+
+Productivity Formula
+
+Productivity = Completed\ Tasks \div Working\ Days
+
+⸻
+
+14. Compliance Analytics
+
+Metrics
+
+Compliance Score
+
+Missing KFS
+
+Insurance Expiry
+
+Pending Forms
+
+Violations
+
+⸻
+
+Compliance Score Formula
+
+Compliance\ Score = \frac{Compliant\ Records}{Total\ Records} \times 100
+
+⸻
+
+15. Report Permissions
+
+Owner
+
+All Reports
+
+⸻
+
+Manager
+
+Operational + Financial
+
+⸻
+
+Accountant
+
+Financial + Compliance
+
+⸻
+
+Staff
+
+Operational Only
+
+⸻
+
+16. Integration Matrix
+
+Module	Data Source
+Customer	Customer Metrics
+Girvi	Loan Metrics
+Interest	Revenue Metrics
+Vault	Utilization Metrics
+Compliance	Regulatory Metrics
+Staff	Productivity Metrics
+Dashboard	KPI Source
+
+⸻
+
+17. Offline Behaviour
+
+Supported:
+
+View Cached Reports
+Export Cached Reports
+
+⸻
+
+Not Supported:
+
+Large Dataset Generation
+Scheduled Reports
+
+⸻
+
+18. Audit Logging
+
+Log:
+
+Report Generated
+Report Exported
+Report Shared
+Scheduled Report Created
+Analytics Viewed
+
+⸻
+
+19. Analytics Events
+
+report_generated
+report_exported
+report_shared
+analytics_viewed
+financial_report_viewed
+audit_report_viewed
+
+⸻
+
+20. Error Catalogue
+
+REP-001
+
+Report Generation Failed
+
+REP-002
+
+Export Failed
+
+REP-003
+
+Permission Denied
+
+REP-004
+
+Dataset Too Large
+
+REP-005
+
+Analytics Calculation Failed
+
+REP-006
+
+Schedule Creation Failed
+
+REP-007
+
+Invalid Filters
+
+⸻
+
+21. Database Entities
+
+report_templates
+report_history
+scheduled_reports
+analytics_snapshots
+report_exports
+
+⸻
+
+22. Backend Structure
+
+reports/
+controllers/
+services/
+repositories/
+dto/
+analytics/
+financial/
+operational/
+audit/
+exports/
+scheduler/
+
+⸻
+
+23. Frontend Structure
+
+features/reports/
+dashboard/
+financial/
+operational/
+audit/
+analytics/
+bloc/
+repository/
+models/
+
+⸻
+
+24. Testing Checklist
+
+✓ Financial Reports
+
+✓ Operational Reports
+
+✓ Audit Reports
+
+✓ Analytics Dashboard
+
+✓ Export PDF
+
+✓ Export Excel
+
+✓ Export CSV
+
+✓ Scheduled Reports
+
+✓ Permission Enforcement
+
+✓ Audit Logging
+
+✓ Performance
+
+⸻
+
+25. Performance Requirements
+
+Report Dashboard:
+
+< 2 Seconds
+
+Financial Report:
+
+< 5 Seconds
+
+Analytics Dashboard:
+
+< 3 Seconds
+
+Export Generation:
+
+< 10 Seconds
+
+⸻
+
+26. Development Sequence
+
+1. Reporting Views
+2. Financial Reports
+3. Operational Reports
+4. Audit Reports
+5. Analytics Engine
+6. Export Engine
+7. Scheduler Engine
+8. Dashboard Integration
+
+END OF DOCUMENT

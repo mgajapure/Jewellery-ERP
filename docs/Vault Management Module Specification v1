@@ -1,0 +1,878 @@
+Jewellery ERP & Girvi Management Platform
+
+Vault Management Module Specification v1.0
+
+Module Code: MOD-VAULT
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Girvi Module, Audit Module, Notification Module, Compliance Module
+
+⸻
+
+1. Module Purpose
+
+The Vault Management Module provides complete physical tracking of pledged jewellery and collateral items.
+
+Every pledged asset must have a precise storage location from the moment it is accepted until it is redeemed or auctioned.
+
+The module is responsible for:
+
+* Vault Configuration
+* Safe Management
+* Tray Management
+* Slot Management
+* Asset Location Assignment
+* Asset Retrieval
+* Occupancy Tracking
+* Vault Search
+* Location History
+* Insurance Mapping
+* Compliance Tracking
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Locate any pledged item within 5 seconds.
+
+BO-002
+
+Prevent misplaced jewellery.
+
+BO-003
+
+Prevent duplicate slot assignment.
+
+BO-004
+
+Provide complete movement history.
+
+BO-005
+
+Support RBI insurance compliance.
+
+⸻
+
+3. Vault Architecture
+
+Physical Structure
+
+Branch
+  |
+Vault
+  |
+Safe
+  |
+Tray
+  |
+Slot
+
+Example:
+
+Main Branch
+   |
+Vault-A
+   |
+Safe-02
+   |
+Tray-05
+   |
+Slot-18
+
+Generated Coordinate:
+
+VA-A/SF-02/TR-05/SL-18
+
+⸻
+
+4. Screen Inventory
+
+Screen ID	Screen Name
+SCR-034	Vault Assignment
+SCR-035	Vault Search & Occupancy
+
+Future Phase:
+
+Screen ID	Screen Name
+SCR-091	Vault Configuration
+SCR-092	Insurance Mapping
+SCR-093	Movement History
+
+⸻
+
+5. Module Flow
+
+Girvi Created
+      |
+Vault Assignment
+      |
+Slot Occupied
+      |
+Customer Search
+      |
+Retrieve Location
+      |
+Redemption
+      |
+Slot Released
+      |
+Available Again
+
+⸻
+
+6. Core Business Rules
+
+BR-VAULT-001
+
+Every active Girvi must have a vault location.
+
+BR-VAULT-002
+
+A slot can contain only one active Girvi.
+
+BR-VAULT-003
+
+Location cannot be deleted.
+
+BR-VAULT-004
+
+All movements must be audited.
+
+BR-VAULT-005
+
+Redeemed Girvi automatically releases slot.
+
+BR-VAULT-006
+
+Auctioned Girvi automatically releases slot.
+
+BR-VAULT-007
+
+Insurance must cover every occupied vault.
+
+BR-VAULT-008
+
+Vault assignment mandatory before Girvi activation.
+
+⸻
+
+7. Screen Specification
+
+SCR-034 Vault Assignment
+
+Purpose
+
+Assign physical location during Girvi creation.
+
+⸻
+
+Entry Point
+
+Create Girvi Wizard
+      |
+Vault Assignment Step
+
+⸻
+
+UI Layout
+
+Vault Dropdown
+
+Select Vault
+
+Example:
+
+Vault-A
+Vault-B
+Vault-C
+
+⸻
+
+Safe Dropdown
+
+Select Safe
+
+⸻
+
+Tray Dropdown
+
+Select Tray
+
+⸻
+
+Slot Dropdown
+
+Select Slot
+
+⸻
+
+Location Preview
+
+Displays:
+
+VA-A/SF-02/TR-05/SL-18
+
+⸻
+
+Occupancy Indicator
+
+Visual Status:
+
+Available
+Occupied
+Reserved
+
+⸻
+
+Confirm Button
+
+Assign Location
+
+⸻
+
+Validation Rules
+
+Required
+
+Vault
+Safe
+Tray
+Slot
+
+⸻
+
+Unique Slot
+
+System validates:
+
+Slot Must Be Available
+
+⸻
+
+Active Assignment
+
+System blocks:
+
+Duplicate Assignment
+
+⸻
+
+API Mapping
+
+Get Vaults
+
+GET /vaults
+
+⸻
+
+Get Available Slots
+
+GET /vaults/slots
+
+⸻
+
+Assign Slot
+
+POST /vaults/assign
+
+⸻
+
+Request DTO
+
+{
+  "girviId": "",
+  "vaultId": "",
+  "safeId": "",
+  "trayId": "",
+  "slotId": ""
+}
+
+⸻
+
+Success Flow
+
+Assign Slot
+      |
+Mark Occupied
+      |
+Create Audit Log
+      |
+Return Coordinate
+      |
+Continue Girvi Creation
+
+⸻
+
+Acceptance Criteria
+
+Assignment completed within 3 seconds.
+
+⸻
+
+SCR-035 Vault Search & Occupancy
+
+Purpose
+
+Locate assets instantly.
+
+⸻
+
+Search Methods
+
+Girvi ID
+
+Customer Name
+
+Mobile Number
+
+Serial Asset ID
+
+QR Scan
+
+⸻
+
+Search Result
+
+Displays:
+
+Customer Name
+Girvi ID
+Serial Asset ID
+Status
+Vault Coordinate
+
+⸻
+
+Location Card
+
+Example:
+
+Vault A
+Safe 02
+Tray 05
+Slot 18
+
+⸻
+
+Quick Actions
+
+View Girvi
+Open Customer
+Print Location
+Copy Coordinate
+
+⸻
+
+Occupancy Dashboard
+
+Metrics
+
+Total Slots
+Occupied Slots
+Available Slots
+Occupancy Percentage
+
+⸻
+
+Heat Map View
+
+Vault A
+██████░░░░
+60% Occupied
+Vault B
+████████░░
+80% Occupied
+
+⸻
+
+API Mapping
+
+Search
+
+GET /vaults/search
+
+⸻
+
+Occupancy
+
+GET /vaults/occupancy
+
+⸻
+
+Performance Requirement
+
+Search < 1 Second
+
+⸻
+
+8. Vault Configuration Engine
+
+Entity Structure
+
+Vault
+
+vault_id
+vault_code
+vault_name
+
+Example:
+
+VA-A
+Main Vault
+
+⸻
+
+Safe
+
+safe_id
+safe_code
+safe_name
+
+Example:
+
+SF-01
+Safe 1
+
+⸻
+
+Tray
+
+tray_id
+tray_number
+
+⸻
+
+Slot
+
+slot_id
+slot_code
+
+Example:
+
+SL-001
+SL-002
+SL-003
+
+⸻
+
+9. Coordinate Generation Engine
+
+Format
+
+VAULT/SAFE/TRAY/SLOT
+
+Example:
+
+VA-A/SF-02/TR-05/SL-18
+
+⸻
+
+Database Storage
+
+vault_coordinate
+
+Stored in Girvi table.
+
+⸻
+
+Immutable Rule
+
+Coordinate history retained forever.
+
+⸻
+
+10. Occupancy Engine
+
+Formula
+
+Occupancy Percentage:
+
+Occupancy = \frac{Occupied\ Slots}{Total\ Slots} \times 100
+
+⸻
+
+Dashboard Categories
+
+0-50%
+
+Normal
+
+51-80%
+
+Warning
+
+81-100%
+
+Critical
+
+⸻
+
+Notifications
+
+Owner notified when occupancy exceeds:
+
+80%
+
+⸻
+
+11. Slot Release Engine
+
+Trigger Events
+
+Girvi Redemption
+
+Girvi Auction Completion
+
+⸻
+
+Workflow
+
+Status Changed
+      |
+Locate Slot
+      |
+Mark Available
+      |
+Create Audit Entry
+      |
+Update Dashboard
+
+⸻
+
+No Manual Release
+
+Automatic only.
+
+⸻
+
+12. Location History Engine
+
+Purpose
+
+Track every movement.
+
+⸻
+
+Events
+
+Assigned
+Moved
+Released
+Reassigned
+
+⸻
+
+History Record
+
+{
+  "oldLocation": "",
+  "newLocation": "",
+  "user": "",
+  "timestamp": ""
+}
+
+⸻
+
+Immutable
+
+History cannot be edited.
+
+⸻
+
+13. Insurance Mapping
+
+Purpose
+
+RBI Compliance
+
+⸻
+
+Fields
+
+Policy Number
+Provider
+Coverage Amount
+Expiry Date
+Vault Reference
+
+⸻
+
+Validation
+
+Coverage amount must exceed:
+
+Total Vault Exposure
+
+⸻
+
+Alerts
+
+30 Days Before Expiry
+
+15 Days Before Expiry
+
+7 Days Before Expiry
+
+⸻
+
+14. Compliance Rules
+
+RBI
+
+Insurance Tracking
+
+Mandatory.
+
+Gold Safety
+
+Mandatory.
+
+⸻
+
+Maharashtra
+
+Custody Tracking
+
+Mandatory.
+
+⸻
+
+Audit
+
+Every location change logged.
+
+⸻
+
+15. Integration Matrix
+
+Module	Purpose
+Girvi	Assignment
+Redemption	Release
+Auction	Release
+Compliance	Insurance
+Reports	Occupancy
+Dashboard	Metrics
+Audit	Tracking
+
+⸻
+
+16. Offline Behaviour
+
+Supported:
+
+Vault Assignment
+Vault Search
+Occupancy View
+
+⸻
+
+Sync States
+
+PENDING
+SYNCING
+SYNCED
+CONFLICT
+
+⸻
+
+Conflict Handling
+
+Example:
+
+Same Slot Assigned Offline
+
+Resolution:
+
+First Synced Wins
+Conflict Card Generated
+
+⸻
+
+17. Audit Logging
+
+Log:
+
+Vault Created
+Safe Created
+Tray Created
+Slot Created
+Slot Assigned
+Slot Released
+Location Changed
+Insurance Updated
+
+⸻
+
+18. Analytics Events
+
+vault_assigned
+vault_released
+vault_search
+occupancy_viewed
+insurance_updated
+
+⸻
+
+19. Error Catalogue
+
+VAULT-001
+
+Slot Occupied
+
+VAULT-002
+
+Vault Not Found
+
+VAULT-003
+
+Safe Not Found
+
+VAULT-004
+
+Tray Not Found
+
+VAULT-005
+
+Slot Not Found
+
+VAULT-006
+
+Duplicate Assignment
+
+VAULT-007
+
+Insurance Expired
+
+VAULT-008
+
+Location History Missing
+
+⸻
+
+20. Database Entities
+
+vaults
+safes
+trays
+slots
+vault_history
+insurance_records
+
+⸻
+
+21. Backend Structure
+
+vault/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+events/
+occupancy/
+insurance/
+
+⸻
+
+22. Frontend Structure
+
+features/vault/
+vault_assignment/
+vault_search/
+occupancy/
+bloc/
+repository/
+models/
+
+⸻
+
+23. Testing Checklist
+
+✓ Create Vault
+
+✓ Create Safe
+
+✓ Create Tray
+
+✓ Create Slot
+
+✓ Assign Slot
+
+✓ Duplicate Slot Prevention
+
+✓ Search Location
+
+✓ Occupancy Dashboard
+
+✓ Automatic Release
+
+✓ Insurance Tracking
+
+✓ Offline Assignment
+
+✓ Sync Conflict
+
+✓ Audit Logs
+
+✓ Performance
+
+⸻
+
+24. Performance Requirements
+
+Vault Search:
+
+< 1 Second
+
+⸻
+
+Assignment:
+
+< 3 Seconds
+
+⸻
+
+Occupancy Dashboard:
+
+< 2 Seconds
+
+⸻
+
+25. Development Sequence
+
+1. Vault Database
+2. Vault Master Setup
+3. Assignment Engine
+4. Search Engine
+5. Occupancy Engine
+6. Release Engine
+7. Insurance Engine
+8. Dashboard Integration
+9. Compliance Integration
+10. Reporting Integration
+
+⸻
+
+26. Future Enhancements
+
+Phase 2:
+
+RFID Tracking
+Locker Sensors
+QR Tagged Packets
+Vault Heat Maps
+Branch Transfer Tracking
+Insurance API Integration
+
+Phase 3:
+
+AI Retrieval Assistant
+Smart Vault Recommendations
+Predictive Occupancy Planning
+
+END OF DOCUMENT

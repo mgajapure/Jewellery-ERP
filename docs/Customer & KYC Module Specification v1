@@ -1,0 +1,836 @@
+Jewellery ERP & Girvi Management Platform
+
+Customer & KYC Module Specification v1.0
+
+Module Code: MOD-CUSTOMER
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Authentication Module, Document Module, QR Module, Audit Module, Sync Module
+
+⸻
+
+1. Module Purpose
+
+The Customer & KYC Module serves as the master customer registry for the entire platform.
+
+Every Girvi, Savings Scheme, Retail Sale, Scrap Purchase, Compliance Form, and Audit Record must reference a valid customer profile.
+
+The module is responsible for:
+
+* Customer Creation
+* Customer Search
+* Aadhaar OCR
+* PAN Management
+* QR Customer Identification
+* Customer Document Vault
+* Customer Timeline
+* Customer Risk Assessment
+* Customer KYC Verification
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Create customer in less than 60 seconds.
+
+BO-002
+
+Reduce manual data entry using Aadhaar OCR.
+
+BO-003
+
+Enable instant customer retrieval.
+
+BO-004
+
+Maintain RBI-compliant customer records.
+
+BO-005
+
+Support complete offline operation.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-010	Customer List
+SCR-011	Customer Search
+SCR-012	Create Customer
+SCR-013	Aadhaar OCR Capture
+SCR-014	Customer Details
+SCR-015	Document Vault
+SCR-016	Customer Timeline
+SCR-086	QR Scanner
+
+⸻
+
+4. Module Navigation Flow
+
+Dashboard
+    |
+Customer List
+    |
+Customer Search
+    |
++--------------------------+
+|                          |
+Create Customer      Customer Details
+|                          |
+Aadhaar OCR         Document Vault
+|                          |
+Save Profile       Customer Timeline
+|
+QR Generated
+
+⸻
+
+5. Customer Lifecycle
+
+Customer Created
+        |
+KYC Uploaded
+        |
+Verified
+        |
+Active Customer
+        |
+Girvi Created
+        |
+History Accumulates
+        |
+Soft Delete Only
+
+⸻
+
+6. Business Rules
+
+BR-CUST-001
+
+Mobile number must be unique within tenant.
+
+BR-CUST-002
+
+Customer cannot be physically deleted.
+
+BR-CUST-003
+
+PAN mandatory if transaction exceeds ₹50,000.
+
+BR-CUST-004
+
+Aadhaar number must never be stored unmasked.
+
+BR-CUST-005
+
+Every customer receives Digital Customer ID.
+
+BR-CUST-006
+
+Every customer receives QR Code.
+
+BR-CUST-007
+
+All KYC documents encrypted at rest.
+
+BR-CUST-008
+
+Only Owner and Manager can view sensitive documents.
+
+⸻
+
+7. Screen Specification
+
+⸻
+
+SCR-010 Customer List
+
+Purpose
+
+Display all customers.
+
+⸻
+
+UI Components
+
+Search Bar
+
+Name / Mobile / Customer ID
+
+Filter Chips
+
+All
+Active
+Inactive
+High Risk
+
+Customer Card
+
+Displays:
+
+Name
+Mobile
+Customer ID
+Active Girvi Count
+Outstanding Amount
+
+Floating Action Button
+
++ Create Customer
+
+⸻
+
+API Mapping
+
+GET /customers
+
+⸻
+
+Frontend BLoC
+
+Events
+
+LoadCustomers
+RefreshCustomers
+FilterChanged
+
+States
+
+CustomerListLoading
+CustomerListLoaded
+CustomerListEmpty
+CustomerListError
+
+⸻
+
+SCR-011 Customer Search
+
+Purpose
+
+Instant customer retrieval.
+
+⸻
+
+Search Modes
+
+Name
+Mobile
+Customer ID
+QR Scan
+
+⸻
+
+Performance Target
+
+< 1 Second
+
+⸻
+
+API Mapping
+
+GET /customers/search?q=
+
+⸻
+
+Search Result Card
+
+Displays:
+
+Customer Name
+Mobile
+Active Girvi Count
+Outstanding Balance
+Last Transaction Date
+
+⸻
+
+SCR-012 Create Customer
+
+Purpose
+
+Create new customer profile.
+
+⸻
+
+UI Layout
+
+Personal Information
+
+Name
+Mobile Number
+Alternate Mobile
+Gender
+DOB
+
+Address Section
+
+Address
+City
+State
+Pincode
+
+KYC Section
+
+Aadhaar
+PAN
+Customer Photo
+
+⸻
+
+Validation
+
+Name
+
+Required
+Min 3 Characters
+
+Mobile
+
+Required
+10 Digits
+Unique
+
+PAN
+
+Mandatory > ₹50,000 Transactions
+
+⸻
+
+API Mapping
+
+POST /customers
+
+⸻
+
+Request DTO
+
+{
+  "name": "",
+  "mobile": "",
+  "dateOfBirth": "",
+  "gender": "",
+  "address": "",
+  "panNumber": ""
+}
+
+⸻
+
+Success Flow
+
+Customer Saved
+      |
+Generate Customer ID
+      |
+Generate QR
+      |
+Navigate Details Screen
+
+⸻
+
+SCR-013 Aadhaar OCR Capture
+
+Purpose
+
+Auto-populate customer profile.
+
+⸻
+
+UI Components
+
+Camera View
+
+Document Capture Frame
+
+Capture Button
+
+Take Photo
+
+OCR Result Preview
+
+Displays:
+
+Name
+DOB
+Address
+
+⸻
+
+OCR Workflow
+
+Capture Aadhaar
+       |
+Run ML Kit OCR
+       |
+Extract Fields
+       |
+Populate Form
+       |
+User Verification
+       |
+Save
+
+⸻
+
+Security Rules
+
+Never Upload Raw Aadhaar Image
+
+OCR processed entirely on device.
+
+⸻
+
+API Usage
+
+None
+
+On-device processing only.
+
+⸻
+
+Acceptance Criteria
+
+OCR < 3 Seconds
+
+⸻
+
+SCR-014 Customer Details
+
+Purpose
+
+Master customer profile.
+
+⸻
+
+Header
+
+Displays:
+
+Customer Name
+Digital ID
+QR Code
+
+⸻
+
+Summary Cards
+
+Active Girvi
+
+Outstanding Amount
+
+Total Loan History
+
+Customer Risk Level
+
+⸻
+
+Tabs
+
+Profile
+
+Documents
+
+Timeline
+
+Loans
+
+⸻
+
+Actions
+
+Create Girvi
+View Documents
+Share QR
+Edit Customer
+
+⸻
+
+API Mapping
+
+GET /customers/{customerId}
+
+⸻
+
+SCR-015 Document Vault
+
+Purpose
+
+Store customer KYC.
+
+⸻
+
+Supported Documents
+
+AADHAAR
+PAN
+VOTER ID
+DRIVING LICENSE
+PASSPORT
+PHOTO
+
+⸻
+
+Upload Workflow
+
+Capture
+Compress
+Encrypt
+Upload
+Generate Audit Log
+
+⸻
+
+File Restrictions
+
+Max Size
+
+500 KB
+
+Formats
+
+JPG
+PNG
+PDF
+
+⸻
+
+Permissions
+
+Role	View
+Owner	Yes
+Manager	Yes
+Staff	No
+Accountant	No
+
+⸻
+
+API Mapping
+
+POST /customers/{id}/documents
+
+⸻
+
+SCR-016 Customer Timeline
+
+Purpose
+
+View complete customer history.
+
+⸻
+
+Timeline Events
+
+Customer Created
+
+Girvi Created
+
+Partial Payment
+
+Renewal
+
+Redemption
+
+Auction
+
+Document Upload
+
+⸻
+
+Timeline Card
+
+Displays:
+
+Event
+Date
+User
+Amount
+Reference Number
+
+⸻
+
+API Mapping
+
+GET /customers/{customerId}/timeline
+
+⸻
+
+SCR-086 QR Scanner
+
+Purpose
+
+Instant customer lookup.
+
+⸻
+
+UI Layout
+
+Camera Preview
+
+QR Frame
+
+Flash Toggle
+
+Manual Search Button
+
+⸻
+
+Workflow
+
+Scan QR
+      |
+Decode Customer ID
+      |
+Load Customer Details
+
+⸻
+
+Performance Target
+
+< 1 Second
+
+⸻
+
+API Mapping
+
+GET /customers/search?qr=
+
+⸻
+
+8. Customer Risk Engine
+
+Purpose
+
+Categorize customer.
+
+⸻
+
+Risk Levels
+
+LOW
+
+No overdue history
+
+MEDIUM
+
+1-3 overdue incidents
+
+HIGH
+
+Frequent overdue
+Auction history
+
+⸻
+
+Database Field
+
+risk_category
+
+⸻
+
+9. QR Generation Engine
+
+Trigger
+
+Customer Created
+
+⸻
+
+QR Content
+
+Digital Customer ID
+
+Example:
+
+CUST-2026-000001
+
+⸻
+
+Storage
+
+PNG Format
+Cloud Storage
+Local Cache
+
+⸻
+
+10. Offline Behaviour
+
+Supported:
+
+Create Customer
+Edit Customer
+Search Customer
+View Timeline
+Upload Documents
+QR Scan
+
+⸻
+
+Sync Queue
+
+Operations stored locally.
+
+PENDING
+SYNCING
+SYNCED
+CONFLICT
+
+⸻
+
+11. Local Database Tables
+
+customers
+customer_documents
+sync_queue
+
+⸻
+
+12. Audit Logging
+
+Generate logs for:
+
+Customer Created
+Customer Updated
+Document Uploaded
+Document Viewed
+QR Generated
+QR Shared
+
+⸻
+
+13. Analytics Events
+
+customer_created
+customer_search
+customer_viewed
+document_uploaded
+qr_scanned
+ocr_completed
+
+⸻
+
+14. Error Catalogue
+
+CUST-001
+
+Duplicate Mobile Number
+
+CUST-002
+
+Customer Not Found
+
+CUST-003
+
+OCR Failed
+
+CUST-004
+
+Document Upload Failed
+
+CUST-005
+
+Invalid PAN
+
+CUST-006
+
+QR Invalid
+
+CUST-007
+
+Sync Failed
+
+⸻
+
+15. Backend Module Structure
+
+customer/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+events/
+
+⸻
+
+16. Frontend Folder Structure
+
+features/customer/
+customer_list/
+customer_search/
+customer_create/
+aadhaar_ocr/
+customer_details/
+document_vault/
+customer_timeline/
+qr_scanner/
+bloc/
+repository/
+models/
+
+⸻
+
+17. Integration Dependencies
+
+Required Before
+
+* Authentication Module
+* API Contract Layer
+* Database Layer
+
+Consumed By
+
+* Girvi Module
+* Savings Module
+* Sales Module
+* Purchase Module
+* Compliance Module
+
+⸻
+
+18. Testing Checklist
+
+✓ Create Customer
+
+✓ Duplicate Mobile Validation
+
+✓ Aadhaar OCR
+
+✓ QR Generation
+
+✓ QR Search
+
+✓ Document Upload
+
+✓ Document Permission Control
+
+✓ Customer Timeline
+
+✓ Offline Create Customer
+
+✓ Sync Customer
+
+✓ Audit Logging
+
+✓ Risk Classification
+
+⸻
+
+19. Development Order
+
+1. Customer APIs
+2. Customer Database
+3. Customer List
+4. Customer Search
+5. Customer Create
+6. Aadhaar OCR
+7. Customer Details
+8. Document Vault
+9. Timeline
+10. QR Scanner
+
+END OF DOCUMENT

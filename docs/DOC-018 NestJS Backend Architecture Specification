@@ -1,0 +1,1071 @@
+Jewellery ERP & Girvi Management Platform
+
+NestJS Backend Architecture Specification v1.0
+
+Document Code: DOC-018
+Architecture Type: Backend Architecture
+Framework: NestJS 11+
+Database: PostgreSQL 16+
+ORM: Prisma ORM
+Cache: Redis
+Queue: BullMQ
+Storage: S3 Compatible Object Storage
+Authentication: JWT + Refresh Token + Device Binding
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official backend architecture for the Jewellery ERP platform.
+
+This document is the source of truth for:
+
+* Backend Structure
+* Module Boundaries
+* Coding Standards
+* Service Communication
+* Database Access
+* Security Architecture
+* Background Processing
+* Event Processing
+* Deployment Strategy
+
+Every AI agent and developer must follow this document.
+
+⸻
+
+2. Architectural Principles
+
+AP-001
+
+Modular Monolith First.
+
+⸻
+
+AP-002
+
+Domain Driven Design (DDD).
+
+⸻
+
+AP-003
+
+CQRS Ready Architecture.
+
+⸻
+
+AP-004
+
+Event Driven Internal Communication.
+
+⸻
+
+AP-005
+
+Repository Pattern.
+
+⸻
+
+AP-006
+
+Database First Consistency.
+
+⸻
+
+AP-007
+
+Offline First Support.
+
+⸻
+
+AP-008
+
+Audit Everything.
+
+⸻
+
+3. High Level Architecture
+
+Flutter Mobile App
+        |
+REST API Gateway
+        |
+NestJS Application
+        |
++----------------------+
+| Domain Modules       |
++----------------------+
+        |
+Application Services
+        |
+Repositories
+        |
+PostgreSQL
+        |
+Redis / Queue / Storage
+
+⸻
+
+4. Backend Folder Structure
+
+src/
+app.module.ts
+common/
+config/
+database/
+auth/
+customers/
+girvi/
+interest/
+vault/
+compliance/
+staff/
+reports/
+inventory/
+purchase/
+sales/
+savings/
+dashboard/
+settings/
+notifications/
+audit/
+files/
+jobs/
+events/
+
+⸻
+
+5. Domain Structure Standard
+
+Every module must follow:
+
+module/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+events/
+guards/
+interceptors/
+mappers/
+
+Example:
+
+customers/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+
+⸻
+
+6. Layer Architecture
+
+Layer 1
+
+Controllers
+
+Responsibilities:
+
+Request Validation
+Authentication
+Response Formatting
+
+⸻
+
+Layer 2
+
+Application Services
+
+Responsibilities:
+
+Business Logic
+Transactions
+Workflow Orchestration
+
+⸻
+
+Layer 3
+
+Repositories
+
+Responsibilities:
+
+Database Access
+Queries
+Persistence
+
+⸻
+
+Layer 4
+
+Database
+
+Responsibilities:
+
+Storage
+Constraints
+Indexes
+
+⸻
+
+7. Module Dependency Rules
+
+Allowed:
+
+Controller
+      |
+Service
+      |
+Repository
+
+⸻
+
+Forbidden:
+
+Controller
+      |
+Repository
+
+⸻
+
+Forbidden:
+
+Repository
+      |
+Repository
+
+Cross-module access must use services.
+
+⸻
+
+8. CQRS Architecture
+
+Commands
+
+State changing operations.
+
+Examples:
+
+CreateCustomer
+CreateGirvi
+RecordPayment
+RedeemGirvi
+
+⸻
+
+Queries
+
+Read operations.
+
+Examples:
+
+GetCustomer
+GetGirvi
+GetDashboard
+GetReports
+
+⸻
+
+Folder Structure
+
+commands/
+queries/
+handlers/
+
+⸻
+
+9. Repository Pattern
+
+Purpose
+
+Database isolation.
+
+⸻
+
+Example
+
+interface CustomerRepository {
+  create();
+  update();
+  findById();
+  findByMobile();
+}
+
+⸻
+
+Rules
+
+Repositories contain:
+
+Queries
+Persistence Logic
+
+Never:
+
+Business Logic
+
+⸻
+
+10. Prisma Architecture
+
+Structure
+
+prisma/
+schema.prisma
+migrations/
+seeds/
+
+⸻
+
+Rules
+
+One Prisma Client
+
+Singleton only.
+
+⸻
+
+Soft Deletes
+
+Mandatory.
+
+Fields:
+
+deleted_at
+deleted_by
+
+⸻
+
+Timestamps
+
+Mandatory.
+
+Fields:
+
+created_at
+updated_at
+
+⸻
+
+11. Transaction Management
+
+Standard
+
+Use Prisma Transaction API.
+
+⸻
+
+Example Workflow
+
+Create Girvi
+      |
+Create Interest Ledger
+      |
+Assign Vault
+      |
+Create Audit Log
+      |
+Commit
+
+⸻
+
+Rollback
+
+Entire transaction rolled back.
+
+⸻
+
+12. Event Driven Architecture
+
+Purpose
+
+Decouple modules.
+
+⸻
+
+Event Bus
+
+Nest EventEmitter.
+
+⸻
+
+Example
+
+GirviCreated
+
+Triggers:
+
+Interest Setup
+Vault Assignment
+Audit Entry
+Notifications
+
+⸻
+
+Folder
+
+events/
+
+⸻
+
+13. Core Domain Events
+
+CustomerCreated
+GirviCreated
+PaymentRecorded
+GirviRedeemed
+InterestCalculated
+VaultAssigned
+KFSGenerated
+SaleCompleted
+PurchaseApproved
+SchemeMatured
+
+⸻
+
+14. Authentication Architecture
+
+Authentication Flow
+
+Mobile Login
+      |
+OTP Validation
+      |
+Device Verification
+      |
+JWT
+      |
+Refresh Token
+
+⸻
+
+Token Types
+
+Access Token
+
+24 Hours
+
+⸻
+
+Refresh Token
+
+30 Days
+
+⸻
+
+Device Binding
+
+Mandatory.
+
+⸻
+
+15. Authorization Architecture
+
+RBAC
+
+User
+   |
+Role
+   |
+Permissions
+
+⸻
+
+Guards
+
+JwtGuard
+PermissionGuard
+DeviceGuard
+TenantGuard
+
+⸻
+
+16. Multi-Tenant Architecture
+
+Model
+
+Shared Database
+
+Tenant Isolation
+
+⸻
+
+Mandatory Field
+
+tenant_id
+
+All business tables.
+
+⸻
+
+Validation
+
+Every query filtered by:
+
+tenant_id
+
+⸻
+
+17. API Architecture
+
+Versioning
+
+/api/v1/
+
+⸻
+
+Example
+
+/api/v1/customers
+/api/v1/girvi
+
+⸻
+
+Response Format
+
+Success:
+
+{
+  "success": true,
+  "data": {}
+}
+
+⸻
+
+Failure:
+
+{
+  "success": false,
+  "error": {}
+}
+
+⸻
+
+18. DTO Standards
+
+Validation
+
+Class Validator.
+
+⸻
+
+Example
+
+@IsString()
+@IsNotEmpty()
+name: string;
+
+⸻
+
+Rules
+
+Never expose entities directly.
+
+Always use DTOs.
+
+⸻
+
+19. Error Handling Architecture
+
+Global Exception Filter
+
+Mandatory.
+
+⸻
+
+Error Structure
+
+{
+  "code": "CUSTOMER_001",
+  "message": "",
+  "details": []
+}
+
+⸻
+
+Error Categories
+
+Validation
+Authentication
+Authorization
+Business
+System
+
+⸻
+
+20. Audit Architecture
+
+Purpose
+
+Track everything.
+
+⸻
+
+Events Logged
+
+Create
+Update
+Delete
+Approve
+Reject
+Export
+Login
+
+⸻
+
+Audit Table
+
+audit_logs
+
+⸻
+
+Immutable
+
+Append only.
+
+⸻
+
+21. File Storage Architecture
+
+Storage Types
+
+Documents
+
+Images
+
+PDFs
+
+KFS
+
+Reports
+
+⸻
+
+Provider
+
+S3 Compatible Storage.
+
+⸻
+
+Structure
+
+tenant/
+module/
+entity/
+file
+
+Example:
+
+tenant1/
+customers/
+cust123/
+aadhaar.pdf
+
+⸻
+
+22. Notification Architecture
+
+Channels
+
+Push
+SMS
+WhatsApp
+Email
+
+⸻
+
+Workflow
+
+Event
+   |
+Notification Job
+   |
+Provider
+
+⸻
+
+23. Background Job Architecture
+
+Framework
+
+BullMQ
+
+⸻
+
+Queues
+
+notifications
+reports
+exports
+backups
+imports
+
+⸻
+
+Retry Strategy
+
+3 Retries
+
+⸻
+
+Dead Letter Queue
+
+Mandatory.
+
+⸻
+
+24. Redis Architecture
+
+Uses
+
+Caching
+Rate Limiting
+Sessions
+OTP Storage
+Dashboard Cache
+
+⸻
+
+TTL
+
+Configurable.
+
+⸻
+
+25. Search Architecture
+
+Global Search
+
+Sources:
+
+Customer
+Girvi
+Inventory
+Sales
+Purchase
+
+⸻
+
+Strategy
+
+PostgreSQL Full Text Search.
+
+⸻
+
+26. Offline Sync Architecture
+
+Sync Table
+
+sync_queue
+
+⸻
+
+Statuses
+
+PENDING
+SYNCING
+SYNCED
+FAILED
+CONFLICT
+
+⸻
+
+Conflict Resolution
+
+Server Wins.
+
+(Advanced engine defined in DOC-020)
+
+⸻
+
+27. Security Standards
+
+Mandatory
+
+HTTPS Only
+
+JWT Validation
+
+Device Validation
+
+Rate Limiting
+
+Input Sanitization
+
+SQL Injection Prevention
+
+XSS Protection
+
+⸻
+
+Password Storage
+
+Argon2
+
+⸻
+
+28. Configuration Architecture
+
+Source
+
+Environment Variables
+Database Settings
+
+⸻
+
+Config Module
+
+ConfigService
+
+Centralized.
+
+⸻
+
+29. Logging Architecture
+
+Framework
+
+NestJS Logger
+
+⸻
+
+Production
+
+Structured JSON Logs.
+
+⸻
+
+Log Levels
+
+Info
+Warn
+Error
+Debug
+
+⸻
+
+30. Testing Architecture
+
+Unit Tests
+
+Jest
+
+⸻
+
+Integration Tests
+
+Jest + Test DB
+
+⸻
+
+E2E Tests
+
+Nest Testing Module
+
+⸻
+
+Coverage
+
+Minimum:
+
+80%
+
+⸻
+
+31. Deployment Architecture
+
+Environment
+
+Development
+
+Staging
+
+Production
+
+⸻
+
+Containers
+
+Docker.
+
+⸻
+
+Reverse Proxy
+
+Nginx.
+
+⸻
+
+CI/CD
+
+GitHub Actions.
+
+⸻
+
+32. Monitoring Architecture
+
+Metrics
+
+API Response Time
+Queue Size
+Error Rate
+Database Health
+Storage Usage
+
+⸻
+
+Health Endpoint
+
+GET /health
+
+⸻
+
+33. Performance Standards
+
+API Response:
+
+< 500 ms
+
+⸻
+
+Dashboard APIs:
+
+< 2 Seconds
+
+⸻
+
+Report Generation:
+
+< 10 Seconds
+
+⸻
+
+Global Search:
+
+< 1 Second
+
+⸻
+
+34. Backend Development Workflow
+
+Create Module
+      |
+Create DTO
+      |
+Create Service
+      |
+Create Repository
+      |
+Create Tests
+      |
+Create APIs
+      |
+Create Documentation
+
+⸻
+
+35. Mandatory Shared Modules
+
+AuthModule
+AuditModule
+NotificationModule
+FileModule
+ConfigModule
+CacheModule
+QueueModule
+
+⸻
+
+36. Backend Source Tree (Final)
+
+src/
+auth/
+customers/
+girvi/
+interest/
+vault/
+compliance/
+staff/
+reports/
+inventory/
+purchase/
+sales/
+savings/
+dashboard/
+settings/
+audit/
+notifications/
+files/
+search/
+sync/
+jobs/
+events/
+common/
+config/
+database/
+
+⸻
+
+37. AI Agent Development Rules
+
+AI MUST
+
+✓ Use DTOs
+
+✓ Use Services
+
+✓ Use Repository Pattern
+
+✓ Use Transactions
+
+✓ Create Audit Logs
+
+✓ Create Tests
+
+✓ Follow RBAC
+
+✓ Follow Tenant Isolation
+
+⸻
+
+AI MUST NEVER
+
+✗ Query database from controller
+
+✗ Skip audit logging
+
+✗ Bypass RBAC
+
+✗ Expose Prisma entities
+
+✗ Hardcode business rules
+
+✗ Skip transactions for financial operations
+
+⸻
+
+38. Future Architecture Evolution
+
+Phase 2:
+
+CQRS Full Adoption
+Event Store
+Read Models
+Microservice Extraction
+
+⸻
+
+Phase 3:
+
+Service Mesh
+Distributed Events
+Multi-Region Deployment
+AI Services
+
+END OF DOCUMENT

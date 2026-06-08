@@ -1,0 +1,701 @@
+Jewellery ERP & Girvi Management Platform
+
+Inventory Module Specification v1.0
+
+Module Code: MOD-INVENTORY
+Priority: High
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Purchase Module, Sales Module, Reports Module, Audit Module, Barcode Engine
+
+⸻
+
+1. Module Purpose
+
+The Inventory Module manages jewellery stock available for retail sales.
+
+This module is independent from Girvi collateral inventory.
+
+Responsibilities:
+
+* Inventory Catalog Management
+* Barcode Management
+* Stock Tracking
+* Stock Valuation
+* Inventory Search
+* Inventory Auditing
+* Inventory Movement Tracking
+* Inventory Reporting
+* Inventory Reservation
+* Dead Stock Analysis
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Track every inventory item individually.
+
+BO-002
+
+Support barcode-based operations.
+
+BO-003
+
+Prevent stock mismatch.
+
+BO-004
+
+Provide real-time stock visibility.
+
+BO-005
+
+Enable accurate stock valuation.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-048	Inventory List
+SCR-049	Inventory Item Details
+
+⸻
+
+4. Inventory Architecture
+
+Purchase
+     |
+Inventory
+     |
+Barcode Engine
+     |
+Sales
+     |
+Reports
+
+⸻
+
+5. Inventory Lifecycle
+
+Purchased
+     |
+Received
+     |
+Available
+     |
+Reserved
+     |
+Sold
+     |
+Archived
+
+⸻
+
+6. Core Business Rules
+
+BR-INV-001
+
+Every inventory item requires barcode.
+
+BR-INV-002
+
+Barcode must be unique.
+
+BR-INV-003
+
+Sold inventory cannot be edited.
+
+BR-INV-004
+
+Stock movement history immutable.
+
+BR-INV-005
+
+Negative stock not allowed.
+
+BR-INV-006
+
+Inventory valuation updated automatically.
+
+BR-INV-007
+
+Barcode printing supported.
+
+BR-INV-008
+
+Inventory linked to purchase record.
+
+⸻
+
+7. Screen Specifications
+
+SCR-048 Inventory List
+
+Purpose
+
+View and manage stock.
+
+⸻
+
+UI Components
+
+Search
+
+Barcode
+Item Name
+Category
+Tag Number
+
+⸻
+
+Filters
+
+All
+Available
+Reserved
+Sold
+Low Stock
+
+⸻
+
+Inventory Card
+
+Displays:
+
+Barcode
+Item Name
+Category
+Weight
+Purity
+Selling Price
+Status
+
+⸻
+
+Actions
+
+View
+Print Barcode
+Reserve
+Mark Sold
+
+⸻
+
+API Mapping
+
+GET /inventory
+
+⸻
+
+SCR-049 Inventory Item Details
+
+Purpose
+
+View complete stock information.
+
+⸻
+
+Sections
+
+Basic Details
+
+Barcode
+Item Name
+Category
+Description
+
+⸻
+
+Jewellery Details
+
+Metal Type
+Gross Weight
+Net Weight
+Purity
+Making Charges
+
+⸻
+
+Pricing
+
+Cost Price
+Selling Price
+Profit Margin
+
+⸻
+
+Images
+
+Multiple photos supported.
+
+⸻
+
+Movement History
+
+Displays:
+
+Created
+Purchased
+Reserved
+Sold
+
+⸻
+
+Actions
+
+Edit
+Print Barcode
+View Purchase
+Mark Reserved
+Mark Sold
+
+⸻
+
+API Mapping
+
+GET /inventory/{inventoryId}
+
+⸻
+
+8. Inventory Categories
+
+Gold Jewellery
+
+Ring
+Chain
+Necklace
+Bangle
+Bracelet
+Pendant
+
+⸻
+
+Silver Jewellery
+
+Chain
+Payal
+Ring
+Coin
+
+⸻
+
+Bullion
+
+Gold Coin
+Gold Bar
+Silver Coin
+Silver Bar
+
+⸻
+
+Custom Categories
+
+Tenant configurable.
+
+⸻
+
+9. Barcode Engine
+
+Purpose
+
+Unique identification.
+
+⸻
+
+Barcode Format
+
+INV-2026-000001
+
+⸻
+
+Generation Rule
+
+Year + Running Counter
+
+⸻
+
+Barcode Types
+
+QR
+Code128
+
+⸻
+
+Printing
+
+Supported:
+
+Bluetooth Printer
+Thermal Printer
+
+⸻
+
+10. Inventory Valuation Engine
+
+Purpose
+
+Calculate stock value.
+
+⸻
+
+Cost Valuation Formula
+
+Inventory\ Value = Quantity \times Cost\ Price
+
+⸻
+
+Retail Valuation Formula
+
+Retail\ Value = Quantity \times Selling\ Price
+
+⸻
+
+Margin Formula
+
+Margin\ Percentage = \frac{Selling\ Price - Cost\ Price}{Cost\ Price} \times 100
+
+⸻
+
+11. Inventory Movement Engine
+
+Events
+
+Item Created
+
+Item Updated
+
+Reserved
+
+Released
+
+Sold
+
+Adjusted
+
+⸻
+
+Ledger Structure
+
+Date
+Action
+User
+Reference
+Quantity
+Remarks
+
+⸻
+
+Immutable
+
+Movement history cannot be modified.
+
+⸻
+
+12. Reservation Engine
+
+Purpose
+
+Reserve stock.
+
+⸻
+
+States
+
+AVAILABLE
+RESERVED
+SOLD
+
+⸻
+
+Workflow
+
+Reserve Item
+      |
+Set Status Reserved
+      |
+Prevent Sale To Others
+
+⸻
+
+Expiry
+
+Configurable.
+
+Default:
+
+48 Hours
+
+⸻
+
+13. Dead Stock Engine
+
+Purpose
+
+Identify slow-moving inventory.
+
+⸻
+
+Criteria
+
+90 Days
+
+Warning
+
+180 Days
+
+High Risk
+
+365 Days
+
+Dead Stock
+
+⸻
+
+Dashboard Metrics
+
+Displays:
+
+Dead Stock Count
+Dead Stock Value
+Aging Analysis
+
+⸻
+
+14. Stock Audit Engine
+
+Purpose
+
+Periodic stock verification.
+
+⸻
+
+Audit Types
+
+Full Audit
+
+Spot Audit
+
+Category Audit
+
+⸻
+
+Variance Formula
+
+Variance = Physical\ Stock - System\ Stock
+
+⸻
+
+Escalation
+
+Variance requires manager approval.
+
+⸻
+
+15. Inventory Search Engine
+
+Search Methods
+
+Barcode
+
+QR
+
+Item Name
+
+Category
+
+Weight Range
+
+Price Range
+
+⸻
+
+Performance Target
+
+< 1 Second
+
+⸻
+
+16. Integration Matrix
+
+Module	Purpose
+Purchase	Stock Source
+Sales	Stock Consumption
+Reports	Valuation
+Dashboard	KPIs
+Audit	Tracking
+
+⸻
+
+17. Offline Behaviour
+
+Supported:
+
+Inventory Search
+Inventory View
+Barcode Scan
+Reservation
+
+⸻
+
+Not Supported:
+
+Bulk Imports
+Large Exports
+
+⸻
+
+18. Audit Logging
+
+Log:
+
+Item Created
+Item Updated
+Barcode Printed
+Reserved
+Released
+Sold
+Stock Audit
+
+⸻
+
+19. Analytics Events
+
+inventory_created
+inventory_viewed
+barcode_printed
+item_reserved
+item_sold
+stock_audit_completed
+
+⸻
+
+20. Error Catalogue
+
+INV-001
+
+Duplicate Barcode
+
+INV-002
+
+Inventory Not Found
+
+INV-003
+
+Item Already Sold
+
+INV-004
+
+Reservation Conflict
+
+INV-005
+
+Negative Stock
+
+INV-006
+
+Audit Variance Detected
+
+INV-007
+
+Barcode Generation Failed
+
+⸻
+
+21. Database Entities
+
+inventory_items
+inventory_images
+inventory_movements
+inventory_reservations
+inventory_audits
+
+⸻
+
+22. Backend Structure
+
+inventory/
+controllers/
+services/
+repositories/
+dto/
+entities/
+barcode/
+audit/
+reservation/
+
+⸻
+
+23. Frontend Structure
+
+features/inventory/
+inventory_list/
+inventory_details/
+barcode/
+bloc/
+repository/
+models/
+
+⸻
+
+24. Testing Checklist
+
+✓ Create Inventory
+
+✓ Barcode Generation
+
+✓ Barcode Printing
+
+✓ Inventory Search
+
+✓ Reservation
+
+✓ Sold Status
+
+✓ Stock Audit
+
+✓ Dead Stock Detection
+
+✓ Movement History
+
+✓ Offline Search
+
+✓ Audit Logs
+
+⸻
+
+25. Performance Requirements
+
+Inventory Search:
+
+< 1 Second
+
+⸻
+
+Barcode Generation:
+
+< 500 ms
+
+⸻
+
+Inventory Detail Load:
+
+< 2 Seconds
+
+⸻
+
+26. Development Sequence
+
+1. Inventory Database
+2. Barcode Engine
+3. Inventory CRUD
+4. Search Engine
+5. Reservation Engine
+6. Audit Engine
+7. Valuation Engine
+8. Reporting Integration
+9. Dashboard Integration
+
+END OF DOCUMENT

@@ -1,0 +1,1002 @@
+Jewellery ERP & Girvi Management Platform
+
+Offline Sync Engine Specification v1.0
+
+Document Code: DOC-020
+Architecture Type: Offline Sync Architecture
+Frontend: Flutter + Drift SQLite
+Backend: NestJS + PostgreSQL
+Queue Engine: Sync Queue Engine
+Conflict Strategy: Hybrid Resolution Model
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official Offline-First Synchronization Architecture for the Jewellery ERP platform.
+
+The application must remain fully operational when:
+
+* Internet is unavailable
+* Internet is unstable
+* Network is slow
+* Backend is temporarily unavailable
+
+The sync engine guarantees eventual consistency between mobile devices and the central server.
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+100% offline Girvi operations.
+
+BO-002
+
+No data loss.
+
+BO-003
+
+Automatic background synchronization.
+
+BO-004
+
+Conflict detection and resolution.
+
+BO-005
+
+Multi-device consistency.
+
+⸻
+
+3. Offline First Philosophy
+
+Principle
+
+Write Local First
+Sync Later
+
+⸻
+
+User Experience
+
+User never waits for server.
+
+⸻
+
+Workflow
+
+User Action
+      |
+Save To SQLite
+      |
+Queue Sync Job
+      |
+Immediate Success
+      |
+Background Sync
+      |
+Server Confirmation
+
+⸻
+
+4. Offline Supported Modules
+
+Full Offline Support
+
+Customer
+Girvi
+Payments
+Interest Calculation
+Vault Assignment
+Savings Deposits
+Inventory Search
+Sales Draft
+Purchase Draft
+
+⸻
+
+Partial Offline Support
+
+Reports
+Dashboard
+Notifications
+
+⸻
+
+Online Required
+
+Subscription
+Backup Restore
+Large Exports
+Compliance Submission
+
+⸻
+
+5. Sync Architecture
+
+Flutter App
+      |
+Drift Database
+      |
+Sync Queue
+      |
+Sync Service
+      |
+REST APIs
+      |
+NestJS Backend
+      |
+PostgreSQL
+
+⸻
+
+6. Local Database Architecture
+
+Database
+
+Drift SQLite
+
+⸻
+
+Storage Layers
+
+Master Data
+Transaction Data
+Sync Queue
+Settings
+Cache
+
+⸻
+
+Tables
+
+customers
+girvi
+payments
+interest_ledger
+vault_assignments
+inventory
+sales
+purchases
+savings
+sync_queue
+
+⸻
+
+7. Sync Queue Architecture
+
+Queue Table
+
+sync_queue
+
+⸻
+
+Structure
+
+id
+entity_type
+entity_id
+operation
+payload
+status
+retry_count
+created_at
+
+⸻
+
+Operations
+
+CREATE
+UPDATE
+DELETE
+APPROVE
+
+⸻
+
+8. Sync States
+
+PENDING
+SYNCING
+SYNCED
+FAILED
+CONFLICT
+
+⸻
+
+Flow
+
+PENDING
+   |
+SYNCING
+   |
++-------------+
+|             |
+SUCCESS     FAIL
+|             |
+SYNCED     FAILED
+                |
+             RETRY
+
+⸻
+
+9. Sync Engine Components
+
+Sync Manager
+
+Controls synchronization.
+
+⸻
+
+Queue Processor
+
+Processes pending jobs.
+
+⸻
+
+Conflict Resolver
+
+Handles conflicts.
+
+⸻
+
+Retry Manager
+
+Handles retries.
+
+⸻
+
+Connectivity Monitor
+
+Tracks network status.
+
+⸻
+
+10. Connectivity Engine
+
+States
+
+ONLINE
+OFFLINE
+LIMITED
+
+⸻
+
+Monitoring
+
+Real-time.
+
+⸻
+
+Events
+
+Connection Restored
+Connection Lost
+Weak Connection
+
+⸻
+
+11. Write Strategy
+
+Standard Rule
+
+Always:
+
+Write Local First
+
+⸻
+
+Never:
+
+Wait For Server
+
+⸻
+
+Example
+
+Customer Creation:
+
+Create Customer
+      |
+SQLite Save
+      |
+Queue Sync
+      |
+Return Success
+
+⸻
+
+12. Read Strategy
+
+Priority
+
+Local Database
+      |
+Server Refresh
+
+⸻
+
+Benefits
+
+Fast UI.
+
+⸻
+
+Offline Operation
+
+Fully supported.
+
+⸻
+
+13. Conflict Resolution Engine
+
+Purpose
+
+Handle multiple device updates.
+
+⸻
+
+Conflict Types
+
+Update vs Update
+
+Delete vs Update
+
+Approval vs Update
+
+Payment vs Payment
+
+⸻
+
+14. Conflict Resolution Policy
+
+Customer Records
+
+Last Write Wins
+
+⸻
+
+Settings
+
+Server Wins
+
+⸻
+
+Financial Transactions
+
+Manual Review Required
+
+⸻
+
+Payments
+
+Never Auto Merge
+
+⸻
+
+15. Financial Conflict Rules
+
+Applies To:
+
+Payments
+Redemptions
+Interest Adjustments
+Sales
+Purchases
+
+⸻
+
+Workflow
+
+Conflict Detected
+      |
+Freeze Record
+      |
+Create Conflict Case
+      |
+Manager Resolution
+
+⸻
+
+Audit Required
+
+Mandatory.
+
+⸻
+
+16. Versioning Architecture
+
+Purpose
+
+Detect stale updates.
+
+⸻
+
+Fields
+
+version
+updated_at
+
+⸻
+
+Example
+
+Version 12
+Device Sends Version 10
+Conflict
+
+⸻
+
+17. Entity Sync Metadata
+
+Every entity contains:
+
+id
+tenant_id
+version
+last_synced_at
+sync_status
+created_at
+updated_at
+
+⸻
+
+18. Sync Batching Engine
+
+Purpose
+
+Reduce API calls.
+
+⸻
+
+Batch Size
+
+50 Records
+
+⸻
+
+Workflow
+
+50 Queue Records
+      |
+Single Request
+      |
+Server Processing
+
+⸻
+
+Benefits
+
+Faster synchronization.
+
+⸻
+
+19. Retry Engine
+
+Retry Schedule
+
+Attempt 1:
+
+Immediate
+
+⸻
+
+Attempt 2:
+
+30 Seconds
+
+⸻
+
+Attempt 3:
+
+2 Minutes
+
+⸻
+
+Attempt 4:
+
+5 Minutes
+
+⸻
+
+Attempt 5:
+
+15 Minutes
+
+⸻
+
+Maximum
+
+5 Attempts
+
+⸻
+
+20. Dead Letter Queue
+
+Purpose
+
+Store permanently failed syncs.
+
+⸻
+
+Status
+
+FAILED
+
+⸻
+
+Resolution
+
+Manual retry.
+
+⸻
+
+Dashboard Visibility
+
+Mandatory.
+
+⸻
+
+21. Media Sync Architecture
+
+Supported Files
+
+Images
+KYC
+Invoices
+Reports
+Documents
+
+⸻
+
+Workflow
+
+Capture
+      |
+Store Local
+      |
+Create Queue Item
+      |
+Upload Background
+      |
+Verify Upload
+
+⸻
+
+Temporary Storage
+
+Encrypted local storage.
+
+⸻
+
+22. Large File Handling
+
+Upload Chunks
+
+Supported.
+
+⸻
+
+Chunk Size
+
+5 MB
+
+⸻
+
+Resume Upload
+
+Supported.
+
+⸻
+
+23. Sync API Architecture
+
+Upload Endpoint
+
+POST /sync/upload
+
+⸻
+
+Download Endpoint
+
+POST /sync/download
+
+⸻
+
+Conflict Endpoint
+
+POST /sync/conflicts
+
+⸻
+
+Health Endpoint
+
+GET /sync/status
+
+⸻
+
+24. Download Sync Strategy
+
+Purpose
+
+Fetch server updates.
+
+⸻
+
+Workflow
+
+Last Sync Timestamp
+      |
+Request Changes
+      |
+Apply Updates
+      |
+Update Local DB
+
+⸻
+
+Delta Sync
+
+Mandatory.
+
+⸻
+
+25. Initial Device Sync
+
+First Login
+
+Authenticate
+      |
+Download Master Data
+      |
+Download Settings
+      |
+Download Open Transactions
+
+⸻
+
+Priority Order
+
+Settings
+Customers
+Girvi
+Vault
+Payments
+Reports
+
+⸻
+
+26. Master Data Sync
+
+Data Types
+
+Categories
+Purities
+Roles
+Permissions
+GST Settings
+Interest Settings
+
+⸻
+
+Strategy
+
+Read Only.
+
+⸻
+
+Refresh
+
+Every 6 Hours
+
+⸻
+
+27. Background Sync Service
+
+Trigger Events
+
+App Launch
+
+Connectivity Restored
+
+Periodic Timer
+
+Manual Refresh
+
+⸻
+
+Frequency
+
+Every 5 Minutes
+
+⸻
+
+28. Real-Time Sync Support
+
+Future Feature
+
+WebSocket Sync.
+
+⸻
+
+Events
+
+Customer Updated
+Girvi Updated
+Payment Recorded
+Vault Assigned
+
+⸻
+
+29. Offline Dashboard Cache
+
+Cached Metrics
+
+Collections
+Active Girvi
+Overdues
+Vault Occupancy
+
+⸻
+
+Refresh
+
+When online.
+
+⸻
+
+30. Notification Sync
+
+Offline Queue
+
+Supported.
+
+⸻
+
+Delivery
+
+Upon reconnect.
+
+⸻
+
+Read Status Sync
+
+Supported.
+
+⸻
+
+31. Sync Security
+
+Requirements
+
+JWT Required
+
+Device Validation
+
+Tenant Validation
+
+Payload Signing
+
+TLS Required
+
+⸻
+
+Validation Flow
+
+Device
+   |
+JWT
+   |
+Tenant
+   |
+Payload
+
+⸻
+
+32. Encryption Standards
+
+Local Database
+
+AES-256 Encryption.
+
+⸻
+
+Secure Storage
+
+Used for:
+
+Tokens
+Device Keys
+Certificates
+
+⸻
+
+33. Sync Monitoring Dashboard
+
+Metrics
+
+Pending Syncs
+Failed Syncs
+Conflicts
+Last Sync
+Average Sync Time
+
+⸻
+
+Owner Visibility
+
+Mandatory.
+
+⸻
+
+34. Audit Architecture
+
+Log Events
+
+Sync Started
+Sync Completed
+Sync Failed
+Conflict Created
+Conflict Resolved
+
+⸻
+
+Audit Table
+
+sync_audit_logs
+
+⸻
+
+35. Performance Requirements
+
+Queue Insert:
+
+< 100 ms
+
+⸻
+
+Sync Processing:
+
+< 500 ms
+
+⸻
+
+Conflict Detection:
+
+< 200 ms
+
+⸻
+
+App Startup:
+
+< 3 Seconds
+
+⸻
+
+36. Database Tables
+
+sync_queue
+sync_conflicts
+sync_logs
+sync_checkpoints
+sync_metadata
+
+⸻
+
+37. Backend Structure
+
+sync/
+controllers/
+services/
+repositories/
+dto/
+conflicts/
+batch/
+media/
+monitoring/
+
+⸻
+
+38. Frontend Structure
+
+core/sync/
+sync_manager/
+queue_processor/
+conflict_resolver/
+connectivity/
+offline_storage/
+background_sync/
+
+⸻
+
+39. Testing Requirements
+
+Unit Tests
+
+✓ Queue Processing
+
+✓ Retry Logic
+
+✓ Conflict Detection
+
+✓ Batch Processing
+
+⸻
+
+Integration Tests
+
+✓ Upload Sync
+
+✓ Download Sync
+
+✓ Media Upload
+
+✓ Delta Sync
+
+⸻
+
+Offline Tests
+
+✓ Airplane Mode
+
+✓ Weak Network
+
+✓ Duplicate Updates
+
+✓ Device Reconnect
+
+⸻
+
+40. AI Development Rules
+
+AI MUST
+
+✓ Write Local First
+
+✓ Queue Transactions
+
+✓ Handle Sync States
+
+✓ Detect Conflicts
+
+✓ Preserve Financial Accuracy
+
+✓ Create Audit Logs
+
+✓ Retry Failed Syncs
+
+⸻
+
+AI MUST NEVER
+
+✗ Block User For Server Response
+
+✗ Lose Offline Data
+
+✗ Auto Merge Financial Conflicts
+
+✗ Skip Version Validation
+
+✗ Ignore Tenant Validation
+
+⸻
+
+41. Future Evolution
+
+Phase 2:
+
+WebSocket Sync
+Live Updates
+Multi-Device Awareness
+
+⸻
+
+Phase 3:
+
+CRDT Based Sync
+Smart Conflict Resolution
+Predictive Sync Optimization
+
+END OF DOCUMENT

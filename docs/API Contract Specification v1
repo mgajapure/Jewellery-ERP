@@ -1,0 +1,873 @@
+Jewellery ERP & Girvi Management Platform
+
+API Contract Specification v1.0
+
+Document Type: Backend API Contract Specification
+Version: 1.0
+Status: Architecture Baseline
+Framework: NestJS 11+
+Protocol: REST + WebSocket
+Authentication: Firebase OTP + JWT + Device Token
+Format: JSON
+
+⸻
+
+1. Purpose
+
+This document defines:
+
+* API Standards
+* Endpoint Contracts
+* Request DTOs
+* Response DTOs
+* Validation Rules
+* Error Codes
+* Authorization Requirements
+* Sync Contracts
+* WebSocket Events
+
+This document acts as the single source of truth for:
+
+* Flutter Integration
+* NestJS Development
+* QA Testing
+* AI Agent Development
+
+⸻
+
+2. Base URL Structure
+
+Production
+
+https://api.jewelleryerp.com/v1
+
+Staging
+
+https://staging-api.jewelleryerp.com/v1
+
+⸻
+
+3. Standard Headers
+
+Required Headers
+
+Authorization: Bearer <JWT>
+X-Tenant-Id: uuid
+X-Device-Id: uuid
+Content-Type: application/json
+
+⸻
+
+4. Standard Success Response
+
+{
+  "success": true,
+  "message": "Operation completed successfully",
+  "data": {},
+  "timestamp": "2026-06-08T10:00:00Z"
+}
+
+⸻
+
+5. Standard Error Response
+
+{
+  "success": false,
+  "errorCode": "CUSTOMER_NOT_FOUND",
+  "message": "Customer not found",
+  "timestamp": "2026-06-08T10:00:00Z"
+}
+
+⸻
+
+6. Authentication APIs
+
+⸻
+
+AUTH-001 Request OTP
+
+Endpoint
+
+POST /auth/otp/request
+
+Request
+
+{
+  "mobile": "9876543210"
+}
+
+Validation
+
+Required
+10 digits
+Indian mobile only
+
+Response
+
+{
+  "success": true,
+  "otpSent": true,
+  "expiryMinutes": 5
+}
+
+⸻
+
+AUTH-002 Verify OTP
+
+Endpoint
+
+POST /auth/otp/verify
+
+Request
+
+{
+  "mobile": "9876543210",
+  "otp": "123456",
+  "deviceFingerprint": "encrypted_string"
+}
+
+Response
+
+{
+  "jwtToken": "",
+  "refreshToken": "",
+  "deviceApprovalRequired": false,
+  "user": {}
+}
+
+⸻
+
+AUTH-003 Refresh Token
+
+POST /auth/refresh
+
+⸻
+
+AUTH-004 Logout
+
+POST /auth/logout
+
+⸻
+
+7. Device Management APIs
+
+⸻
+
+DEV-001 Register Device
+
+POST /devices/register
+
+Request
+
+{
+  "deviceName": "Samsung Tab",
+  "platform": "ANDROID",
+  "appVersion": "1.0.0",
+  "deviceFingerprint": ""
+}
+
+⸻
+
+DEV-002 Approve Device
+
+POST /devices/{deviceId}/approve
+
+Permission:
+
+OWNER ONLY
+
+⸻
+
+DEV-003 Reject Device
+
+POST /devices/{deviceId}/reject
+
+⸻
+
+DEV-004 Device List
+
+GET /devices
+
+⸻
+
+8. Customer APIs
+
+⸻
+
+CUST-001 Create Customer
+
+POST /customers
+
+Permission:
+
+CUSTOMER_CREATE
+
+Request DTO
+
+{
+  "name": "John Doe",
+  "mobile": "9876543210",
+  "dateOfBirth": "1990-01-01",
+  "address": "",
+  "aadhaarMasked": "",
+  "panNumber": ""
+}
+
+Validation
+
+Name Required
+Mobile Required
+Unique Mobile per Tenant
+
+⸻
+
+CUST-002 Update Customer
+
+PUT /customers/{customerId}
+
+⸻
+
+CUST-003 Customer Details
+
+GET /customers/{customerId}
+
+⸻
+
+CUST-004 Search Customer
+
+GET /customers/search?q=
+
+Supports:
+
+Name
+Mobile
+Customer ID
+QR
+
+⸻
+
+CUST-005 Upload Document
+
+POST /customers/{customerId}/documents
+
+Multipart Form Data
+
+⸻
+
+CUST-006 Customer Timeline
+
+GET /customers/{customerId}/timeline
+
+Returns:
+
+Girvi History
+Payments
+Renewals
+Redemptions
+
+⸻
+
+9. Girvi APIs
+
+⸻
+
+GIRVI-001 Create Girvi
+
+POST /girvi
+
+Request DTO
+
+{
+  "customerId": "",
+  "interestType": "KATMITI",
+  "interestRate": 18,
+  "loanAmount": 50000,
+  "startDate": "2026-06-08",
+  "items": []
+}
+
+Processing Pipeline
+
+Calculate Net Weight
+Calculate Fine Gold Weight
+Calculate Valuation
+Check LTV
+Generate KFS
+Assign Vault
+Create Contract
+
+⸻
+
+GIRVI-002 Girvi Details
+
+GET /girvi/{girviId}
+
+⸻
+
+GIRVI-003 Update Girvi
+
+PUT /girvi/{girviId}
+
+Restrictions:
+
+ACTIVE only
+
+⸻
+
+GIRVI-004 Upload Item Photo
+
+POST /girvi/{girviId}/photos
+
+⸻
+
+GIRVI-005 Partial Payment
+
+POST /girvi/{girviId}/payments
+
+Request
+
+{
+  "amount": 10000,
+  "paymentMode": "UPI"
+}
+
+⸻
+
+GIRVI-006 Renew Girvi
+
+POST /girvi/{girviId}/renew
+
+⸻
+
+GIRVI-007 Redeem Girvi
+
+POST /girvi/{girviId}/redeem
+
+Validation
+
+Payment Equals Total Due
+Photo Verification Required
+
+⸻
+
+GIRVI-008 Due List
+
+GET /girvi/due
+
+⸻
+
+GIRVI-009 Overdue List
+
+GET /girvi/overdue
+
+⸻
+
+GIRVI-010 Auction Initiate
+
+POST /girvi/{girviId}/auction/initiate
+
+⸻
+
+GIRVI-011 Auction Complete
+
+POST /girvi/{girviId}/auction/complete
+
+⸻
+
+10. Interest Engine APIs
+
+⸻
+
+INT-001 Calculate Interest
+
+POST /interest/calculate
+
+Request
+
+{
+  "girviId": ""
+}
+
+⸻
+
+INT-002 Interest Breakdown
+
+GET /interest/{girviId}
+
+⸻
+
+INT-003 Recalculate Interest
+
+POST /interest/recalculate
+
+Permission:
+
+OWNER
+
+⸻
+
+11. Vault APIs
+
+⸻
+
+VAULT-001 Vault List
+
+GET /vaults
+
+⸻
+
+VAULT-002 Assign Slot
+
+POST /vaults/assign
+
+Request
+
+{
+  "girviId": "",
+  "slotId": ""
+}
+
+⸻
+
+VAULT-003 Vault Search
+
+GET /vaults/search
+
+⸻
+
+VAULT-004 Occupancy Dashboard
+
+GET /vaults/occupancy
+
+⸻
+
+VAULT-005 Release Slot
+
+POST /vaults/release
+
+Automatic during redemption.
+
+⸻
+
+12. Compliance APIs
+
+⸻
+
+COMP-001 Generate Form 6
+
+POST /compliance/forms/form6
+
+⸻
+
+COMP-002 Generate Form 9
+
+POST /compliance/forms/form9
+
+⸻
+
+COMP-003 Generate Form 11
+
+POST /compliance/forms/form11
+
+⸻
+
+COMP-004 Generate Form 12
+
+POST /compliance/forms/form12
+
+⸻
+
+COMP-005 Generate Form 13
+
+POST /compliance/forms/form13
+
+⸻
+
+COMP-006 Generate KFS
+
+POST /compliance/kfs
+
+⸻
+
+COMP-007 Compliance Dashboard
+
+GET /compliance/dashboard
+
+⸻
+
+13. Dashboard APIs
+
+⸻
+
+DASH-001 Summary
+
+GET /dashboard/summary
+
+Returns:
+
+{
+  "activeGirvi": 0,
+  "dueToday": 0,
+  "overdue": 0,
+  "collectionsToday": 0,
+  "loanExposure": 0
+}
+
+⸻
+
+DASH-002 Staff Activity
+
+GET /dashboard/staff-activity
+
+⸻
+
+DASH-003 Gold Rate
+
+GET /dashboard/gold-rate
+
+⸻
+
+14. Staff APIs
+
+⸻
+
+STAFF-001 Create Staff
+
+POST /staff
+
+⸻
+
+STAFF-002 Update Staff
+
+PUT /staff/{staffId}
+
+⸻
+
+STAFF-003 Deactivate Staff
+
+POST /staff/{staffId}/deactivate
+
+⸻
+
+STAFF-004 Permission Matrix
+
+GET /staff/{staffId}/permissions
+
+⸻
+
+STAFF-005 Update Permissions
+
+PUT /staff/{staffId}/permissions
+
+⸻
+
+15. Reports APIs
+
+⸻
+
+REP-001 Financial Report
+
+GET /reports/financial
+
+⸻
+
+REP-002 Girvi Report
+
+GET /reports/girvi
+
+⸻
+
+REP-003 Vault Report
+
+GET /reports/vault
+
+⸻
+
+REP-004 Audit Report
+
+GET /reports/audit
+
+⸻
+
+16. Inventory APIs
+
+⸻
+
+INV-001 Create Item
+
+POST /inventory
+
+⸻
+
+INV-002 Update Item
+
+PUT /inventory/{inventoryId}
+
+⸻
+
+INV-003 Item Search
+
+GET /inventory/search
+
+⸻
+
+INV-004 Barcode Lookup
+
+GET /inventory/barcode/{barcode}
+
+⸻
+
+17. Sales APIs
+
+⸻
+
+SALE-001 Create Invoice
+
+POST /sales
+
+⸻
+
+SALE-002 Invoice Details
+
+GET /sales/{saleId}
+
+⸻
+
+SALE-003 GST Export
+
+GET /sales/gst/export
+
+⸻
+
+18. Purchase APIs
+
+⸻
+
+PUR-001 Scrap Purchase
+
+POST /purchases
+
+⸻
+
+PUR-002 Purchase Details
+
+GET /purchases/{purchaseId}
+
+⸻
+
+19. Savings Scheme APIs
+
+⸻
+
+SAVE-001 Create Scheme
+
+POST /savings
+
+⸻
+
+SAVE-002 Deposit Entry
+
+POST /savings/{schemeId}/deposit
+
+⸻
+
+SAVE-003 Maturity
+
+POST /savings/{schemeId}/mature
+
+⸻
+
+20. Notification APIs
+
+⸻
+
+NOTIF-001 Send Notification
+
+POST /notifications/send
+
+⸻
+
+NOTIF-002 Notification History
+
+GET /notifications
+
+⸻
+
+21. Sync APIs
+
+⸻
+
+SYNC-001 Upload Sync Batch
+
+POST /sync/upload
+
+Request
+
+{
+  "deviceId": "",
+  "batch": []
+}
+
+⸻
+
+SYNC-002 Download Changes
+
+GET /sync/download
+
+⸻
+
+SYNC-003 Resolve Conflict
+
+POST /sync/conflict/resolve
+
+Permission:
+
+OWNER
+
+⸻
+
+22. Backup APIs
+
+⸻
+
+BACKUP-001 Trigger Backup
+
+POST /backup/manual
+
+⸻
+
+BACKUP-002 Backup History
+
+GET /backup/history
+
+⸻
+
+BACKUP-003 Restore Backup
+
+POST /backup/restore
+
+Permission:
+
+OWNER
+
+⸻
+
+23. WebSocket Events
+
+Connection:
+
+/ws
+
+⸻
+
+Dashboard Updates
+
+dashboard.updated
+
+⸻
+
+Girvi Created
+
+girvi.created
+
+⸻
+
+Girvi Redeemed
+
+girvi.redeemed
+
+⸻
+
+Payment Recorded
+
+payment.recorded
+
+⸻
+
+Device Approval Request
+
+device.approval.pending
+
+⸻
+
+Sync Conflict
+
+sync.conflict
+
+⸻
+
+24. Error Code Registry
+
+AUTH_001_INVALID_OTP
+AUTH_002_OTP_EXPIRED
+AUTH_003_DEVICE_NOT_APPROVED
+CUST_001_DUPLICATE_MOBILE
+CUST_002_CUSTOMER_NOT_FOUND
+GIRVI_001_LTV_EXCEEDED
+GIRVI_002_INVALID_WEIGHT
+GIRVI_003_KFS_REQUIRED
+PAY_001_OVERPAYMENT
+VAULT_001_SLOT_OCCUPIED
+VAULT_002_SLOT_NOT_FOUND
+COMP_001_FORM_GENERATION_FAILED
+SYNC_001_CONFLICT_DETECTED
+RBAC_001_PERMISSION_DENIED
+
+⸻
+
+25. API Versioning Strategy
+
+Format:
+
+/api/v1/
+
+Future:
+
+/api/v2/
+
+No breaking changes allowed within same version.
+
+⸻
+
+26. Rate Limiting
+
+OTP:
+
+5 requests / hour
+
+Search:
+
+100 requests / minute
+
+General APIs:
+
+1000 requests / hour
+
+⸻
+
+27. Security Rules
+
+* JWT Mandatory
+* Device Approval Mandatory
+* Tenant Isolation Mandatory
+* TLS 1.3 Mandatory
+* Audit Logging Mandatory
+* RBAC Mandatory
+* Idempotency Mandatory For Financial Transactions
+
+⸻
+
+28. Development Sequence
+
+1. Auth APIs
+2. Customer APIs
+3. Girvi APIs
+4. Interest APIs
+5. Vault APIs
+6. Compliance APIs
+7. Dashboard APIs
+8. Staff APIs
+9. Reports APIs
+10. Sync APIs
+
+END OF DOCUMENT

@@ -1,0 +1,730 @@
+Jewellery ERP & Girvi Management Platform
+
+Purchase Module Specification v1.0
+
+Module Code: MOD-PURCHASE
+Priority: High
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Customer Module, Inventory Module, Reports Module, Audit Module, Compliance Module
+
+⸻
+
+1. Module Purpose
+
+The Purchase Module manages procurement of gold, silver, jewellery, scrap metal, and bullion from customers, suppliers, and traders.
+
+This module is the primary inventory acquisition source for the ERP.
+
+Responsibilities:
+
+* Scrap Gold Purchase
+* Jewellery Purchase
+* Bullion Purchase
+* Supplier Purchases
+* Purity Assessment
+* Weight Verification
+* Purchase Ledger
+* Purchase Invoicing
+* Inventory Creation
+* Compliance Tracking
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Record purchases within 2 minutes.
+
+BO-002
+
+Ensure accurate valuation.
+
+BO-003
+
+Maintain supplier/customer traceability.
+
+BO-004
+
+Automatically create inventory records.
+
+BO-005
+
+Support audit and compliance requirements.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-050	Purchase Dashboard
+SCR-058	New Purchase Entry
+SCR-059	Purchase Details
+SCR-060	Supplier Management
+SCR-061	Purchase Ledger
+
+⸻
+
+4. Purchase Architecture
+
+Supplier / Customer
+         |
+Purchase Entry
+         |
+Purity Assessment
+         |
+Valuation Engine
+         |
+Purchase Approval
+         |
+Inventory Creation
+         |
+Reports
+
+⸻
+
+5. Purchase Lifecycle
+
+Draft
+   |
+Evaluated
+   |
+Approved
+   |
+Inventory Created
+   |
+Completed
+
+⸻
+
+6. Core Business Rules
+
+BR-PUR-001
+
+Every purchase requires identity information.
+
+BR-PUR-002
+
+Purchase amount must be calculated automatically.
+
+BR-PUR-003
+
+Approved purchases cannot be deleted.
+
+BR-PUR-004
+
+Inventory records created automatically after approval.
+
+BR-PUR-005
+
+Purchase ledger immutable after approval.
+
+BR-PUR-006
+
+Photos mandatory for scrap purchases.
+
+BR-PUR-007
+
+Weight and purity required.
+
+BR-PUR-008
+
+Audit log mandatory for all approvals.
+
+⸻
+
+7. Screen Specifications
+
+SCR-050 Purchase Dashboard
+
+Purpose
+
+Central purchase monitoring screen.
+
+⸻
+
+Dashboard Cards
+
+Today’s Purchases
+
+Purchase Value
+
+Pending Approvals
+
+Suppliers
+
+Scrap Purchases
+
+Inventory Added
+
+⸻
+
+Quick Actions
+
+New Purchase
+View Ledger
+Suppliers
+Reports
+
+⸻
+
+API Mapping
+
+GET /purchases/dashboard
+
+⸻
+
+SCR-058 New Purchase Entry
+
+Purpose
+
+Create purchase transaction.
+
+⸻
+
+Purchase Types
+
+Scrap Gold
+Scrap Silver
+Jewellery
+Bullion
+Supplier Purchase
+
+⸻
+
+Seller Information
+
+Customer
+
+Supplier
+
+Walk-in Seller
+
+⸻
+
+Seller Details
+
+Name
+Mobile
+Address
+PAN
+Aadhaar
+
+⸻
+
+Item Details
+
+Category
+Description
+Quantity
+Weight
+Purity
+
+⸻
+
+Photos
+
+Required:
+
+Minimum 2 Photos
+
+⸻
+
+Valuation Inputs
+
+Metal Rate
+Purity
+Weight
+
+⸻
+
+Purchase Formula
+
+Purchase Value:
+
+Purchase\ Value = Net\ Weight \times Purity\ Factor \times Market\ Rate
+
+⸻
+
+API Mapping
+
+POST /purchases
+
+⸻
+
+Request DTO
+
+{
+  "sellerId": "",
+  "purchaseType": "SCRAP_GOLD",
+  "weight": 25.5,
+  "purity": 91.6,
+  "marketRate": 8500
+}
+
+⸻
+
+SCR-059 Purchase Details
+
+Purpose
+
+View purchase transaction.
+
+⸻
+
+Sections
+
+Seller Details
+
+Purchase Details
+
+Photos
+
+Valuation
+
+Approval History
+
+Inventory Link
+
+⸻
+
+Actions
+
+Approve
+Reject
+Print
+View Inventory
+
+⸻
+
+API Mapping
+
+GET /purchases/{purchaseId}
+
+⸻
+
+SCR-060 Supplier Management
+
+Purpose
+
+Manage suppliers.
+
+⸻
+
+Supplier Fields
+
+Supplier Code
+Business Name
+Contact Person
+Mobile
+GST Number
+Address
+
+⸻
+
+Metrics
+
+Total Purchases
+Purchase Value
+Last Purchase Date
+
+⸻
+
+Actions
+
+Create
+Edit
+Deactivate
+View History
+
+⸻
+
+API Mapping
+
+GET /suppliers
+POST /suppliers
+
+⸻
+
+SCR-061 Purchase Ledger
+
+Purpose
+
+Complete purchase history.
+
+⸻
+
+Filters
+
+Date Range
+Supplier
+Purchase Type
+Status
+
+⸻
+
+Ledger Columns
+
+Purchase ID
+Date
+Seller
+Weight
+Purity
+Amount
+Status
+
+⸻
+
+Export Formats
+
+PDF
+Excel
+CSV
+
+⸻
+
+API Mapping
+
+GET /purchases/ledger
+
+⸻
+
+8. Valuation Engine
+
+Purpose
+
+Calculate purchase amount.
+
+⸻
+
+Net Weight Formula
+
+Net\ Weight = Gross\ Weight - Stone\ Weight
+
+⸻
+
+Fine Weight Formula
+
+Fine\ Weight = Net\ Weight \times Purity\ Factor
+
+⸻
+
+Purchase Amount Formula
+
+Purchase\ Amount = Fine\ Weight \times Market\ Rate
+
+⸻
+
+9. Supplier Engine
+
+Supplier Code Format
+
+SUP-2026-000001
+
+⸻
+
+Supplier Categories
+
+Jeweller
+Trader
+Bullion Dealer
+Refinery
+
+⸻
+
+Risk Flags
+
+High Value
+Frequent Seller
+Blacklisted
+
+⸻
+
+10. Inventory Integration Engine
+
+Trigger
+
+Purchase Approved
+
+⸻
+
+Workflow
+
+Purchase Approved
+      |
+Create Inventory Item
+      |
+Generate Barcode
+      |
+Add To Stock
+      |
+Update Dashboard
+
+⸻
+
+Status Mapping
+
+Purchase Approved
+      |
+Inventory Available
+
+⸻
+
+11. Purchase Approval Engine
+
+Approval Thresholds
+
+Below ₹50,000
+
+Auto Approved
+
+⸻
+
+₹50,000 - ₹5,00,000
+
+Manager Approval
+
+⸻
+
+Above ₹5,00,000
+
+Owner Approval
+
+⸻
+
+Approval Formula
+
+Approval\ Level = f(Purchase\ Amount)
+
+⸻
+
+12. Compliance Rules
+
+KYC
+
+Mandatory for high-value purchases.
+
+⸻
+
+PAN Requirement
+
+Mandatory above configured threshold.
+
+⸻
+
+Purchase Documentation
+
+Mandatory photo evidence.
+
+⸻
+
+Audit Trail
+
+Mandatory.
+
+⸻
+
+13. Purchase Analytics
+
+Metrics
+
+Total Purchases
+
+Purchase Value
+
+Average Purchase Size
+
+Supplier Concentration
+
+Scrap vs Jewellery Ratio
+
+⸻
+
+Scrap Ratio Formula
+
+Scrap\ Ratio = \frac{Scrap\ Purchases}{Total\ Purchases} \times 100
+
+⸻
+
+14. Integration Matrix
+
+Module	Purpose
+Inventory	Stock Creation
+Reports	Purchase Reports
+Dashboard	KPIs
+Customer	Seller Info
+Audit	Tracking
+Compliance	KYC
+
+⸻
+
+15. Offline Behaviour
+
+Supported:
+
+Create Purchase
+View Purchases
+Supplier Lookup
+
+⸻
+
+Not Supported:
+
+Large Exports
+Bulk Imports
+
+⸻
+
+16. Audit Logging
+
+Log:
+
+Purchase Created
+Purchase Approved
+Purchase Rejected
+Supplier Created
+Supplier Updated
+Inventory Generated
+
+⸻
+
+17. Analytics Events
+
+purchase_created
+purchase_approved
+purchase_rejected
+supplier_created
+inventory_generated
+
+⸻
+
+18. Error Catalogue
+
+PUR-001
+
+Invalid Weight
+
+PUR-002
+
+Invalid Purity
+
+PUR-003
+
+Approval Required
+
+PUR-004
+
+Supplier Not Found
+
+PUR-005
+
+Purchase Not Found
+
+PUR-006
+
+Inventory Creation Failed
+
+PUR-007
+
+KYC Missing
+
+⸻
+
+19. Database Entities
+
+purchases
+purchase_items
+purchase_photos
+suppliers
+purchase_approvals
+purchase_ledger
+
+⸻
+
+20. Backend Structure
+
+purchase/
+controllers/
+services/
+repositories/
+dto/
+entities/
+valuation/
+suppliers/
+approval/
+
+⸻
+
+21. Frontend Structure
+
+features/purchase/
+dashboard/
+purchase_entry/
+purchase_details/
+suppliers/
+ledger/
+bloc/
+repository/
+models/
+
+⸻
+
+22. Testing Checklist
+
+✓ Create Purchase
+
+✓ Valuation
+
+✓ Photo Upload
+
+✓ Supplier Management
+
+✓ Approval Workflow
+
+✓ Inventory Creation
+
+✓ Purchase Ledger
+
+✓ Export
+
+✓ Offline Entry
+
+✓ Audit Logs
+
+⸻
+
+23. Performance Requirements
+
+Purchase Entry Save:
+
+< 2 Seconds
+
+⸻
+
+Valuation:
+
+< 500 ms
+
+⸻
+
+Ledger Load:
+
+< 3 Seconds
+
+⸻
+
+24. Development Sequence
+
+1. Supplier Engine
+2. Purchase Database
+3. Valuation Engine
+4. Purchase Entry
+5. Approval Workflow
+6. Inventory Integration
+7. Ledger Engine
+8. Reports Integration
+9. Dashboard Integration
+
+END OF DOCUMENT

@@ -1,0 +1,858 @@
+Jewellery ERP & Girvi Management Platform
+
+Compliance Module Specification v1.0
+
+Module Code: MOD-COMPLIANCE
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Girvi Module, Customer Module, Interest Engine, Reports Module, Notification Module, Audit Module
+
+⸻
+
+1. Module Purpose
+
+The Compliance Module ensures that all lending operations comply with:
+
+* Maharashtra Money-Lending (Regulation) Act
+* RBI Gold Loan Guidelines
+* KFS (Key Fact Statement) Requirements
+* Customer Disclosure Requirements
+* Auction Regulations
+* Gold Return Obligations
+* Audit Requirements
+
+This module automatically generates regulatory forms and monitors compliance violations.
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+100% automated compliance.
+
+BO-002
+
+Zero manual regulatory calculations.
+
+BO-003
+
+Automatic form generation.
+
+BO-004
+
+Early warning of compliance violations.
+
+BO-005
+
+Complete audit readiness.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-036	Form 6 Generator
+SCR-037	Form 9 Register
+SCR-038	Forms 11 & 12
+SCR-039	Form 13 Generator
+SCR-078	Compliance Dashboard
+
+⸻
+
+4. Compliance Architecture
+
+Customer
+      |
+Girvi
+      |
+Interest
+      |
+Compliance Engine
+      |
++----------------------+
+|                      |
+KFS                 Forms
+|                      |
+Dashboard         Audit Logs
+
+⸻
+
+5. Compliance Domains
+
+Maharashtra Compliance
+
+Form 6
+
+Money Lending License Information
+
+Form 9
+
+Daily Loan Register
+
+Form 11
+
+Pledged Articles Register
+
+Form 12
+
+Loan Transaction Register
+
+Form 13
+
+Annual Return
+
+⸻
+
+RBI Compliance
+
+LTV Monitoring
+
+KFS Generation
+
+Insurance Monitoring
+
+Auction Monitoring
+
+Gold Return Monitoring
+
+Interest Disclosure
+
+⸻
+
+6. Core Business Rules
+
+BR-COMP-001
+
+Every Girvi requires KFS.
+
+BR-COMP-002
+
+Every active Girvi must appear in Form 11.
+
+BR-COMP-003
+
+Every transaction must appear in Form 12.
+
+BR-COMP-004
+
+Auction notice mandatory before auction.
+
+BR-COMP-005
+
+LTV violations must block loan creation.
+
+BR-COMP-006
+
+Compliance records are immutable.
+
+BR-COMP-007
+
+Generated forms cannot be edited.
+
+BR-COMP-008
+
+All forms require audit logging.
+
+⸻
+
+7. Screen Specifications
+
+SCR-036 Form 6 Generator
+
+Purpose
+
+Generate Money Lending License records.
+
+⸻
+
+Inputs
+
+License Number
+Business Name
+Owner Name
+Address
+Reporting Period
+
+⸻
+
+Actions
+
+Preview
+Generate PDF
+Download
+Email
+
+⸻
+
+API Mapping
+
+POST /compliance/forms/form6
+
+⸻
+
+Output
+
+Digitally Generated Form 6 PDF
+
+⸻
+
+SCR-037 Form 9 Register
+
+Purpose
+
+Daily lending register.
+
+⸻
+
+Data Sources
+
+Girvi
+Payments
+Interest Ledger
+
+⸻
+
+Filters
+
+Date Range
+Customer
+Status
+
+⸻
+
+Actions
+
+Preview
+Export PDF
+Export Excel
+
+⸻
+
+API Mapping
+
+POST /compliance/forms/form9
+
+⸻
+
+SCR-038 Forms 11 & 12
+
+Purpose
+
+Mandatory loan and pledged article registers.
+
+⸻
+
+Form 11
+
+Displays
+
+Girvi ID
+Customer
+Item Description
+Weight
+Vault Location
+
+⸻
+
+Form 12
+
+Displays
+
+Loan Amount
+Interest
+Payments
+Outstanding
+
+⸻
+
+Actions
+
+Generate
+Preview
+Print
+Export PDF
+
+⸻
+
+API Mapping
+
+POST /compliance/forms/form11
+POST /compliance/forms/form12
+
+⸻
+
+SCR-039 Form 13 Generator
+
+Purpose
+
+Annual statutory return.
+
+⸻
+
+Inputs
+
+Financial Year
+Branch
+Reporting Period
+
+⸻
+
+Generated Data
+
+Total Loans
+Total Principal
+Total Interest
+Active Accounts
+Closed Accounts
+Auction Accounts
+
+⸻
+
+API Mapping
+
+POST /compliance/forms/form13
+
+⸻
+
+SCR-078 Compliance Dashboard
+
+Purpose
+
+Central compliance monitoring.
+
+⸻
+
+Dashboard Cards
+
+Active Girvi
+
+LTV Violations
+
+Pending KFS
+
+Insurance Expiry
+
+Auction Notices Pending
+
+Gold Return Due
+
+Form Generation Status
+
+⸻
+
+Compliance Health Score
+
+Formula:
+
+Compliance\ Score = \frac{Compliant\ Records}{Total\ Records} \times 100
+
+⸻
+
+Status Indicators
+
+Green  = 95-100%
+Yellow = 80-94%
+Red    = <80%
+
+⸻
+
+API Mapping
+
+GET /compliance/dashboard
+
+⸻
+
+8. KFS Engine
+
+Purpose
+
+Generate RBI-compliant Key Fact Statement.
+
+⸻
+
+Trigger
+
+Girvi Creation
+
+⸻
+
+Mandatory Fields
+
+Customer
+Loan Amount
+Interest Rate
+APR
+Repayment Terms
+Penalty Terms
+Auction Rules
+Customer Rights
+
+⸻
+
+Workflow
+
+Generate KFS
+      |
+Preview
+      |
+Customer Acknowledgement
+      |
+PDF Storage
+      |
+Audit Log
+
+⸻
+
+Validation
+
+Girvi activation blocked without acknowledgement.
+
+⸻
+
+9. LTV Compliance Engine
+
+Purpose
+
+Prevent RBI violations.
+
+⸻
+
+Formula
+
+LTV = \frac{Loan\ Amount}{Valuation} \times 100
+
+⸻
+
+Rules
+
+Loan Range	Maximum LTV
+≤ ₹2.5 Lakh	85%
+₹2.5–₹5 Lakh	80%
+> ₹5 Lakh	75%
+
+⸻
+
+Violations
+
+Hard Block
+
+No contract creation.
+
+Audit Entry
+
+Mandatory.
+
+⸻
+
+10. Auction Compliance Engine
+
+Preconditions
+
+Before auction:
+
+Overdue
+Notice Generated
+Notice Delivered
+Waiting Period Completed
+
+⸻
+
+Workflow
+
+Generate Notice
+      |
+Notify Customer
+      |
+Track Delivery
+      |
+Wait Statutory Period
+      |
+Enable Auction
+
+⸻
+
+Generated Documents
+
+Notice PDF
+Delivery Proof
+Auction Ledger
+
+⸻
+
+11. Gold Return Compliance Engine
+
+Purpose
+
+Track post-redemption obligations.
+
+⸻
+
+Trigger
+
+Redemption Completed
+
+⸻
+
+Timer
+
+7 Working Days
+
+⸻
+
+Dashboard Alerts
+
+Due Today
+
+Due This Week
+
+Overdue
+
+⸻
+
+Escalation
+
+Notify:
+
+Manager
+Owner
+
+⸻
+
+12. Insurance Compliance Engine
+
+Purpose
+
+Ensure vault coverage.
+
+⸻
+
+Validation
+
+Coverage >= Exposure
+
+⸻
+
+Alerts
+
+30 Days
+
+15 Days
+
+7 Days
+
+Before expiry.
+
+⸻
+
+Dashboard
+
+Displays:
+
+Policy Number
+Coverage
+Expiry
+Vault
+
+⸻
+
+13. Compliance Monitoring Engine
+
+Checks Performed
+
+Missing KFS
+
+LTV Violation
+
+Missing Vault
+
+Expired Insurance
+
+Missing Notice
+
+Gold Return Overdue
+
+Missing Customer KYC
+
+⸻
+
+Scan Frequency
+
+Every 1 Hour
+
+⸻
+
+14. Compliance Ledger
+
+Purpose
+
+Track compliance events.
+
+⸻
+
+Event Types
+
+KFS Generated
+KFS Acknowledged
+Form Generated
+Violation Detected
+Violation Resolved
+Notice Sent
+
+⸻
+
+Immutable
+
+Append-only.
+
+⸻
+
+15. Compliance Reports
+
+Available Reports
+
+KFS Register
+
+Form Register
+
+LTV Audit Report
+
+Auction Report
+
+Insurance Report
+
+Gold Return Report
+
+Compliance Violations Report
+
+⸻
+
+16. Notification Integration
+
+Events
+
+KFS Pending
+
+Insurance Expiry
+
+Auction Notice Due
+
+Gold Return Due
+
+Compliance Failure
+
+⸻
+
+Channels
+
+Push
+WhatsApp
+In-App
+
+⸻
+
+17. Integration Matrix
+
+Module	Purpose
+Girvi	Source Data
+Customer	KYC
+Interest	Calculations
+Vault	Insurance
+Reports	Exports
+Dashboard	KPIs
+Notifications	Alerts
+Audit	Tracking
+
+⸻
+
+18. Offline Behaviour
+
+Supported:
+
+View Forms
+Generate Draft Forms
+View Dashboard
+
+⸻
+
+Not Supported:
+
+Final Submission
+Email Delivery
+Cloud Validation
+
+⸻
+
+19. Audit Logging
+
+Log:
+
+Form Generated
+KFS Generated
+KFS Viewed
+Violation Detected
+Violation Resolved
+Notice Sent
+Insurance Updated
+
+⸻
+
+20. Analytics Events
+
+form_generated
+kfs_generated
+kfs_acknowledged
+ltv_violation
+insurance_expiry
+auction_notice_sent
+compliance_viewed
+
+⸻
+
+21. Error Catalogue
+
+COMP-001
+
+Form Generation Failed
+
+COMP-002
+
+KFS Generation Failed
+
+COMP-003
+
+LTV Violation
+
+COMP-004
+
+Insurance Expired
+
+COMP-005
+
+Notice Missing
+
+COMP-006
+
+Compliance Scan Failed
+
+COMP-007
+
+Gold Return Overdue
+
+COMP-008
+
+KYC Missing
+
+⸻
+
+22. Database Entities
+
+compliance_forms
+kfs_documents
+compliance_violations
+auction_notices
+insurance_records
+gold_return_tracker
+
+⸻
+
+23. Backend Structure
+
+compliance/
+controllers/
+services/
+repositories/
+dto/
+entities/
+validators/
+kfs/
+forms/
+ltv/
+insurance/
+auction/
+gold_return/
+
+⸻
+
+24. Frontend Structure
+
+features/compliance/
+form6/
+form9/
+forms11_12/
+form13/
+dashboard/
+bloc/
+repository/
+models/
+
+⸻
+
+25. Testing Checklist
+
+✓ KFS Generation
+
+✓ KFS Acknowledgement
+
+✓ Form 6
+
+✓ Form 9
+
+✓ Form 11
+
+✓ Form 12
+
+✓ Form 13
+
+✓ LTV Validation
+
+✓ Auction Notice Workflow
+
+✓ Insurance Alerts
+
+✓ Gold Return Tracking
+
+✓ Compliance Dashboard
+
+✓ Audit Logs
+
+✓ Notifications
+
+⸻
+
+26. Performance Requirements
+
+Compliance Dashboard:
+
+< 2 Seconds
+
+⸻
+
+KFS Generation:
+
+< 3 Seconds
+
+⸻
+
+Form Generation:
+
+< 5 Seconds
+
+⸻
+
+27. Development Sequence
+
+1. KFS Engine
+2. LTV Engine
+3. Form Engine
+4. Auction Compliance
+5. Insurance Compliance
+6. Gold Return Tracking
+7. Compliance Dashboard
+8. Reporting Integration
+9. Notification Integration
+10. Audit Integration
+
+END OF DOCUMENT

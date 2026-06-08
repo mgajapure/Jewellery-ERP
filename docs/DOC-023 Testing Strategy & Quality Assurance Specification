@@ -1,0 +1,1088 @@
+Jewellery ERP & Girvi Management Platform
+
+Testing Strategy & Quality Assurance Specification v1.0
+
+Document Code: DOC-023
+Architecture Type: Quality Assurance & Testing Architecture
+Applies To: Flutter Mobile App, NestJS Backend, APIs, Database, Infrastructure, Offline Engine
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the official testing strategy, quality assurance standards, release quality gates, and validation procedures for the Jewellery ERP platform.
+
+This document is the source of truth for:
+
+* Unit Testing
+* Integration Testing
+* End-to-End Testing
+* API Testing
+* Offline Testing
+* Security Testing
+* Performance Testing
+* User Acceptance Testing
+* Regression Testing
+* Release Validation
+
+Every AI agent and developer must follow this document.
+
+⸻
+
+2. Quality Objectives
+
+QA-001
+
+Prevent production defects.
+
+QA-002
+
+Achieve predictable releases.
+
+QA-003
+
+Protect financial accuracy.
+
+QA-004
+
+Guarantee offline reliability.
+
+QA-005
+
+Maintain enterprise-grade quality.
+
+⸻
+
+3. Testing Philosophy
+
+Principle 1
+
+Test Early.
+
+⸻
+
+Principle 2
+
+Test Continuously.
+
+⸻
+
+Principle 3
+
+Automate Everything Possible.
+
+⸻
+
+Principle 4
+
+Financial Accuracy First.
+
+⸻
+
+Principle 5
+
+Offline Reliability First.
+
+⸻
+
+Principle 6
+
+No Untested Production Releases.
+
+⸻
+
+4. Quality Pyramid
+
+E2E Tests
+    |
+Integration Tests
+    |
+Unit Tests
+
+⸻
+
+Coverage Distribution
+
+70% Unit Tests
+20% Integration Tests
+10% E2E Tests
+
+⸻
+
+5. Testing Layers
+
+Layer 1
+
+Unit Testing
+
+⸻
+
+Layer 2
+
+Integration Testing
+
+⸻
+
+Layer 3
+
+API Testing
+
+⸻
+
+Layer 4
+
+E2E Testing
+
+⸻
+
+Layer 5
+
+User Acceptance Testing
+
+⸻
+
+Layer 6
+
+Production Validation
+
+⸻
+
+6. Backend Testing Strategy
+
+Framework
+
+Jest
+
+⸻
+
+Coverage Target
+
+Minimum 85%
+
+⸻
+
+Required Coverage
+
+Services
+
+Validators
+
+Utilities
+
+Event Handlers
+
+Domain Logic
+
+⸻
+
+Excluded
+
+DTOs
+Generated Code
+
+⸻
+
+7. Backend Unit Test Standards
+
+Every Service Must Test:
+
+Success Path
+
+Validation Failure
+
+Business Rule Failure
+
+Permission Failure
+
+Edge Cases
+
+⸻
+
+Example
+
+Girvi Creation:
+
+Valid Customer
+Invalid Customer
+Inactive Customer
+Duplicate Transaction
+Missing Vault Slot
+
+⸻
+
+8. Backend Integration Testing
+
+Purpose
+
+Validate module interaction.
+
+⸻
+
+Examples
+
+Girvi + Interest
+Girvi + Vault
+Sales + Inventory
+Purchase + Inventory
+Savings + Sales
+
+⸻
+
+Environment
+
+Dedicated Test Database.
+
+⸻
+
+9. API Testing Strategy
+
+Scope
+
+Every API Endpoint.
+
+⸻
+
+Tests
+
+Authentication
+
+Authorization
+
+Validation
+
+Success
+
+Failure
+
+Edge Cases
+
+⸻
+
+Example
+
+POST /api/v1/girvi
+
+Must test:
+
+Valid Request
+Invalid Request
+Unauthorized
+Forbidden
+Duplicate Data
+
+⸻
+
+10. Frontend Testing Strategy
+
+Frameworks
+
+flutter_test
+bloc_test
+integration_test
+
+⸻
+
+Coverage Target
+
+Minimum 80%
+
+⸻
+
+Test Scope
+
+Widgets
+
+BLoCs
+
+Forms
+
+Screens
+
+Offline Behaviour
+
+⸻
+
+11. BLoC Testing Standards
+
+Every BLoC Must Test:
+
+Initial State
+
+Loading State
+
+Success State
+
+Error State
+
+Offline State
+
+⸻
+
+Example
+
+LoadCustomers
+CreateCustomer
+UpdateCustomer
+
+⸻
+
+12. Widget Testing Standards
+
+Mandatory Components
+
+Buttons
+Forms
+Dialogs
+Search
+Lists
+Cards
+
+⸻
+
+Validation
+
+UI behavior verified.
+
+⸻
+
+13. Integration Testing Strategy
+
+Scope
+
+Complete user flows.
+
+⸻
+
+Examples
+
+Customer Creation
+
+Girvi Creation
+
+Payment Collection
+
+Redemption
+
+Sale Completion
+
+Savings Redemption
+
+⸻
+
+Validation
+
+Cross-module consistency.
+
+⸻
+
+14. End-to-End Testing
+
+Purpose
+
+Validate real-world usage.
+
+⸻
+
+Tools
+
+Flutter Integration Test
+Physical Device Testing
+
+⸻
+
+Critical E2E Flows
+
+Login
+
+Customer Creation
+
+Girvi Creation
+
+Payment
+
+Redemption
+
+Sale
+
+Purchase
+
+Savings Deposit
+
+Backup
+
+⸻
+
+15. Offline Testing Strategy
+
+Critical Requirement
+
+Mandatory.
+
+⸻
+
+Test Scenarios
+
+Airplane Mode
+
+Weak Network
+
+No Internet
+
+Network Restoration
+
+Device Restart
+
+⸻
+
+Validation
+
+No Data Loss
+Queue Integrity
+Sync Success
+
+⸻
+
+16. Sync Engine Testing
+
+Scope
+
+DOC-020 Validation.
+
+⸻
+
+Test Cases
+
+Queue Creation
+
+Retry Logic
+
+Conflict Detection
+
+Conflict Resolution
+
+Delta Sync
+
+Media Sync
+
+⸻
+
+Financial Conflicts
+
+Manual resolution required.
+
+⸻
+
+17. Database Testing
+
+Validation
+
+Constraints
+
+Transactions
+
+Rollbacks
+
+Soft Deletes
+
+Tenant Isolation
+
+⸻
+
+Required
+
+Database migration testing.
+
+⸻
+
+18. Security Testing
+
+Authentication Tests
+
+OTP
+
+JWT
+
+Device Approval
+
+Session Expiry
+
+⸻
+
+Authorization Tests
+
+RBAC
+
+Permission Checks
+
+Module Access
+
+⸻
+
+Data Security Tests
+
+Encryption
+
+Secure Storage
+
+Backup Security
+
+⸻
+
+19. Penetration Testing
+
+Scope
+
+APIs
+
+Authentication
+
+File Upload
+
+Session Management
+
+⸻
+
+Attack Simulations
+
+SQL Injection
+XSS
+Broken Authentication
+Privilege Escalation
+IDOR
+
+⸻
+
+Frequency
+
+Before major release.
+
+⸻
+
+20. Performance Testing
+
+Tools
+
+k6
+Postman
+JMeter
+
+⸻
+
+API Targets
+
+< 500 ms
+
+⸻
+
+Dashboard Target
+
+< 2 Seconds
+
+⸻
+
+Report Target
+
+< 10 Seconds
+
+⸻
+
+21. Load Testing
+
+Simulated Users
+
+Phase 1:
+
+100 Concurrent Users
+
+⸻
+
+Phase 2:
+
+500 Concurrent Users
+
+⸻
+
+Validation
+
+System stability.
+
+⸻
+
+22. Stress Testing
+
+Purpose
+
+Determine breaking point.
+
+⸻
+
+Metrics
+
+CPU
+
+Memory
+
+Queue Load
+
+Database Load
+
+⸻
+
+Outcome
+
+Document system limits.
+
+⸻
+
+23. Data Integrity Testing
+
+Critical Modules
+
+Girvi
+
+Payments
+
+Interest
+
+Sales
+
+Purchase
+
+Savings
+
+⸻
+
+Validation
+
+Financial totals must reconcile.
+
+⸻
+
+24. Financial Testing Standards
+
+Validate
+
+Interest Calculations
+
+Katmiti Calculations
+
+Redemptions
+
+Ledger Balances
+
+Revenue Reports
+
+⸻
+
+Requirement
+
+Zero Financial Variance
+
+⸻
+
+25. UAT Strategy
+
+Participants
+
+Business Owner
+
+Manager
+
+Staff
+
+Accountant
+
+⸻
+
+Validation
+
+Business process acceptance.
+
+⸻
+
+Sign-Off
+
+Mandatory before production.
+
+⸻
+
+26. Regression Testing
+
+Trigger
+
+Every release.
+
+⸻
+
+Scope
+
+All critical flows.
+
+⸻
+
+Regression Suite
+
+Login
+
+Customer
+
+Girvi
+
+Payment
+
+Vault
+
+Reports
+
+Settings
+
+⸻
+
+27. Release Quality Gates
+
+Gate 1
+
+Build Successful.
+
+⸻
+
+Gate 2
+
+Unit Tests Pass.
+
+⸻
+
+Gate 3
+
+Integration Tests Pass.
+
+⸻
+
+Gate 4
+
+Security Tests Pass.
+
+⸻
+
+Gate 5
+
+UAT Sign-Off Complete.
+
+⸻
+
+Gate 6
+
+Deployment Approval.
+
+⸻
+
+28. Test Data Strategy
+
+Types
+
+Synthetic Data
+
+Seed Data
+
+Edge Case Data
+
+High Volume Data
+
+⸻
+
+Never Use
+
+Real customer production data.
+
+⸻
+
+29. Test Environment Strategy
+
+Environments
+
+Local
+
+QA
+
+Staging
+
+Production
+
+⸻
+
+Rule
+
+Staging mirrors production.
+
+⸻
+
+30. Defect Management Process
+
+Severity Levels
+
+Critical
+
+High
+
+Medium
+
+Low
+
+⸻
+
+Workflow
+
+Reported
+    |
+Validated
+    |
+Assigned
+    |
+Fixed
+    |
+Retested
+    |
+Closed
+
+⸻
+
+31. Release Testing Checklist
+
+Functional
+
+✓ All Modules Working
+
+✓ Permissions Working
+
+✓ Reports Working
+
+⸻
+
+Security
+
+✓ Authentication
+
+✓ Authorization
+
+✓ Device Validation
+
+⸻
+
+Infrastructure
+
+✓ Monitoring
+
+✓ Backups
+
+✓ Logging
+
+⸻
+
+Offline
+
+✓ Queue
+
+✓ Sync
+
+✓ Conflict Handling
+
+⸻
+
+32. Quality Metrics
+
+Track
+
+Defect Density
+Test Coverage
+Regression Pass Rate
+UAT Success Rate
+Release Success Rate
+
+⸻
+
+Dashboard Visibility
+
+Mandatory.
+
+⸻
+
+33. Automation Strategy
+
+Automated
+
+Unit Tests
+
+Integration Tests
+
+API Tests
+
+Security Scans
+
+Build Validation
+
+⸻
+
+Manual
+
+UAT
+
+Exploratory Testing
+
+Business Validation
+
+⸻
+
+34. Test Repository Structure
+
+tests/
+unit/
+integration/
+api/
+e2e/
+security/
+performance/
+fixtures/
+mocks/
+
+⸻
+
+35. Backend Testing Structure
+
+src/
+module/
+tests/
+unit/
+integration/
+
+⸻
+
+36. Frontend Testing Structure
+
+test/
+bloc/
+widgets/
+screens/
+integration/
+
+⸻
+
+37. AI Agent Testing Rules
+
+AI MUST
+
+✓ Create Unit Tests
+
+✓ Create Integration Tests
+
+✓ Create Error Tests
+
+✓ Create Security Tests
+
+✓ Create Offline Tests
+
+✓ Create Mock Data
+
+✓ Test Edge Cases
+
+⸻
+
+AI MUST NEVER
+
+✗ Merge Untested Code
+
+✗ Skip Financial Validation
+
+✗ Skip Permission Testing
+
+✗ Skip Offline Testing
+
+✗ Ignore Regression Tests
+
+⸻
+
+38. Production Validation
+
+Post Deployment
+
+Validate:
+
+Login
+
+Dashboard
+
+Customer
+
+Girvi
+
+Payment
+
+Reports
+
+Sync Engine
+
+⸻
+
+Monitoring Window
+
+24 Hours
+
+After release.
+
+⸻
+
+39. Quality KPIs
+
+Coverage
+
+Backend:
+
+≥ 85%
+
+Frontend:
+
+≥ 80%
+
+⸻
+
+Release Success
+
+≥ 95%
+
+⸻
+
+Critical Defects
+
+0 Open
+
+Before release.
+
+⸻
+
+Financial Accuracy
+
+100%
+
+Required.
+
+⸻
+
+40. Testing Readiness Checklist
+
+✓ Unit Tests Complete
+
+✓ Integration Tests Complete
+
+✓ API Tests Complete
+
+✓ Security Tests Complete
+
+✓ Offline Tests Complete
+
+✓ UAT Approved
+
+✓ Performance Approved
+
+✓ Release Approved
+
+END OF DOCUMENT

@@ -1,0 +1,820 @@
+Jewellery ERP & Girvi Management Platform
+
+Dashboard Module Specification v1.0
+
+Module Code: MOD-DASHBOARD
+Priority: Critical MVP
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: Authentication Module, Girvi Module, Customer Module, Interest Module, Vault Module, Compliance Module, Sales Module, Purchase Module, Savings Module, Reports Module
+
+⸻
+
+1. Module Purpose
+
+The Dashboard Module serves as the operational command center of the Jewellery ERP platform.
+
+It provides real-time visibility into business performance, operational status, financial health, compliance status, and pending actions.
+
+The dashboard must allow owners, managers, and staff to immediately understand the current state of the business without navigating into individual modules.
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Provide complete business visibility within 5 seconds.
+
+BO-002
+
+Highlight critical actions requiring attention.
+
+BO-003
+
+Enable faster operational decisions.
+
+BO-004
+
+Reduce navigation effort.
+
+BO-005
+
+Provide role-based dashboard experiences.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-007	Dashboard Home
+SCR-008	Alerts & Tasks Center
+SCR-009	Quick Actions Hub
+
+⸻
+
+4. Dashboard Architecture
+
+All Business Modules
+          |
+Aggregation Layer
+          |
+KPI Engine
+          |
+Dashboard APIs
+          |
+Mobile Dashboard
+
+⸻
+
+5. Role Based Dashboard
+
+Owner Dashboard
+
+Displays:
+
+Financial KPIs
+Revenue
+Exposure
+Profitability
+Compliance
+Staff Productivity
+Vault Utilization
+
+⸻
+
+Manager Dashboard
+
+Displays:
+
+Operations
+Collections
+Overdues
+Customer Activity
+Pending Approvals
+
+⸻
+
+Staff Dashboard
+
+Displays:
+
+Today's Tasks
+Collections
+Customer Activity
+Quick Actions
+
+⸻
+
+Accountant Dashboard
+
+Displays:
+
+Revenue
+Collections
+GST
+Purchase Value
+Sales Value
+
+⸻
+
+6. Core Business Rules
+
+BR-DASH-001
+
+Dashboard data refreshes automatically.
+
+BR-DASH-002
+
+Role permissions determine widget visibility.
+
+BR-DASH-003
+
+Dashboard must load within 3 seconds.
+
+BR-DASH-004
+
+All KPI values sourced from authoritative modules.
+
+BR-DASH-005
+
+Alerts must be prioritized.
+
+BR-DASH-006
+
+Dashboard supports offline cache.
+
+BR-DASH-007
+
+Financial metrics are read-only.
+
+BR-DASH-008
+
+Dashboard actions require permission validation.
+
+⸻
+
+7. Screen Specifications
+
+SCR-007 Dashboard Home
+
+Purpose
+
+Primary landing screen after login.
+
+⸻
+
+Header Section
+
+Displays:
+
+Business Name
+Branch
+Current User
+Current Date
+
+⸻
+
+KPI Cards
+
+Active Girvi
+
+Displays:
+
+Count
+Outstanding Amount
+
+⸻
+
+Due Today
+
+Displays:
+
+Count
+Due Value
+
+⸻
+
+Overdue Accounts
+
+Displays:
+
+Count
+Exposure
+
+⸻
+
+Today’s Collections
+
+Displays:
+
+Amount
+Transaction Count
+
+⸻
+
+Today’s Sales
+
+Displays:
+
+Sales Value
+Invoice Count
+
+⸻
+
+Today’s Purchases
+
+Displays:
+
+Purchase Value
+Purchase Count
+
+⸻
+
+Active Savings Schemes
+
+Displays:
+
+Count
+Deposit Value
+
+⸻
+
+Vault Occupancy
+
+Formula:
+
+Occupancy Percentage:
+
+Occupancy = \frac{Occupied\ Slots}{Total\ Slots} \times 100
+
+⸻
+
+Charts Section
+
+Collections Trend
+
+Revenue Trend
+
+Girvi Growth Trend
+
+Customer Growth Trend
+
+⸻
+
+Quick Summary Section
+
+Displays:
+
+Pending Approvals
+Compliance Issues
+Insurance Alerts
+Missed Installments
+
+⸻
+
+API Mapping
+
+GET /dashboard/home
+
+⸻
+
+SCR-008 Alerts & Tasks Center
+
+Purpose
+
+Centralized action management.
+
+⸻
+
+Alert Categories
+
+Due Today
+
+Overdue Accounts
+
+Insurance Expiry
+
+Device Approvals
+
+Pending KFS
+
+Gold Return Due
+
+Savings Installments Due
+
+Pending Returns
+
+⸻
+
+Priority Levels
+
+Critical
+High
+Medium
+Low
+
+⸻
+
+Alert Card
+
+Displays:
+
+Title
+Description
+Module
+Priority
+Timestamp
+
+⸻
+
+Actions
+
+View
+Resolve
+Assign
+Dismiss
+
+⸻
+
+API Mapping
+
+GET /dashboard/alerts
+
+⸻
+
+Auto Refresh
+
+Every 5 Minutes
+
+⸻
+
+SCR-009 Quick Actions Hub
+
+Purpose
+
+Fast navigation.
+
+⸻
+
+Quick Actions
+
+Create Customer
+
+Create Girvi
+
+Record Payment
+
+Redeem Girvi
+
+New Sale
+
+New Purchase
+
+Record Deposit
+
+Search Customer
+
+Search Girvi
+
+Scan QR
+
+⸻
+
+UI Layout
+
+3x3 Grid
+Large Touch Targets
+Role Based Visibility
+
+⸻
+
+Recent Actions
+
+Displays:
+
+Last 10 Actions
+
+⸻
+
+Favorites
+
+User configurable.
+
+⸻
+
+API Mapping
+
+GET /dashboard/actions
+
+⸻
+
+8. KPI Aggregation Engine
+
+Purpose
+
+Collect metrics from all modules.
+
+⸻
+
+Sources
+
+Customer
+
+Girvi
+
+Interest
+
+Vault
+
+Compliance
+
+Sales
+
+Purchase
+
+Savings
+
+⸻
+
+Refresh Frequency
+
+5 Minutes
+
+⸻
+
+Real-Time Metrics
+
+Collections
+
+Sales
+
+Payments
+
+Due Accounts
+
+⸻
+
+9. Financial KPI Engine
+
+Metrics
+
+Total Loan Exposure
+
+Formula:
+
+Loan\ Exposure = \sum Outstanding\ Amount
+
+⸻
+
+Collection Efficiency
+
+Collection\ Efficiency = \frac{Collected\ Amount}{Due\ Amount} \times 100
+
+⸻
+
+Revenue
+
+Interest Revenue
+Sales Revenue
+Penalty Revenue
+
+⸻
+
+Average Loan Size
+
+Average\ Loan = \frac{Total\ Principal}{Active\ Girvi}
+
+⸻
+
+10. Operational KPI Engine
+
+Metrics
+
+Active Girvi
+
+Redeemed Girvi
+
+Auctioned Girvi
+
+Active Customers
+
+Active Schemes
+
+Inventory Count
+
+Staff Productivity
+
+⸻
+
+11. Compliance KPI Engine
+
+Metrics
+
+Compliance Score
+
+Missing KFS
+
+LTV Violations
+
+Insurance Expiry
+
+Gold Return Overdue
+
+Pending Forms
+
+⸻
+
+Compliance Score
+
+Compliance\ Score = \frac{Compliant\ Records}{Total\ Records} \times 100
+
+⸻
+
+12. Task Engine
+
+Purpose
+
+Generate actionable tasks.
+
+⸻
+
+Task Sources
+
+Due Accounts
+
+Missed Installments
+
+Device Requests
+
+Pending Approvals
+
+Expired Policies
+
+Pending Returns
+
+⸻
+
+Workflow
+
+Detect Event
+      |
+Generate Task
+      |
+Assign Priority
+      |
+Display Dashboard
+
+⸻
+
+13. Notification Integration
+
+Sources
+
+Compliance
+
+Girvi
+
+Savings
+
+Staff
+
+Vault
+
+⸻
+
+Channels
+
+In-App
+Push Notifications
+WhatsApp
+
+⸻
+
+14. Dashboard Personalization Engine
+
+User Preferences
+
+Favorite Actions
+
+Favorite Reports
+
+Hidden Widgets
+
+Widget Order
+
+⸻
+
+Storage
+
+user_dashboard_preferences
+
+⸻
+
+15. Offline Behaviour
+
+Supported:
+
+Cached KPIs
+Cached Charts
+Recent Alerts
+Quick Actions
+
+⸻
+
+Not Supported:
+
+Real-Time Updates
+Large Analytics Queries
+
+⸻
+
+16. Integration Matrix
+
+Module	Contribution
+Customer	Customer KPIs
+Girvi	Loan KPIs
+Interest	Revenue KPIs
+Vault	Occupancy KPIs
+Compliance	Compliance KPIs
+Sales	Sales KPIs
+Purchase	Purchase KPIs
+Savings	Savings KPIs
+Reports	Analytics KPIs
+
+⸻
+
+17. Audit Logging
+
+Log:
+
+Dashboard Viewed
+Alert Resolved
+Task Assigned
+Widget Customized
+Quick Action Used
+
+⸻
+
+18. Analytics Events
+
+dashboard_viewed
+alert_opened
+alert_resolved
+quick_action_used
+widget_customized
+
+⸻
+
+19. Error Catalogue
+
+DASH-001
+
+Dashboard Data Unavailable
+
+DASH-002
+
+KPI Calculation Failed
+
+DASH-003
+
+Widget Load Failed
+
+DASH-004
+
+Alert Fetch Failed
+
+DASH-005
+
+Task Assignment Failed
+
+DASH-006
+
+Permission Denied
+
+⸻
+
+20. Database Entities
+
+dashboard_snapshots
+dashboard_alerts
+dashboard_tasks
+dashboard_preferences
+dashboard_kpi_cache
+
+⸻
+
+21. Backend Structure
+
+dashboard/
+controllers/
+services/
+repositories/
+dto/
+kpis/
+alerts/
+tasks/
+preferences/
+cache/
+
+⸻
+
+22. Frontend Structure
+
+features/dashboard/
+home/
+alerts/
+quick_actions/
+widgets/
+bloc/
+repository/
+models/
+
+⸻
+
+23. Testing Checklist
+
+✓ Dashboard Load
+
+✓ KPI Accuracy
+
+✓ Role-Based Widgets
+
+✓ Alerts Center
+
+✓ Quick Actions
+
+✓ Offline Cache
+
+✓ Auto Refresh
+
+✓ KPI Refresh
+
+✓ Notification Integration
+
+✓ Personalization
+
+✓ Audit Logs
+
+⸻
+
+24. Performance Requirements
+
+Dashboard Load:
+
+< 3 Seconds
+
+⸻
+
+KPI Refresh:
+
+< 2 Seconds
+
+⸻
+
+Alert Load:
+
+< 1 Second
+
+⸻
+
+Quick Action Launch:
+
+< 500 ms
+
+⸻
+
+25. Development Sequence
+
+1. KPI Aggregation Layer
+2. Dashboard APIs
+3. Dashboard Home
+4. Alerts Center
+5. Quick Actions Hub
+6. Personalization Engine
+7. Notification Integration
+8. Performance Optimization
+
+⸻
+
+26. Future Enhancements
+
+Phase 2:
+
+AI Business Insights
+Predictive Collections
+Revenue Forecasting
+Customer Churn Prediction
+Risk Analytics
+
+⸻
+
+Phase 3:
+
+Voice Dashboard
+AI Copilot
+Natural Language Queries
+Executive Summary Generator
+
+END OF DOCUMENT

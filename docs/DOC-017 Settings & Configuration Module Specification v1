@@ -1,0 +1,991 @@
+Jewellery ERP & Girvi Management Platform
+
+Settings & Configuration Module Specification v1.0
+
+Module Code: MOD-SETTINGS
+Priority: Critical
+Version: 1.0
+Frontend: Flutter + BLoC
+Backend: NestJS
+Dependencies: All Modules
+
+⸻
+
+1. Module Purpose
+
+The Settings & Configuration Module acts as the central administration and business configuration layer for the entire Jewellery ERP platform.
+
+Every business rule, financial rule, operational rule, notification rule, and system behavior is controlled through this module.
+
+Responsibilities:
+
+* Business Configuration
+* Branch Configuration
+* Interest Configuration
+* GST Configuration
+* Notification Configuration
+* Printer Configuration
+* Backup & Restore
+* Subscription Management
+* Theme & Branding
+* Number Series Management
+* Master Data Management
+* Application Preferences
+
+⸻
+
+2. Business Objectives
+
+BO-001
+
+Centralized configuration management.
+
+BO-002
+
+No hardcoded business rules.
+
+BO-003
+
+Support multi-branch scalability.
+
+BO-004
+
+Enable tenant-specific customization.
+
+BO-005
+
+Reduce operational dependency on developers.
+
+⸻
+
+3. Screen Inventory
+
+Screen ID	Screen Name
+SCR-052	Business Settings
+SCR-071	Interest Configuration
+SCR-072	GST Configuration
+SCR-074	Notification Settings
+SCR-075	Printer Settings
+SCR-076	Backup & Restore
+SCR-079	Subscription Management
+SCR-082	Branch Management
+SCR-083	Number Series Management
+SCR-084	Master Data Management
+SCR-085	Theme & Branding
+SCR-087	Application Preferences
+SCR-088	Data Import & Export
+SCR-090	System Information
+
+⸻
+
+4. Configuration Architecture
+
+Tenant
+   |
+Business Settings
+   |
+Financial Rules
+   |
+Operational Rules
+   |
+System Services
+   |
+All Modules
+
+⸻
+
+5. Core Business Rules
+
+BR-SET-001
+
+Only Owner can modify settings.
+
+BR-SET-002
+
+Configuration changes generate audit logs.
+
+BR-SET-003
+
+Historical transactions retain original settings.
+
+BR-SET-004
+
+Critical changes require confirmation.
+
+BR-SET-005
+
+Settings changes are versioned.
+
+BR-SET-006
+
+Backup before restore mandatory.
+
+BR-SET-007
+
+Deleted configurations remain archived.
+
+BR-SET-008
+
+All modules consume settings through configuration service.
+
+⸻
+
+6. Screen Specifications
+
+SCR-052 Business Settings
+
+Purpose
+
+Configure business profile.
+
+⸻
+
+Fields
+
+Business Name
+Legal Name
+GST Number
+PAN Number
+License Number
+Email
+Mobile
+Website
+
+⸻
+
+Address
+
+Address
+City
+State
+Pincode
+Country
+
+⸻
+
+Actions
+
+Save
+Verify GST
+Upload Logo
+
+⸻
+
+API Mapping
+
+GET /settings/business
+PUT /settings/business
+
+⸻
+
+SCR-071 Interest Configuration
+
+Purpose
+
+Configure lending rules.
+
+⸻
+
+Interest Types
+
+Simple Interest
+Katmiti
+Daily Interest
+
+⸻
+
+Configuration Fields
+
+Default Interest Rate
+Penalty Rate
+Minimum Billing Rule
+Grace Days
+Renewal Rules
+
+⸻
+
+Formula Preview
+
+Interest:
+
+Interest = Principal \times Rate \times Time
+
+⸻
+
+API Mapping
+
+GET /settings/interest
+PUT /settings/interest
+
+⸻
+
+SCR-072 GST Configuration
+
+Purpose
+
+Tax settings.
+
+⸻
+
+Fields
+
+GST Enabled
+Default GST Rate
+CGST Rate
+SGST Rate
+IGST Rate
+
+⸻
+
+Validation
+
+GST components must total configured GST.
+
+⸻
+
+API Mapping
+
+GET /settings/gst
+PUT /settings/gst
+
+⸻
+
+SCR-074 Notification Settings
+
+Purpose
+
+Control notification behavior.
+
+⸻
+
+Channels
+
+Push
+WhatsApp
+SMS
+Email
+
+⸻
+
+Events
+
+Due Reminder
+Overdue Alert
+Device Approval
+KFS Pending
+Insurance Expiry
+Savings Due
+
+⸻
+
+Actions
+
+Enable
+Disable
+Test Notification
+
+⸻
+
+API Mapping
+
+GET /settings/notifications
+PUT /settings/notifications
+
+⸻
+
+SCR-075 Printer Settings
+
+Purpose
+
+Manage printing.
+
+⸻
+
+Supported Printers
+
+Bluetooth Thermal
+USB Thermal
+A4 Printer
+Network Printer
+
+⸻
+
+Templates
+
+Invoice
+Receipt
+KFS
+Auction Notice
+
+⸻
+
+Actions
+
+Test Print
+Save
+Preview
+
+⸻
+
+SCR-076 Backup & Restore
+
+Purpose
+
+Data protection.
+
+⸻
+
+Backup Types
+
+Manual
+Scheduled
+Cloud
+Local
+
+⸻
+
+Actions
+
+Backup Now
+Restore
+Download
+Delete
+
+⸻
+
+Validation
+
+Restore requires owner approval.
+
+⸻
+
+API Mapping
+
+POST /settings/backup
+POST /settings/restore
+
+⸻
+
+SCR-079 Subscription Management
+
+Purpose
+
+Manage SaaS subscription.
+
+⸻
+
+Displays
+
+Plan
+Expiry Date
+Active Users
+Storage Usage
+
+⸻
+
+Actions
+
+Renew
+Upgrade
+View Usage
+
+⸻
+
+API Mapping
+
+GET /subscription
+
+⸻
+
+SCR-082 Branch Management
+
+Purpose
+
+Multi-branch setup.
+
+⸻
+
+Branch Fields
+
+Branch Name
+Code
+Address
+Contact Number
+Manager
+
+⸻
+
+Actions
+
+Create
+Edit
+Deactivate
+
+⸻
+
+API Mapping
+
+GET /branches
+POST /branches
+
+⸻
+
+SCR-083 Number Series Management
+
+Purpose
+
+Control numbering sequences.
+
+⸻
+
+Series Types
+
+Customer ID
+Girvi ID
+Invoice Number
+Purchase Number
+Scheme Number
+
+⸻
+
+Format Examples
+
+CUST-2026-000001
+GRV-2026-000001
+INV-2026-000001
+
+⸻
+
+API Mapping
+
+GET /settings/series
+PUT /settings/series
+
+⸻
+
+SCR-084 Master Data Management
+
+Purpose
+
+Manage lookup values.
+
+⸻
+
+Masters
+
+Jewellery Categories
+Metal Types
+Purity Types
+Payment Modes
+Notification Templates
+Reasons
+
+⸻
+
+Actions
+
+Create
+Edit
+Deactivate
+
+⸻
+
+SCR-085 Theme & Branding
+
+Purpose
+
+Customize application appearance.
+
+⸻
+
+Branding Elements
+
+Logo
+Primary Color
+Secondary Color
+Business Tagline
+
+⸻
+
+Preview
+
+Real-time preview supported.
+
+⸻
+
+SCR-087 Application Preferences
+
+Purpose
+
+User-level preferences.
+
+⸻
+
+Options
+
+Language
+Theme
+Default Dashboard
+Default Printer
+Date Format
+Currency Format
+
+⸻
+
+Languages
+
+English
+Marathi
+Hindi
+
+⸻
+
+SCR-088 Data Import & Export
+
+Purpose
+
+Bulk data management.
+
+⸻
+
+Import Types
+
+Customers
+Inventory
+Suppliers
+Schemes
+
+⸻
+
+Export Types
+
+CSV
+Excel
+JSON
+
+⸻
+
+Validation
+
+Dry-run before import.
+
+⸻
+
+SCR-090 System Information
+
+Purpose
+
+System diagnostics.
+
+⸻
+
+Displays
+
+Application Version
+Database Version
+API Version
+Last Backup
+Storage Usage
+Connected Devices
+
+⸻
+
+Actions
+
+Check Updates
+Export Diagnostics
+Sync Status
+
+⸻
+
+7. Interest Configuration Engine
+
+Purpose
+
+Central lending configuration.
+
+⸻
+
+Settings
+
+Default Interest
+Penalty Interest
+Minimum Interest
+Renewal Duration
+Auction Threshold
+
+⸻
+
+Versioning
+
+Changes affect new contracts only.
+
+⸻
+
+8. Number Series Engine
+
+Purpose
+
+Generate business identifiers.
+
+⸻
+
+Generation Rule
+
+Customer ID:
+
+CUST-YYYY-XXXXXX
+
+⸻
+
+Girvi ID:
+
+GRV-YYYY-XXXXXX
+
+⸻
+
+Invoice ID:
+
+INV-YYYY-XXXXXX
+
+⸻
+
+Rules
+
+Immutable after generation.
+
+⸻
+
+9. Backup Engine
+
+Backup Contents
+
+Database
+Documents
+Configurations
+Templates
+
+⸻
+
+Schedule Options
+
+Daily
+Weekly
+Monthly
+
+⸻
+
+Retention Policy
+
+Configurable.
+
+Default:
+
+90 Days
+
+⸻
+
+10. Import Engine
+
+Workflow
+
+Upload File
+      |
+Validate
+      |
+Dry Run
+      |
+Preview Errors
+      |
+Import
+
+⸻
+
+Supported Formats
+
+CSV
+Excel
+
+⸻
+
+11. Notification Configuration Engine
+
+Template Types
+
+SMS
+
+WhatsApp
+
+Email
+
+Push
+
+⸻
+
+Variables
+
+{{CustomerName}}
+{{Amount}}
+{{DueDate}}
+{{GirviId}}
+
+⸻
+
+12. Branch Management Engine
+
+Purpose
+
+Multi-branch operation.
+
+⸻
+
+Features
+
+Branch Isolation
+Branch Reports
+Branch Permissions
+Branch Inventory
+
+⸻
+
+Branch Code Format
+
+BR-001
+BR-002
+
+⸻
+
+13. Theme Engine
+
+Supported Themes
+
+Light
+
+Dark
+
+System
+
+⸻
+
+Branding
+
+Tenant-specific.
+
+⸻
+
+14. Integration Matrix
+
+Module	Uses Settings
+Authentication	Session Rules
+Customer	Customer Rules
+Girvi	Interest Rules
+Interest	Interest Config
+Sales	GST Config
+Purchase	Number Series
+Savings	Scheme Rules
+Reports	Formatting
+Dashboard	Preferences
+
+⸻
+
+15. Offline Behaviour
+
+Supported:
+
+View Settings
+Cached Configurations
+Printer Preferences
+
+⸻
+
+Not Supported:
+
+Restore
+Large Imports
+Subscription Updates
+
+⸻
+
+16. Audit Logging
+
+Log:
+
+Business Updated
+Interest Updated
+GST Updated
+Backup Created
+Restore Executed
+Branch Created
+Series Updated
+
+⸻
+
+17. Analytics Events
+
+settings_updated
+backup_created
+restore_executed
+branch_created
+theme_changed
+import_completed
+
+⸻
+
+18. Error Catalogue
+
+SET-001
+
+Invalid Configuration
+
+SET-002
+
+GST Validation Failed
+
+SET-003
+
+Backup Failed
+
+SET-004
+
+Restore Failed
+
+SET-005
+
+Series Conflict
+
+SET-006
+
+Import Validation Failed
+
+SET-007
+
+Permission Denied
+
+⸻
+
+19. Database Entities
+
+settings
+branches
+number_series
+notification_templates
+theme_settings
+backups
+imports
+exports
+
+⸻
+
+20. Backend Structure
+
+settings/
+controllers/
+services/
+repositories/
+dto/
+business/
+interest/
+gst/
+notifications/
+backup/
+branches/
+series/
+import_export/
+
+⸻
+
+21. Frontend Structure
+
+features/settings/
+business/
+interest/
+gst/
+notifications/
+printers/
+backup/
+subscription/
+branches/
+series/
+masters/
+branding/
+preferences/
+import_export/
+system_info/
+
+⸻
+
+22. Testing Checklist
+
+✓ Business Settings
+
+✓ Interest Settings
+
+✓ GST Settings
+
+✓ Notifications
+
+✓ Printer Setup
+
+✓ Backup
+
+✓ Restore
+
+✓ Subscription
+
+✓ Branch Management
+
+✓ Number Series
+
+✓ Import
+
+✓ Export
+
+✓ Branding
+
+✓ Preferences
+
+✓ Audit Logs
+
+⸻
+
+23. Performance Requirements
+
+Settings Load:
+
+< 2 Seconds
+
+⸻
+
+Save Configuration:
+
+< 1 Second
+
+⸻
+
+Backup Start:
+
+< 5 Seconds
+
+⸻
+
+Import Validation:
+
+< 10 Seconds
+
+⸻
+
+24. Development Sequence
+
+1. Business Settings
+2. Branch Management
+3. Number Series
+4. Interest Configuration
+5. GST Configuration
+6. Notifications
+7. Printer Management
+8. Backup & Restore
+9. Import/Export
+10. Branding & Preferences
+11. Subscription Integration
+
+END OF DOCUMENT

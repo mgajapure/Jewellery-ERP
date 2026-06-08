@@ -1,0 +1,1029 @@
+Jewellery ERP & Girvi Management Platform
+
+AI Agent Development Standards v1.0
+
+Document Code: DOC-024
+Document Type: AI Development Governance Standard
+Applies To: OpenAI Codex, Claude Code, Cursor, Windsurf, Cline, Roo Code, Gemini CLI, Human Developers
+Version: 1.0
+
+⸻
+
+1. Purpose
+
+This document defines the mandatory standards that all AI coding agents and developers must follow while contributing to the Jewellery ERP platform.
+
+This document is the supreme implementation authority governing:
+
+* Code Generation
+* File Creation
+* Architecture Compliance
+* Documentation Standards
+* Testing Standards
+* Review Standards
+* Task Execution
+* Pull Requests
+* Refactoring
+* Technical Debt
+
+No code may be generated that violates this document.
+
+⸻
+
+2. AI Agent Mission
+
+The objective of every AI agent is:
+
+Generate Enterprise Grade Production Ready Code
+
+Not:
+
+Generate Demo Code
+Generate MVP Code
+Generate Prototype Code
+
+⸻
+
+3. Source Of Truth Hierarchy
+
+Priority Order:
+
+DOC-001 System Architecture
+DOC-002 Database Schema
+DOC-003 API Contracts
+Module Specifications
+DOC-018 Backend Architecture
+DOC-019 Frontend Architecture
+DOC-020 Offline Sync
+DOC-021 Security
+DOC-022 DevOps
+DOC-023 Testing
+DOC-024 AI Standards
+
+⸻
+
+Rule
+
+AI must never contradict higher-priority documents.
+
+⸻
+
+4. Mandatory Development Workflow
+
+Every task follows:
+
+Understand Requirement
+        |
+Read Relevant Specs
+        |
+Create Design
+        |
+Implement
+        |
+Create Tests
+        |
+Run Validation
+        |
+Update Documentation
+
+⸻
+
+Forbidden
+
+Implement First
+Think Later
+
+⸻
+
+5. AI Task Execution Standard
+
+Before writing code AI must identify:
+
+Module
+
+Screen
+
+APIs
+
+Database Tables
+
+Permissions
+
+Offline Impact
+
+Audit Impact
+
+Tests Required
+
+⸻
+
+Output Checklist
+
+Mandatory.
+
+⸻
+
+6. Architecture Compliance Rules
+
+AI must comply with:
+
+DDD
+
+Repository Pattern
+
+BLoC Pattern
+
+Offline First
+
+RBAC
+
+Tenant Isolation
+
+Audit Logging
+
+Security Standards
+
+⸻
+
+Violations
+
+Block implementation.
+
+⸻
+
+7. Backend Development Rules
+
+AI MUST
+
+✓ Create DTOs
+
+✓ Create Services
+
+✓ Create Repositories
+
+✓ Create Tests
+
+✓ Create Audit Logs
+
+✓ Create Validation
+
+✓ Create Events
+
+✓ Use Transactions
+
+⸻
+
+AI MUST NEVER
+
+✗ Query Prisma from Controllers
+
+✗ Put Business Logic In Controllers
+
+✗ Skip DTO Validation
+
+✗ Skip RBAC
+
+✗ Skip Tenant Validation
+
+⸻
+
+8. Frontend Development Rules
+
+AI MUST
+
+✓ Use Flutter BLoC
+
+✓ Use Repositories
+
+✓ Use Shared Widgets
+
+✓ Use Localization
+
+✓ Use Offline Cache
+
+✓ Handle Errors
+
+✓ Handle Loading States
+
+⸻
+
+AI MUST NEVER
+
+✗ Call APIs From Widgets
+
+✗ Hardcode Text
+
+✗ Hardcode Colors
+
+✗ Use setState For Business Logic
+
+✗ Duplicate Widgets
+
+⸻
+
+9. File Creation Standards
+
+One Responsibility Per File
+
+Mandatory.
+
+⸻
+
+Example
+
+Good:
+
+customer_repository.dart
+
+⸻
+
+Bad:
+
+customer_everything.dart
+
+⸻
+
+Maximum File Length
+
+Target:
+
+500 Lines
+
+⸻
+
+Hard Limit:
+
+1000 Lines
+
+⸻
+
+10. Naming Conventions
+
+Backend
+
+Services
+
+CustomerService
+
+⸻
+
+Repositories
+
+CustomerRepository
+
+⸻
+
+DTOs
+
+CreateCustomerDto
+
+⸻
+
+Events
+
+CustomerCreatedEvent
+
+⸻
+
+Frontend
+
+Pages
+
+CustomerListPage
+
+⸻
+
+Bloc
+
+CustomerBloc
+
+⸻
+
+States
+
+CustomerLoaded
+
+⸻
+
+11. Folder Compliance Rules
+
+AI may only create files inside approved structures.
+
+⸻
+
+Backend
+
+controllers/
+services/
+repositories/
+dto/
+entities/
+events/
+
+⸻
+
+Frontend
+
+pages/
+widgets/
+bloc/
+repositories/
+datasources/
+
+⸻
+
+Forbidden
+
+Random folders.
+
+⸻
+
+12. Documentation Requirements
+
+Every Feature Must Have:
+
+Purpose
+
+Business Rules
+
+APIs
+
+Validation Rules
+
+Dependencies
+
+Test Cases
+
+⸻
+
+Missing Documentation
+
+Not acceptable.
+
+⸻
+
+13. Code Comment Standards
+
+Required
+
+Business-critical logic.
+
+⸻
+
+Example
+
+// Katmiti interest is rounded up
+// to nearest billing month.
+
+⸻
+
+Avoid
+
+Obvious comments.
+
+⸻
+
+14. API Development Standards
+
+Every API must include:
+
+DTO Validation
+
+RBAC
+
+Audit Logging
+
+Error Handling
+
+Tenant Validation
+
+⸻
+
+Response Format
+
+Success:
+
+{
+  "success": true,
+  "data": {}
+}
+
+⸻
+
+Failure:
+
+{
+  "success": false,
+  "error": {}
+}
+
+⸻
+
+15. Database Standards
+
+AI MUST
+
+✓ Use Prisma
+
+✓ Use Migrations
+
+✓ Add Indexes
+
+✓ Add Foreign Keys
+
+✓ Add Audit Fields
+
+⸻
+
+Mandatory Fields
+
+id
+tenant_id
+created_at
+updated_at
+
+⸻
+
+Soft Delete Entities
+
+deleted_at
+deleted_by
+
+⸻
+
+16. Transaction Standards
+
+Financial Operations Require:
+
+Transaction
+
+Audit Entry
+
+Validation
+
+Rollback Support
+
+⸻
+
+Applies To
+
+Payments
+Sales
+Purchases
+Girvi
+Redemption
+
+⸻
+
+17. Event Standards
+
+Every major business action emits events.
+
+⸻
+
+Examples
+
+CustomerCreated
+GirviCreated
+PaymentRecorded
+SaleCompleted
+
+⸻
+
+Rule
+
+Events must be idempotent.
+
+⸻
+
+18. Offline Standards
+
+AI must evaluate:
+
+Local Storage
+
+Sync Queue
+
+Conflict Risk
+
+Retry Behaviour
+
+⸻
+
+Financial Data
+
+Requires special handling.
+
+⸻
+
+Never
+
+Block user due to network.
+
+⸻
+
+19. Security Standards
+
+AI must implement:
+
+RBAC
+
+JWT Validation
+
+Device Validation
+
+Encryption
+
+Input Validation
+
+Audit Logging
+
+⸻
+
+Forbidden
+
+Plain Text Tokens
+Hardcoded Secrets
+Permission Bypass
+
+⸻
+
+20. Audit Logging Standards
+
+Every action must answer:
+
+Who
+What
+When
+Where
+Why
+
+⸻
+
+Log Required
+
+Create
+
+Update
+
+Delete
+
+Approve
+
+Reject
+
+Export
+
+Print
+
+⸻
+
+21. Testing Requirements
+
+Every task must include:
+
+Unit Tests
+
+Integration Tests
+
+Error Tests
+
+Permission Tests
+
+⸻
+
+Financial Modules
+
+Additional:
+
+Calculation Tests
+
+Reconciliation Tests
+
+⸻
+
+22. Test Coverage Requirements
+
+Backend:
+
+85%
+
+⸻
+
+Frontend:
+
+80%
+
+⸻
+
+Critical Modules:
+
+95%
+
+⸻
+
+23. Pull Request Standards
+
+Every PR must include:
+
+Summary
+
+Changed Files
+
+Screens Affected
+
+APIs Affected
+
+Database Impact
+
+Test Evidence
+
+⸻
+
+Missing Sections
+
+PR rejected.
+
+⸻
+
+24. Code Review Checklist
+
+Reviewer validates:
+
+✓ Architecture
+
+✓ Security
+
+✓ RBAC
+
+✓ Audit Logging
+
+✓ Offline Support
+
+✓ Tests
+
+✓ Documentation
+
+✓ Performance
+
+⸻
+
+25. Performance Standards
+
+API:
+
+< 500 ms
+
+⸻
+
+Dashboard:
+
+< 2 Seconds
+
+⸻
+
+Search:
+
+< 1 Second
+
+⸻
+
+Barcode Scan:
+
+< 500 ms
+
+⸻
+
+26. Refactoring Rules
+
+Allowed only if:
+
+Tests Exist
+
+No Business Logic Changes
+
+Documentation Updated
+
+⸻
+
+Mandatory
+
+Backward compatibility.
+
+⸻
+
+27. Technical Debt Rules
+
+AI must not introduce:
+
+Duplicate Logic
+
+Dead Code
+
+Unused Files
+
+Hardcoded Values
+
+Magic Numbers
+
+⸻
+
+28. Error Handling Standards
+
+Every feature must handle:
+
+Validation Errors
+
+Permission Errors
+
+Network Errors
+
+System Errors
+
+Offline Errors
+
+⸻
+
+User Messages
+
+Human friendly.
+
+⸻
+
+29. Localization Standards
+
+All UI text must support:
+
+English
+
+Marathi
+
+Hindi
+
+⸻
+
+Forbidden
+
+Hardcoded strings.
+
+⸻
+
+30. Design System Compliance
+
+AI must use:
+
+Shared Colors
+
+Shared Typography
+
+Shared Components
+
+Shared Spacing
+
+⸻
+
+Forbidden
+
+Screen-specific design systems.
+
+⸻
+
+31. AI Generated File Header Standard
+
+Every generated file begins with:
+
+Module
+Purpose
+Dependencies
+Author
+Created Date
+
+⸻
+
+32. Acceptance Criteria Template
+
+Every task includes:
+
+Functional
+
+Security
+
+Performance
+
+Offline
+
+Testing
+
+Documentation
+
+⸻
+
+33. AI Self Validation Checklist
+
+Before completion AI must verify:
+
+✓ Spec Compliance
+
+✓ Architecture Compliance
+
+✓ Security Compliance
+
+✓ Offline Compliance
+
+✓ Test Coverage
+
+✓ Documentation
+
+⸻
+
+34. Forbidden Patterns
+
+Backend
+
+✗ Fat Controllers
+
+✗ Direct DB Calls
+
+✗ Business Logic In DTOs
+
+⸻
+
+Frontend
+
+✗ API Calls In Widgets
+
+✗ setState Business Logic
+
+✗ Hardcoded Strings
+
+⸻
+
+Infrastructure
+
+✗ Hardcoded Secrets
+
+✗ Disabled Monitoring
+
+✗ Disabled Backups
+
+⸻
+
+35. AI Development Output Format
+
+For every completed task AI should provide:
+
+Summary
+Files Created
+Files Modified
+APIs Added
+Database Changes
+Tests Added
+Documentation Updated
+
+⸻
+
+36. AI Code Review Workflow
+
+Generate Code
+      |
+Generate Tests
+      |
+Self Review
+      |
+Architecture Check
+      |
+Security Check
+      |
+Documentation Check
+      |
+Finalize
+
+⸻
+
+37. Enterprise Readiness Criteria
+
+Feature considered complete only when:
+
+✓ Functional
+
+✓ Secure
+
+✓ Audited
+
+✓ Offline Ready
+
+✓ Tested
+
+✓ Documented
+
+✓ Deployable
+
+⸻
+
+38. AI Governance Levels
+
+Level 1
+
+Feature Development
+
+⸻
+
+Level 2
+
+Module Development
+
+⸻
+
+Level 3
+
+Architecture Development
+
+⸻
+
+Level 4
+
+Platform Governance
+
+⸻
+
+Requirement
+
+Higher level rules override lower levels.
+
+⸻
+
+39. Quality Gates For AI
+
+AI must stop implementation if:
+
+Missing Specification
+
+Security Ambiguity
+
+Database Ambiguity
+
+Financial Ambiguity
+
+Compliance Ambiguity
+
+⸻
+
+Action
+
+Request clarification.
+
+⸻
+
+40. Final AI Principle
+
+Every generated line of code must satisfy:
+
+Production Ready
+Secure
+Tested
+Auditable
+Offline Compatible
+Maintainable
+Scalable
+
+⸻
+
+41. AI Agent Certification Checklist
+
+Before marking any task complete:
+
+✓ Architecture Followed
+
+✓ Security Followed
+
+✓ Offline Supported
+
+✓ Audit Added
+
+✓ Tests Added
+
+✓ Documentation Added
+
+✓ No Forbidden Patterns
+
+✓ Performance Standards Met
+
+✓ Tenant Isolation Maintained
+
+✓ RBAC Implemented
+
+⸻
+
+42. Master Compliance Rule
+
+If any generated code conflicts with:
+
+Security
+Architecture
+Offline Engine
+Database Design
+Module Specifications
+
+The implementation must be rejected and redesigned.
+
+END OF DOCUMENT

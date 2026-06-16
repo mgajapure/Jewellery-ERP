@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../customer/customer.dart';
-import '../inventory/inventory_page.dart';
+import '../girvi/girvi.dart';
 
 const _navy = Color(0xFF061C49);
 const _gold = Color(0xFFE7A726);
@@ -42,6 +42,8 @@ class DashboardPage extends StatelessWidget {
                   const _SectionHeader(title: 'जलद कृती / Quick Actions'),
                   const SizedBox(height: 12),
                   _QuickActions(
+                    onNewGirviTap: () =>
+                        context.goNamed(CreateGirviWizardPage.routeName),
                     onSearchCustomerTap: () =>
                         context.goNamed(CustomerSearchPage.routeName),
                   ),
@@ -56,7 +58,7 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
             _DashboardBottomNav(
-              onInventoryTap: () => context.goNamed(InventoryPage.routeName),
+              onGirviTap: () => context.goNamed(GirviListPage.routeName),
               onCustomersTap: () => context.goNamed(CustomerListPage.routeName),
             ),
           ],
@@ -386,8 +388,12 @@ class _MetricTile extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({this.onSearchCustomerTap});
+  const _QuickActions({
+    this.onNewGirviTap,
+    this.onSearchCustomerTap,
+  });
 
+  final VoidCallback? onNewGirviTap;
   final VoidCallback? onSearchCustomerTap;
 
   @override
@@ -400,6 +406,7 @@ class _QuickActions extends StatelessWidget {
             titleMr: 'नवीन गिरवी',
             titleEn: 'New Girvi',
             filled: true,
+            onTap: onNewGirviTap,
           ),
         ),
         SizedBox(width: 10),
@@ -680,11 +687,11 @@ class _ListDivider extends StatelessWidget {
 
 class _DashboardBottomNav extends StatelessWidget {
   const _DashboardBottomNav({
-    required this.onInventoryTap,
+    required this.onGirviTap,
     required this.onCustomersTap,
   });
 
-  final VoidCallback onInventoryTap;
+  final VoidCallback onGirviTap;
   final VoidCallback onCustomersTap;
 
   @override
@@ -711,7 +718,7 @@ class _DashboardBottomNav extends StatelessWidget {
               icon: Icons.diamond_outlined,
               titleMr: 'गिरवी',
               titleEn: 'Girvi',
-              onTap: onInventoryTap,
+              onTap: onGirviTap,
             ),
           ),
           Expanded(

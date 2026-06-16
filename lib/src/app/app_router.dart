@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../features/auth/auth.dart';
 import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
+import '../features/girvi/girvi.dart';
 import '../features/inventory/inventory_page.dart';
 
 final appRouter = GoRouter(
@@ -57,6 +58,21 @@ final appRouter = GoRouter(
       path: '/customers/:id',
       name: CustomerDetailsPage.routeName,
       builder: (context, state) => const CustomerDetailsPage(),
+    ),
+    GoRoute(
+      path: '/girvi',
+      name: GirviListPage.routeName,
+      builder: (context, state) => const GirviListPage(),
+    ),
+    GoRoute(
+      path: '/girvi/create',
+      name: CreateGirviWizardPage.routeName,
+      builder: (context, state) => const CreateGirviWizardPage(),
+    ),
+    GoRoute(
+      path: '/girvi/:id',
+      name: GirviDetailsPage.routeName,
+      builder: (context, state) => const GirviDetailsPage(),
     ),
   ],
 );

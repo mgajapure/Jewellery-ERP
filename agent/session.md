@@ -193,3 +193,69 @@ Continue the frontend implementation after Dashboard by building the Customer & 
 - Run `dart format lib/src/features/customer lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
 - Run `flutter analyze` and fix any reported issues.
 - Continue with the next module in the frontend roadmap: Girvi Core (MOD-GIRVI) or wire existing customer actions (create Girvi, share QR, documents) when those modules exist.
+
+## 2026-06-14 - Girvi Core Module Screens (MOD-GIRVI)
+
+### Goal
+
+Build the Girvi Core module frontend screens after the Customer module, following the same bilingual navy/gold design system and wiring the dashboard's New Girvi action and Girvi bottom-nav tab.
+
+### What Was Done
+
+- Created a new girvi feature under `lib/src/features/girvi/`.
+- Added shared girvi colours in `lib/src/features/girvi/theme/girvi_colors.dart` matching the dashboard palette.
+- Created a barrel export at `lib/src/features/girvi/girvi.dart`.
+- Implemented SCR-017 Girvi List (`girvi_list_page.dart`):
+  - Search bar with QR scan affordance.
+  - Filter chips: All / Active / Partial / Renewed / Redeemed / Overdue.
+  - Girvi contract cards with serial ID, customer, status badge, loan/outstanding amounts, item count, due date, and days-left indicator.
+  - Floating action button to start new Girvi creation.
+- Implemented SCR-027 Girvi Details (`girvi_details_page.dart`):
+  - Navy header card with serial ID, customer info, loan amount, outstanding, and due date.
+  - Summary grid: Total Items, Total Weight, Valuation, LTV.
+  - Action buttons: Record Payment, Renew, Redeem, Auction.
+  - Pledged items list, interest details card, vault location card, and recent payments list.
+- Implemented SCR-018 Create Girvi Wizard (`create_girvi_wizard_page.dart`):
+  - 8-step wizard with step indicator: Customer → Items → Photos → Valuation → Loan → KFS → Vault → Confirm.
+  - Customer selection step with search and recent customers.
+  - Jewellery entry step with item type, description, quantity, weights, purity.
+  - Photo capture step with placeholder grid and rules.
+  - Valuation & LTV step with live gold rate and LTV status.
+  - Loan terms step with amount, interest type, rate, dates, penalty.
+  - KFS preview step with terms and acknowledgement checkbox.
+  - Vault assignment step with suggested vault coordinate.
+  - Success/completion step with summary.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/girvi` → Girvi List
+  - `/girvi/create` → Create Girvi Wizard
+  - `/girvi/:id` → Girvi Details
+- Wired dashboard navigation:
+  - `New Girvi` quick action now opens the Create Girvi Wizard.
+  - `Girvi` bottom-nav tab now opens Girvi List (previously pointed to Inventory).
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first / English labels.
+- Navy + gold premium palette, white cards, rounded corners, soft shadows.
+- Private helper widgets scoped inside page files.
+- Full-width navy CTAs and outlined secondary buttons.
+- Status chips with colour-coded risk/overdue states.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- Verified brace/parenthesis/bracket balance across all modified files.
+- `dart format` and `flutter analyze` could not be run because the Flutter/Dart SDK is not installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes with mock data and placeholder callbacks.
+- LTV engine, valuation calculations, photo capture, QR scanner, and backend integration are not yet wired.
+- Payment, renewal, redemption, and auction action buttons are placeholders.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/girvi lib/src/features/dashboard lib/src/app/app_router.dart` when the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Vault Management (MOD-VAULT) or Interest Engine (MOD-INTEREST), followed by Compliance and Payments.

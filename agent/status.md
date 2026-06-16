@@ -24,17 +24,23 @@ Last updated: 2026-06-14 19:17:20 +00:00
   - Customer Details (SCR-014)
 - Customer routes are registered in `lib/src/app/app_router.dart`.
 - Dashboard `Search Customer` quick action and `Customers` bottom-nav tab now navigate to the new customer screens.
+- Girvi Core module (MOD-GIRVI) frontend screens are now in place under `lib/src/features/girvi/`:
+  - Girvi List (SCR-017)
+  - Create Girvi Wizard (SCR-018)
+  - Girvi Details (SCR-027)
+- Girvi routes are registered in `lib/src/app/app_router.dart`.
+- Dashboard `New Girvi` quick action and `Girvi` bottom-nav tab now navigate to the new girvi screens.
 
 ## Known Issue
 
 - No current analyzer issues known, but `flutter analyze` could not be executed because the Flutter SDK is not installed in this environment.
-- Customer screens currently use static mock data and placeholder actions for OCR, QR, and documents.
+- Customer and Girvi screens currently use static mock data and placeholder actions for OCR, QR, photos, payments, renewal, redemption, and auction.
 
 ## Next Step
 
 - Run `dart format` and `flutter analyze` when the SDK is available.
-- Continue with the next module in the frontend roadmap: Girvi Core (MOD-GIRVI), or wire customer detail actions once Girvi/Document modules exist.
-- Implement remaining customer screens: Aadhaar OCR Capture (SCR-013), Document Vault (SCR-015), Customer Timeline (SCR-016), and QR Scanner (SCR-086).
+- Continue with the next module in the frontend roadmap: Vault Management (MOD-VAULT) or Interest Engine (MOD-INTEREST), followed by Payments, Compliance, and Reports.
+- Implement remaining screens: Partial Payment (SCR-028), Renewal (SCR-029), Redemption (SCR-030), Auction Workflow (SCR-031), and Due & Overdue Management (SCR-073).
 
 ## Verification
 
@@ -42,4 +48,4 @@ Last updated: 2026-06-14 19:17:20 +00:00
 - `flutter analyze` completed successfully with no issues.
 - `dart format lib/src/features/dashboard/dashboard_page.dart` completed successfully after adding recent payments.
 - `flutter analyze` completed successfully after adding recent payments.
-- All new customer files were manually reviewed for syntax and const-correctness.
+- All new customer and girvi files were manually reviewed for syntax and const-correctness.

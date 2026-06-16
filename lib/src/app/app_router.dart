@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth.dart';
+import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/inventory/inventory_page.dart';
 
@@ -36,6 +37,26 @@ final appRouter = GoRouter(
       path: '/inventory',
       name: InventoryPage.routeName,
       builder: (context, state) => const InventoryPage(),
+    ),
+    GoRoute(
+      path: '/customers',
+      name: CustomerListPage.routeName,
+      builder: (context, state) => const CustomerListPage(),
+    ),
+    GoRoute(
+      path: '/customers/search',
+      name: CustomerSearchPage.routeName,
+      builder: (context, state) => const CustomerSearchPage(),
+    ),
+    GoRoute(
+      path: '/customers/create',
+      name: CreateCustomerPage.routeName,
+      builder: (context, state) => const CreateCustomerPage(),
+    ),
+    GoRoute(
+      path: '/customers/:id',
+      name: CustomerDetailsPage.routeName,
+      builder: (context, state) => const CustomerDetailsPage(),
     ),
   ],
 );

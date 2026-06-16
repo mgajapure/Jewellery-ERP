@@ -129,3 +129,67 @@ Add a recent payment transactions list below Quick Actions on the dashboard, usi
 
 - `dart format lib/src/features/dashboard/dashboard_page.dart` completed successfully.
 - `flutter analyze` completed successfully with no issues.
+
+## 2026-06-14 - Customer Module Screens (MOD-CUSTOMER)
+
+### Goal
+
+Continue the frontend implementation after Dashboard by building the Customer & KYC module screens, following the same bilingual Marathi/English navy-and-gold design patterns used in the auth flow and dashboard.
+
+### What Was Done
+
+- Created a new customer feature under `lib/src/features/customer/`.
+- Added shared customer colours in `lib/src/features/customer/theme/customer_colors.dart` matching the dashboard palette.
+- Created a barrel export at `lib/src/features/customer/customer.dart`.
+- Implemented SCR-010 Customer List (`customer_list_page.dart`):
+  - Search bar that opens Customer Search.
+  - Filter chips: All / Active / Inactive / High Risk.
+  - Customer cards with name, mobile, customer ID, active Girvi count, outstanding amount, and risk badge.
+  - Floating action button to create a customer.
+- Implemented SCR-011 Customer Search (`customer_search_page.dart`):
+  - Live search field.
+  - Search mode chips: Name / Mobile / ID / QR Scan.
+  - Result cards with customer summary and last transaction date.
+- Implemented SCR-012 Create Customer (`create_customer_page.dart`):
+  - Personal Information section (name, mobile, alternate mobile, gender, DOB).
+  - Address section (address, city, state, pincode).
+  - KYC section with Aadhaar OCR placeholder, PAN input, and customer photo placeholder.
+  - Full-width navy CTA to save customer.
+- Implemented SCR-014 Customer Details (`customer_details_page.dart`):
+  - Navy profile header with name, digital customer ID, and QR placeholder.
+  - Summary cards: Active Girvi, Outstanding, Total Loan History, Risk Level.
+  - Action buttons: New Girvi, Documents, Share QR, Edit.
+  - Profile details section and recent activity list.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/customers` → Customer List
+  - `/customers/search` → Customer Search
+  - `/customers/create` → Create Customer
+  - `/customers/:id` → Customer Details
+- Wired dashboard navigation:
+  - `Search Customer` quick action opens Customer Search.
+  - `Customers` bottom-nav item opens Customer List.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents and active states.
+- White cards with subtle outline borders, rounded corners, and soft shadows.
+- 2×2 summary grids and horizontal quick-action rows consistent with the dashboard.
+- Private helper widgets scoped inside page files, matching the existing dashboard structure.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, state management, or form validation yet.
+- Aadhaar OCR, QR scanner, document vault, and customer timeline screens are not yet implemented.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/customer lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next module in the frontend roadmap: Girvi Core (MOD-GIRVI) or wire existing customer actions (create Girvi, share QR, documents) when those modules exist.

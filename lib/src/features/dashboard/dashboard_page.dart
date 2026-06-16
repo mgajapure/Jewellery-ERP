@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../customer/customer.dart';
 import '../inventory/inventory_page.dart';
 
 const _navy = Color(0xFF061C49);
@@ -28,31 +29,35 @@ class DashboardPage extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
-                children: const [
-                  _GoldRateCard(),
-                  SizedBox(height: 16),
-                  _SectionHeader(
+                children: [
+                  const _GoldRateCard(),
+                  const SizedBox(height: 16),
+                  const _SectionHeader(
                     title: 'मुख्य आकडेवारी / Key Metrics',
                     trailing: 'आज / Today',
                   ),
-                  SizedBox(height: 10),
-                  _MetricGrid(),
-                  SizedBox(height: 18),
-                  _SectionHeader(title: 'जलद कृती / Quick Actions'),
-                  SizedBox(height: 12),
-                  _QuickActions(),
-                  SizedBox(height: 22),
-                  _SectionHeader(
+                  const SizedBox(height: 10),
+                  const _MetricGrid(),
+                  const SizedBox(height: 18),
+                  const _SectionHeader(title: 'जलद कृती / Quick Actions'),
+                  const SizedBox(height: 12),
+                  _QuickActions(
+                    onSearchCustomerTap: () =>
+                        context.goNamed(CustomerSearchPage.routeName),
+                  ),
+                  const SizedBox(height: 22),
+                  const _SectionHeader(
                     title: 'अलीकडील पेमेंट्स / Recent Payments',
                     trailing: 'सर्व पहा / View All',
                   ),
-                  SizedBox(height: 12),
-                  _RecentPaymentsList(),
+                  const SizedBox(height: 12),
+                  const _RecentPaymentsList(),
                 ],
               ),
             ),
             _DashboardBottomNav(
               onInventoryTap: () => context.goNamed(InventoryPage.routeName),
+              onCustomersTap: () => context.goNamed(CustomerListPage.routeName),
             ),
           ],
         ),
@@ -117,7 +122,6 @@ class _DashboardHeader extends StatelessWidget {
             ],
           ),
         ],
-      ),
     );
   }
 }
@@ -293,6 +297,7 @@ class _MetricGrid extends StatelessWidget {
           delta: '+2 आज / today',
         ),
       ],
+      ),
     );
   }
 }
@@ -381,12 +386,14 @@ class _MetricTile extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions();
+  const _QuickActions({this.onSearchCustomerTap});
+
+  final VoidCallback? onSearchCustomerTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: const [
+      children: [
         Expanded(
           child: _QuickAction(
             icon: Icons.add,
@@ -401,6 +408,7 @@ class _QuickActions extends StatelessWidget {
             icon: Icons.search,
             titleMr: 'ग्राहक शोधा',
             titleEn: 'Search Customer',
+            onTap: onSearchCustomerTap,
           ),
         ),
         SizedBox(width: 10),
@@ -430,61 +438,66 @@ class _QuickAction extends StatelessWidget {
     required this.titleMr,
     required this.titleEn,
     this.filled = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String titleMr;
   final String titleEn;
   final bool filled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          width: 54,
-          height: 54,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: filled ? _navy : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: filled ? _navy : _line),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x10000000),
-                blurRadius: 10,
-                offset: Offset(0, 4),
-              ),
-            ],
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 54,
+            height: 54,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: filled ? _navy : Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: filled ? _navy : _line),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x10000000),
+                  blurRadius: 10,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
           ),
-          child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          titleMr,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: _ink,
-            fontSize: 10,
-            fontWeight: FontWeight.w800,
+          const SizedBox(height: 8),
+          Text(
+            titleMr,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _ink,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
           ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          titleEn,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: _ink,
-            fontSize: 10,
-            fontWeight: FontWeight.w500,
-            height: 1.1,
+          const SizedBox(height: 2),
+          Text(
+            titleEn,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: _ink,
+              fontSize: 10,
+              fontWeight: FontWeight.w500,
+              height: 1.1,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -666,9 +679,13 @@ class _ListDivider extends StatelessWidget {
 }
 
 class _DashboardBottomNav extends StatelessWidget {
-  const _DashboardBottomNav({required this.onInventoryTap});
+  const _DashboardBottomNav({
+    required this.onInventoryTap,
+    required this.onCustomersTap,
+  });
 
   final VoidCallback onInventoryTap;
+  final VoidCallback onCustomersTap;
 
   @override
   Widget build(BuildContext context) {
@@ -697,11 +714,12 @@ class _DashboardBottomNav extends StatelessWidget {
               onTap: onInventoryTap,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: _BottomNavItem(
               icon: Icons.groups_outlined,
               titleMr: 'ग्राहक',
               titleEn: 'Customers',
+              onTap: onCustomersTap,
             ),
           ),
           const Expanded(

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
@@ -23,6 +22,7 @@ class _PartialPaymentPageState extends State<PartialPaymentPage> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
 
+  final String _girviId = 'GRV-2026-000042';
   final double _outstanding = 100917.81;
   final double _accruedInterest = 5917.81;
 
@@ -61,6 +61,7 @@ class _PartialPaymentPageState extends State<PartialPaymentPage> {
           onPressed: () => AppNavigation.popOrGoNamed(
             context,
             GirviDetailsPage.routeName,
+            pathParameters: {'id': _girviId},
           ),
         ),
         title: const Column(
@@ -155,6 +156,7 @@ class _PartialPaymentPageState extends State<PartialPaymentPage> {
                           AppNavigation.popOrGoNamed(
                             context,
                             GirviDetailsPage.routeName,
+                            pathParameters: {'id': _girviId},
                           );
                         }
                       : null,

@@ -273,7 +273,10 @@ class _CustomerCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.goNamed(CustomerDetailsPage.routeName),
+      onTap: () => context.goNamed(
+        CustomerDetailsPage.routeName,
+        pathParameters: {'id': customerId},
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),

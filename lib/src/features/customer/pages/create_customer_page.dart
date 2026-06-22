@@ -170,7 +170,10 @@ class _CreateCustomerPageState extends State<CreateCustomerPage> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () => context.goNamed(CustomerDetailsPage.routeName),
+                      onPressed: () => context.goNamed(
+                        CustomerDetailsPage.routeName,
+                        pathParameters: {'id': 'CUS-000101'},
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: CustomerColors.navy,
                         foregroundColor: CustomerColors.gold,

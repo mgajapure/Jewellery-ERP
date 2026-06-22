@@ -299,7 +299,10 @@ class _GirviCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.goNamed(GirviDetailsPage.routeName),
+      onTap: () => context.goNamed(
+        GirviDetailsPage.routeName,
+        pathParameters: {'id': serialId},
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),

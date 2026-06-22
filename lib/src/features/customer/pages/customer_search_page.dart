@@ -58,33 +58,45 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 children: [
                   _SearchResultCard(
+                    customerId: 'CUS-000201',
                     name: 'सुरेश पाटील',
                     nameEn: 'Suresh Patil',
                     mobile: '+91 98765 43210',
                     activeGirvi: 2,
                     outstanding: '₹1,25,000',
                     lastTransaction: '12 Jun 2026',
-                    onTap: () => context.goNamed(CustomerDetailsPage.routeName),
+                    onTap: () => context.goNamed(
+                      CustomerDetailsPage.routeName,
+                      pathParameters: {'id': 'CUS-000201'},
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _SearchResultCard(
+                    customerId: 'CUS-000202',
                     name: 'मीना जाधव',
                     nameEn: 'Meena Jadhav',
                     mobile: '+91 87654 32109',
                     activeGirvi: 1,
                     outstanding: '₹45,000',
                     lastTransaction: '10 Jun 2026',
-                    onTap: () => context.goNamed(CustomerDetailsPage.routeName),
+                    onTap: () => context.goNamed(
+                      CustomerDetailsPage.routeName,
+                      pathParameters: {'id': 'CUS-000202'},
+                    ),
                   ),
                   const SizedBox(height: 12),
                   _SearchResultCard(
+                    customerId: 'CUS-000203',
                     name: 'अमोल देशमुख',
                     nameEn: 'Amol Deshmukh',
                     mobile: '+91 76543 21098',
                     activeGirvi: 3,
                     outstanding: '₹2,80,000',
                     lastTransaction: '08 Jun 2026',
-                    onTap: () => context.goNamed(CustomerDetailsPage.routeName),
+                    onTap: () => context.goNamed(
+                      CustomerDetailsPage.routeName,
+                      pathParameters: {'id': 'CUS-000203'},
+                    ),
                   ),
                 ],
               ),
@@ -221,6 +233,7 @@ class _SearchModeTabs extends StatelessWidget {
 
 class _SearchResultCard extends StatelessWidget {
   const _SearchResultCard({
+    required this.customerId,
     required this.name,
     required this.nameEn,
     required this.mobile,
@@ -230,6 +243,7 @@ class _SearchResultCard extends StatelessWidget {
     this.onTap,
   });
 
+  final String customerId;
   final String name;
   final String nameEn;
   final String mobile;

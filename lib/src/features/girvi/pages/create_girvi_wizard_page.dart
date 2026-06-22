@@ -34,7 +34,10 @@ class _CreateGirviWizardPageState extends State<CreateGirviWizardPage> {
     if (_currentStep < _stepLabels.length - 1) {
       setState(() => _currentStep++);
     } else {
-      context.goNamed(GirviDetailsPage.routeName);
+      context.goNamed(
+        GirviDetailsPage.routeName,
+        pathParameters: {'id': 'GRV-2026-000099'},
+      );
     }
   }
 

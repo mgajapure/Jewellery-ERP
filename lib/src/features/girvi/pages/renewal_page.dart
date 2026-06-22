@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
@@ -71,6 +70,7 @@ class _RenewalPageState extends State<RenewalPage> {
           onPressed: () => AppNavigation.popOrGoNamed(
             context,
             GirviDetailsPage.routeName,
+            pathParameters: {'id': _oldGirviId},
           ),
         ),
         title: const Column(
@@ -184,6 +184,7 @@ class _RenewalPageState extends State<RenewalPage> {
                     AppNavigation.popOrGoNamed(
                       context,
                       GirviDetailsPage.routeName,
+                      pathParameters: {'id': _oldGirviId},
                     );
                   },
                   icon: const Icon(Icons.receipt_long_outlined, size: 20),

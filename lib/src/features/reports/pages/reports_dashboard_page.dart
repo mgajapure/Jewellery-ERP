@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../../reports/theme/reports_colors.dart';
 
 class ReportsDashboardPage extends StatelessWidget {
@@ -12,42 +12,27 @@ class ReportsDashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ReportsColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: ReportsColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'अहवाल आणि विश्लेषण',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            AppHeader(
+              titleMr: 'अहवाल आणि विश्लेषण',
+              titleEn: 'Reports & Analytics',
+              showBackButton: true,
+              backFallbackRoute: 'more',
             ),
-            Text(
-              'Reports & Analytics',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'Reports & Analytics module coming soon',
+                  style: TextStyle(
+                    color: ReportsColors.muted,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'Reports & Analytics module coming soon',
-          style: TextStyle(
-            color: ReportsColors.muted,
-            fontSize: 16,
-          ),
         ),
       ),
     );

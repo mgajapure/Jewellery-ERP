@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../theme/interest_colors.dart';
 
 /// SCR-033 Interest Ledger & Breakdown
@@ -102,56 +102,36 @@ class InterestLedgerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: InterestColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: InterestColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'व्याज खाते',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Interest Ledger',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.print_outlined),
-            onPressed: () {
-              // TODO: print ledger.
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {
-              // TODO: share ledger.
-            },
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
           children: [
+            AppHeader(
+              titleMr: 'व्याज खाते',
+              titleEn: 'Interest Ledger',
+              showBackButton: true,
+              backFallbackRoute: 'more',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.print_outlined,
+                      color: InterestColors.ink),
+                  tooltip: 'प्रिंट / Print',
+                  onPressed: () {
+                    // TODO: print ledger.
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined,
+                      color: InterestColors.ink),
+                  tooltip: 'शेअर / Share',
+                  onPressed: () {
+                    // TODO: share ledger.
+                  },
+                ),
+              ],
+            ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

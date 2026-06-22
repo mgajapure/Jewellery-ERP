@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
+import 'girvi_details_page.dart';
 
 /// SCR-031 Auction Workflow
 ///
@@ -92,7 +94,10 @@ class _AuctionWorkflowPageState extends State<AuctionWorkflowPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            GirviDetailsPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,7 +192,10 @@ class _AuctionWorkflowPageState extends State<AuctionWorkflowPage> {
                   onPressed: _canCompleteAuction
                       ? () {
                           // TODO: close contract and refund surplus.
-                          context.pop();
+                          AppNavigation.popOrGoNamed(
+                            context,
+                            GirviDetailsPage.routeName,
+                          );
                         }
                       : null,
                   icon: const Icon(Icons.gavel_outlined, size: 20),

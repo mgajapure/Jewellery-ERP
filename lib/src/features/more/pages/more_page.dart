@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_bottom_nav.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../compliance/compliance.dart';
 import '../../inventory/inventory.dart';
 import '../../interest/interest.dart';
@@ -99,34 +100,16 @@ class MorePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF061C49),
-        foregroundColor: Colors.white,
-        elevation: 0,
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'सर्व मॉड्यूल्स',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'All Modules',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            const AppListHeader(
+              titleMr: 'सर्व मॉड्यूल्स',
+              titleEn: 'All Modules',
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -151,7 +134,10 @@ class MorePage extends StatelessWidget {
           ),
         ),
       ),
-      bottomNavigationBar: AppBottomNav(
+    ],
+  ),
+),
+bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
         onTap: (index) {
           switch (index) {

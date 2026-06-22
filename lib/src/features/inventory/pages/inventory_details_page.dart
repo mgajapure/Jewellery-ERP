@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/inventory_colors.dart';
+import 'inventory_list_page.dart';
 
 /// SCR-049 Inventory Item Details
 ///
@@ -63,7 +65,10 @@ class InventoryDetailsPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            InventoryListPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,

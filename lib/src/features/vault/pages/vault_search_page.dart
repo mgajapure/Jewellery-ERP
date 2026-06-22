@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../theme/vault_colors.dart';
 
 /// SCR-035 Vault Search & Occupancy
@@ -93,82 +93,64 @@ class _VaultSearchPageState extends State<VaultSearchPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: VaultColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: VaultColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'तिजोरी शोध आणि व्याप्ती',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            AppHeader(
+              titleMr: 'तिजोरी शोध आणि व्याप्ती',
+              titleEn: 'Vault Search & Occupancy',
+              showBackButton: true,
+              backFallbackRoute: 'more',
             ),
-            Text(
-              'Vault Search & Occupancy',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.white70,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _SearchBar(
+                      controller: _searchController,
+                      searchMode: _searchMode,
+                      onChanged: (value) => setState(() {}),
+                      onScanTap: () {
+                        // TODO: open QR scanner.
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    _SearchModeChips(
+                      modes: _searchModes,
+                      selected: _searchMode,
+                      onSelected: (mode) => setState(() => _searchMode = mode),
+                    ),
+                    const SizedBox(height: 20),
+                    _OccupancySummary(
+                      total: _totalSlots,
+                      occupied: _occupiedSlots,
+                      available: _availableSlots,
+                      percentage: _occupancyPercentage,
+                    ),
+                    const SizedBox(height: 20),
+                    _SectionTitle(
+                      titleMr: 'तिजोरी व्याप्ती हीटमॅप',
+                      titleEn: 'Vault Occupancy Heat Map',
+                    ),
+                    const SizedBox(height: 12),
+                    ..._mockOccupancy.map((item) => _VaultHeatMap(item: item)),
+                    const SizedBox(height: 24),
+                    _SectionTitle(
+                      titleMr: 'शोध निकाल',
+                      titleEn: 'Search Results',
+                    ),
+                    const SizedBox(height: 12),
+                    if (_searchController.text.isEmpty)
+                      const _EmptySearchState()
+                    else
+                      ..._mockResults.map((item) => _SearchResultCard(item: item)),
+                  ],
+                ),
               ),
             ),
           ],
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _SearchBar(
-                controller: _searchController,
-                searchMode: _searchMode,
-                onChanged: (value) => setState(() {}),
-                onScanTap: () {
-                  // TODO: open QR scanner.
-                },
-              ),
-              const SizedBox(height: 12),
-              _SearchModeChips(
-                modes: _searchModes,
-                selected: _searchMode,
-                onSelected: (mode) => setState(() => _searchMode = mode),
-              ),
-              const SizedBox(height: 20),
-              _OccupancySummary(
-                total: _totalSlots,
-                occupied: _occupiedSlots,
-                available: _availableSlots,
-                percentage: _occupancyPercentage,
-              ),
-              const SizedBox(height: 20),
-              _SectionTitle(
-                titleMr: 'तिजोरी व्याप्ती हीटमॅप',
-                titleEn: 'Vault Occupancy Heat Map',
-              ),
-              const SizedBox(height: 12),
-              ..._mockOccupancy.map((item) => _VaultHeatMap(item: item)),
-              const SizedBox(height: 24),
-              _SectionTitle(
-                titleMr: 'शोध निकाल',
-                titleEn: 'Search Results',
-              ),
-              const SizedBox(height: 12),
-              if (_searchController.text.isEmpty)
-                const _EmptySearchState()
-              else
-                ..._mockResults.map((item) => _SearchResultCard(item: item)),
-            ],
-          ),
         ),
       ),
     );
@@ -194,8 +176,15 @@ class _SearchBar extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: VaultColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -254,7 +243,7 @@ class _SearchModeChips extends StatelessWidget {
           labelStyle: TextStyle(
             color: isSelected ? Colors.white : VaultColors.ink,
             fontSize: 12,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w700,
           ),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
@@ -293,8 +282,15 @@ class _OccupancySummary extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: VaultColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -306,14 +302,14 @@ class _OccupancySummary extends StatelessWidget {
                 'एकूण व्याप्ती / Total Occupancy',
                 style: TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                   color: VaultColors.ink,
                 ),
               ),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _statusColor.withAlpha(20),
+                  color: _statusColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -387,8 +383,8 @@ class _MetricBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withAlpha(10),
-          borderRadius: BorderRadius.circular(14),
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -397,7 +393,8 @@ class _MetricBox extends StatelessWidget {
               '$labelMr / $labelEn',
               style: TextStyle(
                 fontSize: 11,
-                color: color.withAlpha(180),
+                color: color.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
@@ -441,8 +438,15 @@ class _VaultHeatMap extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: VaultColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -454,7 +458,7 @@ class _VaultHeatMap extends StatelessWidget {
                 item['vault'] as String,
                 style: const TextStyle(
                   fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontWeight: FontWeight.w800,
                   color: VaultColors.ink,
                 ),
               ),
@@ -462,7 +466,7 @@ class _VaultHeatMap extends StatelessWidget {
                 '${(percentage * 100).toStringAsFixed(0)}% Occupied',
                 style: TextStyle(
                   fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w700,
                   color: barColor,
                 ),
               ),
@@ -484,6 +488,7 @@ class _VaultHeatMap extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               color: VaultColors.muted,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -504,8 +509,15 @@ class _SearchResultCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: VaultColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,13 +530,13 @@ class _SearchResultCard extends StatelessWidget {
                   item['customer'] as String,
                   style: const TextStyle(
                     fontSize: 15,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w900,
                     color: VaultColors.ink,
                   ),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
                   color: VaultColors.cream,
                   borderRadius: BorderRadius.circular(8),
@@ -533,7 +545,7 @@ class _SearchResultCard extends StatelessWidget {
                   item['status'] as String,
                   style: const TextStyle(
                     fontSize: 11,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     color: VaultColors.gold,
                   ),
                 ),
@@ -546,7 +558,7 @@ class _SearchResultCard extends StatelessWidget {
           _ResultRow(icon: Icons.qr_code_2_outlined, text: item['serialId'] as String),
           const SizedBox(height: 6),
           _ResultRow(icon: Icons.phone_outlined, text: item['mobile'] as String),
-          const Divider(height: 24, color: VaultColors.line),
+          const Divider(height: 22, color: VaultColors.line),
           Row(
             children: [
               const Icon(
@@ -560,7 +572,7 @@ class _SearchResultCard extends StatelessWidget {
                   item['coordinate'] as String,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w800,
                     color: VaultColors.navy,
                   ),
                 ),
@@ -638,6 +650,7 @@ class _ResultRow extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             color: VaultColors.ink,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -655,7 +668,7 @@ class _EmptySearchState extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 40),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: VaultColors.line),
       ),
       child: Column(
@@ -663,14 +676,14 @@ class _EmptySearchState extends StatelessWidget {
           Icon(
             Icons.search_off_outlined,
             size: 48,
-            color: VaultColors.muted.withAlpha(120),
+            color: VaultColors.muted.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 12),
           const Text(
             'शोधण्यासाठी वर टाइप करा',
             style: TextStyle(
               fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w800,
               color: VaultColors.ink,
             ),
           ),
@@ -680,6 +693,7 @@ class _EmptySearchState extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               color: VaultColors.muted,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -702,8 +716,8 @@ class _SectionTitle extends StatelessWidget {
         Text(
           titleMr,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
             color: VaultColors.ink,
           ),
         ),
@@ -712,6 +726,7 @@ class _SectionTitle extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             color: VaultColors.muted,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],

@@ -1,15 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../theme/purchase_colors.dart';
+import 'purchase_dashboard_page.dart';
 
 /// SCR-061 Purchase Ledger
 ///
 /// Lists historical purchase transactions with filters and totals.
-class PurchaseLedgerPage extends StatelessWidget {
+class PurchaseLedgerPage extends StatefulWidget {
   const PurchaseLedgerPage({super.key});
 
   static const routeName = 'purchase-ledger';
+
+  @override
+  State<PurchaseLedgerPage> createState() => _PurchaseLedgerPageState();
+}
+
+class _PurchaseLedgerPageState extends State<PurchaseLedgerPage> {
+  String _filter = 'सर्व / All';
+
+  final List<String> _filters = const [
+    'सर्व / All',
+    'रोख / Cash',
+    'बँक / Bank',
+    'उधार / Credit',
+  ];
 
   final List<Map<String, dynamic>> _transactions = const [
     {
@@ -18,7 +35,7 @@ class PurchaseLedgerPage extends StatelessWidget {
       'supplier': 'Ramesh Jewellers',
       'type': 'Gold 22K',
       'weight': '24.50 g',
-      'amount': '₹ 1,25,000',
+      'amount': '₹1,25,000',
       'mode': 'Bank Transfer',
     },
     {
@@ -27,7 +44,7 @@ class PurchaseLedgerPage extends StatelessWidget {
       'supplier': 'Shree Gold House',
       'type': 'Scrap',
       'weight': '8.20 g',
-      'amount': '₹ 42,000',
+      'amount': '₹42,000',
       'mode': 'Cash',
     },
     {
@@ -36,7 +53,7 @@ class PurchaseLedgerPage extends StatelessWidget {
       'supplier': 'Mumbai Bullion Traders',
       'type': 'Gold 24K',
       'weight': '50.00 g',
-      'amount': '₹ 3,05,000',
+      'amount': '₹3,05,000',
       'mode': 'Credit',
     },
     {
@@ -45,7 +62,7 @@ class PurchaseLedgerPage extends StatelessWidget {
       'supplier': 'Ramesh Jewellers',
       'type': 'Silver',
       'weight': '100.00 g',
-      'amount': '₹ 7,500',
+      'amount': '₹7,500',
       'mode': 'Cash',
     },
   ];
@@ -54,112 +71,198 @@ class PurchaseLedgerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: PurchaseColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: PurchaseColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'खरेदी खाते',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            AppHeader(
+              titleMr: 'खरेदी खाते',
+              titleEn: 'Purchase Ledger',
+              showBackButton: true,
+              backFallbackRoute: PurchaseDashboardPage.routeName,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.filter_list,
+                      color: PurchaseColors.ink),
+                  tooltip: 'फिल्टर / Filter',
+                  onPressed: () {
+                    // TODO: filter ledger.
+                  },
+                ),
+              ],
             ),
-            Text(
-              'Purchase Ledger',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              child: _SearchBar(),
+            ),
+            _FilterChips(
+              filters: _filters,
+              selected: _filter,
+              onSelected: (filter) => setState(() => _filter = filter),
+            ),
+            const SizedBox(height: 8),
+            _SummaryCard(total: '₹4,79,500'),
+            const SizedBox(height: 8),
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                children: _transactions
+                    .map((tx) => _TransactionCard(
+                          date: tx['date'] as String,
+                          id: tx['id'] as String,
+                          supplier: tx['supplier'] as String,
+                          type: tx['type'] as String,
+                          weight: tx['weight'] as String,
+                          amount: tx['amount'] as String,
+                          mode: tx['mode'] as String,
+                        ))
+                    .toList(),
               ),
             ),
           ],
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list),
-            onPressed: () {
-              // TODO: filter ledger.
-            },
+      ),
+    );
+  }
+}
+
+class _SearchBar extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: PurchaseColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
           ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Container(
-              margin: const EdgeInsets.all(16),
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: PurchaseColors.navy,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'एकूण खरेदी / Total Purchase',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.white70,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        '₹ 4,79,500',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withAlpha(20),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'This Month',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                ],
+      child: const Row(
+        children: [
+          Icon(Icons.search, color: PurchaseColors.muted, size: 22),
+          SizedBox(width: 12),
+          Text(
+            'पुरवठादार / आयडी / तारीख शोधा',
+            style: TextStyle(
+              color: PurchaseColors.muted,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Spacer(),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChips extends StatelessWidget {
+  const _FilterChips({
+    required this.filters,
+    required this.selected,
+    required this.onSelected,
+  });
+
+  final List<String> filters;
+  final String selected;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: 40,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 20),
+        itemCount: filters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final filter = filters[index];
+          final isSelected = filter == selected;
+          return ChoiceChip(
+            label: Text(
+              filter,
+              style: TextStyle(
+                color: isSelected ? PurchaseColors.gold : PurchaseColors.ink,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
               ),
             ),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _transactions.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final tx = _transactions[index];
-                  return _TransactionCard(
-                    date: tx['date'] as String,
-                    id: tx['id'] as String,
-                    supplier: tx['supplier'] as String,
-                    type: tx['type'] as String,
-                    weight: tx['weight'] as String,
-                    amount: tx['amount'] as String,
-                    mode: tx['mode'] as String,
-                    onTap: () => context.goNamed('purchase-details'),
-                  );
-                },
+            selected: isSelected,
+            onSelected: (_) => onSelected(filter),
+            selectedColor: PurchaseColors.navy,
+            backgroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: BorderSide(
+                color: isSelected ? PurchaseColors.navy : PurchaseColors.line,
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _SummaryCard extends StatelessWidget {
+  const _SummaryCard({required this.total});
+
+  final String total;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: PurchaseColors.navy,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'एकूण खरेदी / Total Purchase',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white70,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  total,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.15),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Text(
+                'This Month',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
@@ -178,7 +281,6 @@ class _TransactionCard extends StatelessWidget {
     required this.weight,
     required this.amount,
     required this.mode,
-    required this.onTap,
   });
 
   final String date;
@@ -188,19 +290,26 @@ class _TransactionCard extends StatelessWidget {
   final String weight;
   final String amount;
   final String mode;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      onTap: () => context.goNamed('purchase-details'),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: PurchaseColors.line),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x10000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -212,7 +321,7 @@ class _TransactionCard extends StatelessWidget {
                   id,
                   style: const TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w900,
                     color: PurchaseColors.navy,
                   ),
                 ),
@@ -221,6 +330,7 @@ class _TransactionCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     color: PurchaseColors.muted,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -229,12 +339,12 @@ class _TransactionCard extends StatelessWidget {
             Text(
               supplier,
               style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
                 color: PurchaseColors.ink,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Row(
               children: [
                 _Tag(text: type),
@@ -244,23 +354,20 @@ class _TransactionCard extends StatelessWidget {
                 _Tag(text: mode),
               ],
             ),
-            const Divider(height: 20, color: PurchaseColors.line),
+            const Divider(height: 22, color: PurchaseColors.line),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'रक्कम / Amount',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: PurchaseColors.muted,
-                  ),
+                const _SummaryItem(
+                  labelMr: 'रक्कम',
+                  labelEn: 'Amount',
                 ),
                 Text(
                   amount,
                   style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w700,
-                    color: PurchaseColors.navy,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: PurchaseColors.ink,
                   ),
                 ),
               ],
@@ -268,6 +375,38 @@ class _TransactionCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SummaryItem extends StatelessWidget {
+  const _SummaryItem({required this.labelMr, required this.labelEn});
+
+  final String labelMr;
+  final String labelEn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          labelMr,
+          style: const TextStyle(
+            color: PurchaseColors.muted,
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        Text(
+          labelEn,
+          style: const TextStyle(
+            color: PurchaseColors.muted,
+            fontSize: 9,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -289,7 +428,7 @@ class _Tag extends StatelessWidget {
         text,
         style: const TextStyle(
           fontSize: 11,
-          fontWeight: FontWeight.w600,
+          fontWeight: FontWeight.w700,
           color: PurchaseColors.navy,
         ),
       ),

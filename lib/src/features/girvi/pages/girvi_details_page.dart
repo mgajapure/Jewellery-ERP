@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jewellery_erp/src/features/girvi/girvi.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
+import 'girvi_list_page.dart';
 
 class GirviDetailsPage extends StatelessWidget {
   const GirviDetailsPage({super.key});
@@ -62,7 +64,10 @@ class _GirviDetailsHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => AppNavigation.popOrGoNamed(
+              context,
+              GirviListPage.routeName,
+            ),
             icon: const Icon(Icons.arrow_back, color: GirviColors.ink),
             tooltip: 'Back',
           ),

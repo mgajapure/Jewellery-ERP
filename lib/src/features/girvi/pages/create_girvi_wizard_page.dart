@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
 import 'girvi_details_page.dart';
+import 'girvi_list_page.dart';
 
 class CreateGirviWizardPage extends StatefulWidget {
   const CreateGirviWizardPage({super.key});
@@ -40,7 +42,7 @@ class _CreateGirviWizardPageState extends State<CreateGirviWizardPage> {
     if (_currentStep > 0) {
       setState(() => _currentStep--);
     } else {
-      context.pop();
+      AppNavigation.popOrGoNamed(context, GirviListPage.routeName);
     }
   }
 

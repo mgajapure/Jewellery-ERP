@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/sales_colors.dart';
+import 'sales_dashboard_page.dart';
 
 /// SCR-056 Sales Return
 ///
@@ -37,7 +39,7 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
 
   void _processReturn() {
     // TODO: integrate return API.
-    context.pop();
+    AppNavigation.popOrGoNamed(context, SalesDashboardPage.routeName);
   }
 
   @override
@@ -50,7 +52,10 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            SalesDashboardPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -181,7 +186,10 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => AppNavigation.popOrGoNamed(
+                        context,
+                        SalesDashboardPage.routeName,
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: SalesColors.navy,
                         side: const BorderSide(color: SalesColors.navy),

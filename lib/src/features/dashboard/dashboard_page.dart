@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../compliance/compliance.dart';
 import '../customer/customer.dart';
 import '../girvi/girvi.dart';
+import '../interest/interest.dart';
+import '../inventory/inventory.dart';
+import '../purchase/purchase.dart';
+import '../vault/vault.dart';
 
 const _navy = Color(0xFF061C49);
 const _gold = Color(0xFFE7A726);
@@ -46,6 +51,14 @@ class DashboardPage extends StatelessWidget {
                         context.goNamed(CreateGirviWizardPage.routeName),
                     onSearchCustomerTap: () =>
                         context.goNamed(CustomerSearchPage.routeName),
+                    onVaultSearchTap: () =>
+                        context.goNamed(VaultSearchPage.routeName),
+                    onInterestCalcTap: () =>
+                        context.goNamed(InterestCalculatorPage.routeName),
+                    onComplianceTap: () =>
+                        context.goNamed(ComplianceDashboardPage.routeName),
+                    onPurchaseTap: () =>
+                        context.goNamed(PurchaseDashboardPage.routeName),
                   ),
                   const SizedBox(height: 22),
                   const _SectionHeader(
@@ -60,6 +73,8 @@ class DashboardPage extends StatelessWidget {
             _DashboardBottomNav(
               onGirviTap: () => context.goNamed(GirviListPage.routeName),
               onCustomersTap: () => context.goNamed(CustomerListPage.routeName),
+              onInventoryTap: () =>
+                  context.goNamed(InventoryListPage.routeName),
             ),
           ],
         ),
@@ -388,50 +403,90 @@ class _MetricTile extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({this.onNewGirviTap, this.onSearchCustomerTap});
+  const _QuickActions({
+    this.onNewGirviTap,
+    this.onSearchCustomerTap,
+    this.onVaultSearchTap,
+    this.onInterestCalcTap,
+    this.onComplianceTap,
+    this.onPurchaseTap,
+  });
 
   final VoidCallback? onNewGirviTap;
   final VoidCallback? onSearchCustomerTap;
+  final VoidCallback? onVaultSearchTap;
+  final VoidCallback? onInterestCalcTap;
+  final VoidCallback? onComplianceTap;
+  final VoidCallback? onPurchaseTap;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.add,
-            titleMr: 'नवीन गिरवी',
-            titleEn: 'New Girvi',
-            filled: true,
-            onTap: onNewGirviTap,
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: [
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.add,
+              titleMr: 'नवीन गिरवी',
+              titleEn: 'New Girvi',
+              filled: true,
+              onTap: onNewGirviTap,
+            ),
           ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.search,
-            titleMr: 'ग्राहक शोधा',
-            titleEn: 'Search Customer',
-            onTap: onSearchCustomerTap,
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.search,
+              titleMr: 'ग्राहक शोधा',
+              titleEn: 'Search Customer',
+              onTap: onSearchCustomerTap,
+            ),
           ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.calendar_month_outlined,
-            titleMr: 'देय यादी',
-            titleEn: 'Due List',
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.account_balance,
+              titleMr: 'तिजोरी शोध',
+              titleEn: 'Vault Search',
+              onTap: onVaultSearchTap,
+            ),
           ),
-        ),
-        SizedBox(width: 10),
-        Expanded(
-          child: _QuickAction(
-            icon: Icons.currency_rupee,
-            titleMr: 'पेमेंट नोंद',
-            titleEn: 'Record Payment',
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.calculate_outlined,
+              titleMr: 'व्याज गणना',
+              titleEn: 'Interest Calc',
+              onTap: onInterestCalcTap,
+            ),
           ),
-        ),
-      ],
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.verified_user_outlined,
+              titleMr: 'अनुपालन',
+              titleEn: 'Compliance',
+              onTap: onComplianceTap,
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.shopping_bag_outlined,
+              titleMr: 'खरेदी',
+              titleEn: 'Purchase',
+              onTap: onPurchaseTap,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -686,10 +741,12 @@ class _DashboardBottomNav extends StatelessWidget {
   const _DashboardBottomNav({
     required this.onGirviTap,
     required this.onCustomersTap,
+    required this.onInventoryTap,
   });
 
   final VoidCallback onGirviTap;
   final VoidCallback onCustomersTap;
+  final VoidCallback onInventoryTap;
 
   @override
   Widget build(BuildContext context) {
@@ -726,11 +783,12 @@ class _DashboardBottomNav extends StatelessWidget {
               onTap: onCustomersTap,
             ),
           ),
-          const Expanded(
+          Expanded(
             child: _BottomNavItem(
-              icon: Icons.more_horiz,
-              titleMr: 'अधिक',
-              titleEn: 'More',
+              icon: Icons.inventory_2_outlined,
+              titleMr: 'स्टॉक',
+              titleEn: 'Inventory',
+              onTap: onInventoryTap,
             ),
           ),
         ],

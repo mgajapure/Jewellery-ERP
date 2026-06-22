@@ -4,7 +4,12 @@ import '../features/auth/auth.dart';
 import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/girvi/girvi.dart';
-import '../features/inventory/inventory_page.dart';
+import '../features/inventory/inventory.dart';
+import '../features/compliance/compliance.dart';
+import '../features/interest/interest.dart';
+import '../features/purchase/purchase.dart';
+import '../features/sales/sales.dart';
+import '../features/vault/vault.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -36,8 +41,13 @@ final appRouter = GoRouter(
     ),
     GoRoute(
       path: '/inventory',
-      name: InventoryPage.routeName,
-      builder: (context, state) => const InventoryPage(),
+      name: InventoryListPage.routeName,
+      builder: (context, state) => const InventoryListPage(),
+    ),
+    GoRoute(
+      path: '/inventory/:id',
+      name: InventoryDetailsPage.routeName,
+      builder: (context, state) => const InventoryDetailsPage(),
     ),
     GoRoute(
       path: '/customers',
@@ -73,6 +83,136 @@ final appRouter = GoRouter(
       path: '/girvi/:id',
       name: GirviDetailsPage.routeName,
       builder: (context, state) => const GirviDetailsPage(),
+    ),
+    GoRoute(
+      path: '/girvi/:id/payment',
+      name: PartialPaymentPage.routeName,
+      builder: (context, state) => const PartialPaymentPage(),
+    ),
+    GoRoute(
+      path: '/girvi/:id/renewal',
+      name: RenewalPage.routeName,
+      builder: (context, state) => const RenewalPage(),
+    ),
+    GoRoute(
+      path: '/girvi/:id/redemption',
+      name: RedemptionPage.routeName,
+      builder: (context, state) => const RedemptionPage(),
+    ),
+    GoRoute(
+      path: '/girvi/:id/auction',
+      name: AuctionWorkflowPage.routeName,
+      builder: (context, state) => const AuctionWorkflowPage(),
+    ),
+    GoRoute(
+      path: '/due-overdue',
+      name: DueOverduePage.routeName,
+      builder: (context, state) => const DueOverduePage(),
+    ),
+    GoRoute(
+      path: '/vault/assign',
+      name: VaultAssignmentPage.routeName,
+      builder: (context, state) => const VaultAssignmentPage(),
+    ),
+    GoRoute(
+      path: '/vault/search',
+      name: VaultSearchPage.routeName,
+      builder: (context, state) => const VaultSearchPage(),
+    ),
+    GoRoute(
+      path: '/interest/calculator',
+      name: InterestCalculatorPage.routeName,
+      builder: (context, state) => const InterestCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/interest/ledger',
+      name: InterestLedgerPage.routeName,
+      builder: (context, state) => const InterestLedgerPage(),
+    ),
+    GoRoute(
+      path: '/compliance',
+      name: ComplianceDashboardPage.routeName,
+      builder: (context, state) => const ComplianceDashboardPage(),
+    ),
+    GoRoute(
+      path: '/compliance/form6',
+      name: Form6GeneratorPage.routeName,
+      builder: (context, state) => const Form6GeneratorPage(),
+    ),
+    GoRoute(
+      path: '/compliance/form9',
+      name: Form9RegisterPage.routeName,
+      builder: (context, state) => const Form9RegisterPage(),
+    ),
+    GoRoute(
+      path: '/compliance/forms11-12',
+      name: Forms11_12Page.routeName,
+      builder: (context, state) => const Forms11_12Page(),
+    ),
+    GoRoute(
+      path: '/compliance/form13',
+      name: Form13GeneratorPage.routeName,
+      builder: (context, state) => const Form13GeneratorPage(),
+    ),
+    GoRoute(
+      path: '/purchase',
+      name: PurchaseDashboardPage.routeName,
+      builder: (context, state) => const PurchaseDashboardPage(),
+    ),
+    GoRoute(
+      path: '/purchase/new',
+      name: NewPurchasePage.routeName,
+      builder: (context, state) => const NewPurchasePage(),
+    ),
+    GoRoute(
+      path: '/purchase/ledger',
+      name: PurchaseLedgerPage.routeName,
+      builder: (context, state) => const PurchaseLedgerPage(),
+    ),
+    GoRoute(
+      path: '/purchase/suppliers',
+      name: SupplierManagementPage.routeName,
+      builder: (context, state) => const SupplierManagementPage(),
+    ),
+    GoRoute(
+      path: '/purchase/:id',
+      name: PurchaseDetailsPage.routeName,
+      builder: (context, state) => const PurchaseDetailsPage(),
+    ),
+    GoRoute(
+      path: '/sales',
+      name: SalesDashboardPage.routeName,
+      builder: (context, state) => const SalesDashboardPage(),
+    ),
+    GoRoute(
+      path: '/sales/new',
+      name: NewSalePage.routeName,
+      builder: (context, state) => const NewSalePage(),
+    ),
+    GoRoute(
+      path: '/sales/invoice-preview',
+      name: InvoicePreviewPage.routeName,
+      builder: (context, state) => const InvoicePreviewPage(),
+    ),
+    GoRoute(
+      path: '/sales/ledger',
+      name: SalesLedgerPage.routeName,
+      builder: (context, state) => const SalesLedgerPage(),
+    ),
+    GoRoute(
+      path: '/sales/return',
+      name: SalesReturnPage.routeName,
+      builder: (context, state) => const SalesReturnPage(),
+    ),
+    GoRoute(
+      path: '/sales/barcode',
+      name: BarcodeSalePage.routeName,
+      builder: (context, state) => const BarcodeSalePage(),
+    ),
+    GoRoute(
+      path: '/sales/:id',
+      name: SalesDetailsPage.routeName,
+      builder: (context, state) => const SalesDetailsPage(),
     ),
   ],
 );

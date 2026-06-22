@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
-import 'package:jewellery_erp/src/features/inventory/inventory.dart';
+import 'package:jewellery_erp/src/features/more/more.dart';
 
+import '../../../core/widgets/app_bottom_nav.dart';
 import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_details_page.dart';
@@ -86,11 +87,23 @@ class CustomerListPage extends StatelessWidget {
                 ],
               ),
             ),
-            _AppBottomNav(
-              onDashboardTap: () => context.goNamed(DashboardPage.routeName),
-              onGirviTap: () => context.goNamed(GirviListPage.routeName),
-              onInventoryTap: () =>
-                  context.goNamed(InventoryListPage.routeName),
+            AppBottomNav(
+              currentIndex: 2,
+              onTap: (index) {
+                switch (index) {
+                  case 0:
+                    context.goNamed(DashboardPage.routeName);
+                    break;
+                  case 1:
+                    context.goNamed(GirviListPage.routeName);
+                    break;
+                  case 2:
+                    break;
+                  case 3:
+                    context.goNamed(MorePage.routeName);
+                    break;
+                }
+              },
             ),
           ],
         ),
@@ -447,119 +460,3 @@ class _SummaryItem extends StatelessWidget {
   }
 }
 
-class _AppBottomNav extends StatelessWidget {
-  const _AppBottomNav({
-    required this.onDashboardTap,
-    required this.onGirviTap,
-    required this.onInventoryTap,
-  });
-
-  final VoidCallback onDashboardTap;
-  final VoidCallback onGirviTap;
-  final VoidCallback onInventoryTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 76,
-      padding: const EdgeInsets.only(top: 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _line)),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.home_outlined,
-              titleMr: 'डॅशबोर्ड',
-              titleEn: 'Dashboard',
-              onTap: onDashboardTap,
-            ),
-          ),
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.diamond_outlined,
-              titleMr: 'गिरवी',
-              titleEn: 'Girvi',
-              onTap: onGirviTap,
-            ),
-          ),
-          const Expanded(
-            child: _BottomNavItem(
-              icon: Icons.groups_outlined,
-              titleMr: 'ग्राहक',
-              titleEn: 'Customers',
-              selected: true,
-            ),
-          ),
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.inventory_2_outlined,
-              titleMr: 'स्टॉक',
-              titleEn: 'Inventory',
-              onTap: onInventoryTap,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-const _gold = Color(0xFFE7A726);
-const _ink = Color(0xFF071A49);
-const _muted = Color(0xFF5E6880);
-const _line = Color(0xFFE5E8EF);
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.titleMr,
-    required this.titleEn,
-    this.selected = false,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String titleMr;
-  final String titleEn;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? _gold : _ink;
-
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 3),
-          Text(
-            titleMr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: color,
-              fontSize: 10,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            titleEn,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: selected ? _ink : _muted,
-              fontSize: 8,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

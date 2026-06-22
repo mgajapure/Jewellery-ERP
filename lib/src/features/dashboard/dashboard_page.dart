@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/widgets/app_bottom_nav.dart';
 import '../compliance/compliance.dart';
 import '../customer/customer.dart';
 import '../girvi/girvi.dart';
 import '../interest/interest.dart';
-import '../inventory/inventory.dart';
+import '../more/more.dart';
 import '../purchase/purchase.dart';
+import '../sales/sales.dart';
 import '../vault/vault.dart';
 
 const _navy = Color(0xFF061C49);
@@ -59,6 +61,8 @@ class DashboardPage extends StatelessWidget {
                         context.goNamed(ComplianceDashboardPage.routeName),
                     onPurchaseTap: () =>
                         context.goNamed(PurchaseDashboardPage.routeName),
+                    onSalesTap: () =>
+                        context.goNamed(SalesDashboardPage.routeName),
                   ),
                   const SizedBox(height: 22),
                   const _SectionHeader(
@@ -70,11 +74,23 @@ class DashboardPage extends StatelessWidget {
                 ],
               ),
             ),
-            _DashboardBottomNav(
-              onGirviTap: () => context.goNamed(GirviListPage.routeName),
-              onCustomersTap: () => context.goNamed(CustomerListPage.routeName),
-              onInventoryTap: () =>
-                  context.goNamed(InventoryListPage.routeName),
+            AppBottomNav(
+              currentIndex: 0,
+              onTap: (index) {
+                switch (index) {
+                  case 0:
+                    break;
+                  case 1:
+                    context.goNamed(GirviListPage.routeName);
+                    break;
+                  case 2:
+                    context.goNamed(CustomerListPage.routeName);
+                    break;
+                  case 3:
+                    context.goNamed(MorePage.routeName);
+                    break;
+                }
+              },
             ),
           ],
         ),
@@ -410,6 +426,7 @@ class _QuickActions extends StatelessWidget {
     this.onInterestCalcTap,
     this.onComplianceTap,
     this.onPurchaseTap,
+    this.onSalesTap,
   });
 
   final VoidCallback? onNewGirviTap;
@@ -418,6 +435,7 @@ class _QuickActions extends StatelessWidget {
   final VoidCallback? onInterestCalcTap;
   final VoidCallback? onComplianceTap;
   final VoidCallback? onPurchaseTap;
+  final VoidCallback? onSalesTap;
 
   @override
   Widget build(BuildContext context) {
@@ -483,6 +501,16 @@ class _QuickActions extends StatelessWidget {
               titleMr: 'खरेदी',
               titleEn: 'Purchase',
               onTap: onPurchaseTap,
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.point_of_sale_outlined,
+              titleMr: 'विक्री',
+              titleEn: 'Sales',
+              onTap: onSalesTap,
             ),
           ),
         ],
@@ -737,114 +765,3 @@ class _ListDivider extends StatelessWidget {
   }
 }
 
-class _DashboardBottomNav extends StatelessWidget {
-  const _DashboardBottomNav({
-    required this.onGirviTap,
-    required this.onCustomersTap,
-    required this.onInventoryTap,
-  });
-
-  final VoidCallback onGirviTap;
-  final VoidCallback onCustomersTap;
-  final VoidCallback onInventoryTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 76,
-      padding: const EdgeInsets.only(top: 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _line)),
-      ),
-      child: Row(
-        children: [
-          const Expanded(
-            child: _BottomNavItem(
-              icon: Icons.home_outlined,
-              titleMr: 'डॅशबोर्ड',
-              titleEn: 'Dashboard',
-              selected: true,
-            ),
-          ),
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.diamond_outlined,
-              titleMr: 'गिरवी',
-              titleEn: 'Girvi',
-              onTap: onGirviTap,
-            ),
-          ),
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.groups_outlined,
-              titleMr: 'ग्राहक',
-              titleEn: 'Customers',
-              onTap: onCustomersTap,
-            ),
-          ),
-          Expanded(
-            child: _BottomNavItem(
-              icon: Icons.inventory_2_outlined,
-              titleMr: 'स्टॉक',
-              titleEn: 'Inventory',
-              onTap: onInventoryTap,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _BottomNavItem extends StatelessWidget {
-  const _BottomNavItem({
-    required this.icon,
-    required this.titleMr,
-    required this.titleEn,
-    this.selected = false,
-    this.onTap,
-  });
-
-  final IconData icon;
-  final String titleMr;
-  final String titleEn;
-  final bool selected;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = selected ? _gold : _ink;
-
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 3),
-          Text(
-            titleMr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: color,
-              fontSize: 9,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          Text(
-            titleEn,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              color: selected ? _ink : _muted,
-              fontSize: 9,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

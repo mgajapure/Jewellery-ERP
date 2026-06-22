@@ -7,12 +7,17 @@ import '../features/girvi/girvi.dart';
 import '../features/inventory/inventory.dart';
 import '../features/compliance/compliance.dart';
 import '../features/interest/interest.dart';
+import '../features/more/more.dart';
 import '../features/purchase/purchase.dart';
+import '../features/reports/reports.dart';
 import '../features/sales/sales.dart';
+import '../features/savings/savings.dart';
+import '../features/settings/settings.dart';
+import '../features/staff/staff.dart';
 import '../features/vault/vault.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
     GoRoute(
       path: '/splash',
@@ -213,6 +218,31 @@ final appRouter = GoRouter(
       path: '/sales/:id',
       name: SalesDetailsPage.routeName,
       builder: (context, state) => const SalesDetailsPage(),
+    ),
+    GoRoute(
+      path: '/more',
+      name: MorePage.routeName,
+      builder: (context, state) => const MorePage(),
+    ),
+    GoRoute(
+      path: '/savings',
+      name: SavingsDashboardPage.routeName,
+      builder: (context, state) => const SavingsDashboardPage(),
+    ),
+    GoRoute(
+      path: '/reports',
+      name: ReportsDashboardPage.routeName,
+      builder: (context, state) => const ReportsDashboardPage(),
+    ),
+    GoRoute(
+      path: '/staff',
+      name: StaffDashboardPage.routeName,
+      builder: (context, state) => const StaffDashboardPage(),
+    ),
+    GoRoute(
+      path: '/settings',
+      name: SettingsDashboardPage.routeName,
+      builder: (context, state) => const SettingsDashboardPage(),
     ),
   ],
 );

@@ -59,7 +59,7 @@ Last updated: 2026-06-22 05:38:59 +00:00
 - Inventory routes are registered in `lib/src/app/app_router.dart`:
   - `/inventory` → Inventory List
   - `/inventory/:id` → Inventory Item Details
-- Dashboard bottom navigation now includes an `Inventory` tab (replacing the placeholder `More` item) that opens the Inventory List.
+- Dashboard bottom navigation now uses a shared four-item navigation bar: Dashboard, Girvi, Customers, and More.
 - Purchase module (MOD-PURCHASE) frontend screens are in place under `lib/src/features/purchase/`:
   - Purchase Dashboard (SCR-050)
   - New Purchase Entry (SCR-058)
@@ -73,16 +73,34 @@ Last updated: 2026-06-22 05:38:59 +00:00
   - `/purchase/suppliers` → Supplier Management
   - `/purchase/:id` → Purchase Details
 - Dashboard quick action row now includes a `Purchase` quick action that opens the Purchase Dashboard.
+- Sales module (MOD-SALES) frontend screens are in place under `lib/src/features/sales/`:
+  - Sales Dashboard (SCR-051)
+  - New Sale (SCR-053)
+  - Invoice Preview (SCR-054)
+  - Sales Details (SCR-055)
+  - Sales Return (SCR-056)
+  - Sales Ledger (SCR-057)
+  - Barcode Sale (SCR-081)
+- Sales routes are registered in `lib/src/app/app_router.dart`:
+  - `/sales` → Sales Dashboard
+  - `/sales/new` → New Sale
+  - `/sales/invoice-preview` → Invoice Preview
+  - `/sales/ledger` → Sales Ledger
+  - `/sales/return` → Sales Return
+  - `/sales/barcode` → Barcode Sale
+  - `/sales/:id` → Sales Details
+- Dashboard quick action row now includes a `Sales` quick action that opens the Sales Dashboard.
 
 ## Known Issue
 
 - No current analyzer issues known, but `flutter analyze` could not be executed because the Flutter SDK is not installed in this environment.
-- Customer, Girvi, Vault, Interest, Compliance, Payment, Inventory, and Purchase screens currently use static mock data and placeholder actions for backend integration, OCR, QR scanning, photos, receipt generation, automatic slot release, real date pickers, PDF generation, phone/WhatsApp integration, barcode scanning, auction closure, and supplier/purchase APIs.
+- Customer, Girvi, Vault, Interest, Compliance, Payment, Inventory, Purchase, and Sales screens currently use static mock data and placeholder actions for backend integration, OCR, QR scanning, photos, receipt generation, automatic slot release, real date pickers, PDF generation, phone/WhatsApp integration, barcode scanning, auction closure, supplier/purchase APIs, and GST/pricing engines.
+- Savings, Reports, Staff & RBAC, and Settings screens are placeholder "coming soon" pages.
 
 ## Next Step
 
 - Run `dart format` and `flutter analyze` when the SDK is available.
-- Continue with the next modules in the frontend roadmap: Sales (MOD-SALES), Savings Scheme (MOD-SAVINGS), Reports & Analytics, and Settings.
+- Continue with the next modules in the frontend roadmap: Savings Scheme (MOD-SAVINGS), Reports & Analytics, Settings, and Staff & RBAC.
 - Implement remaining screens: KFS preview/acknowledgement flow, Vault Configuration (SCR-091), Insurance Mapping (SCR-092), Movement History (SCR-093), Reports, and Settings.
 
 ## Verification
@@ -91,5 +109,6 @@ Last updated: 2026-06-22 05:38:59 +00:00
 - `flutter analyze` completed successfully with no issues.
 - `dart format lib/src/features/dashboard/dashboard_page.dart` completed successfully after adding recent payments.
 - `flutter analyze` completed successfully after adding recent payments.
-- All new customer, girvi, vault, interest, compliance, payment, inventory, and purchase files were manually reviewed for syntax and const-correctness.
+- All new customer, girvi, vault, interest, compliance, payment, inventory, purchase, sales, more, savings, reports, staff, and settings files were manually reviewed for syntax and const-correctness.
 - Brace/parenthesis/bracket balance was verified across all new and modified files.
+- A shared `AppBottomNav` widget was introduced and wired into Dashboard, Girvi List, Customer List, and More screens.

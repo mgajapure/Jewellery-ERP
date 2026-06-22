@@ -671,3 +671,142 @@ Continue the frontend implementation after Inventory by building the Purchase mo
 - Run `dart format lib/src/features/purchase lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
 - Run `flutter analyze` and fix any reported issues.
 - Continue with the next modules in the frontend roadmap: Sales (MOD-SALES), Savings Scheme (MOD-SAVINGS), Reports & Analytics, and Settings.
+
+## 2026-06-22 - Sales Module Screens (MOD-SALES)
+
+### Goal
+
+Continue the frontend implementation after Purchase by building the Sales module screens, following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Created a new sales feature under `lib/src/features/sales/`:
+  - `theme/sales_colors.dart` — shared navy/gold/green/red/orange/blue palette.
+  - `pages/sales_dashboard_page.dart` — SCR-051 Sales Dashboard:
+    - Six metric cards: Today's Sales, Today's Revenue, Monthly Revenue, Avg Invoice, Top Category, Pending Returns.
+    - Quick actions for New Sale, Barcode Sale, Sales Ledger, and Sales Return.
+  - `pages/new_sale_page.dart` — SCR-053 New Sale:
+    - Customer type selector and search.
+    - Item list with add-item affordance.
+    - Live pricing summary with discount, CGST, SGST, and total due.
+    - Payment mode selector and Preview Invoice CTA.
+  - `pages/invoice_preview_page.dart` — SCR-054 Invoice Preview:
+    - Invoice header with business and customer info.
+    - Item breakdown with taxable, GST, and line totals.
+    - Tax summary and total invoice amount.
+    - Print and Finalize Sale actions.
+  - `pages/sales_details_page.dart` — SCR-055 Sales Details:
+    - Status header, summary card, customer/items/payment/audit sections.
+    - Print and Return actions.
+  - `pages/sales_return_page.dart` — SCR-056 Sales Return:
+    - Invoice lookup, return type selector, item selection, reason input.
+    - Inventory status selector and manager-approval notice.
+    - Cancel and Return CTAs.
+  - `pages/sales_ledger_page.dart` — SCR-057 Sales Ledger:
+    - Total revenue header card.
+    - Transaction list with invoice, customer, items, tax, amount, and status.
+    - Filter and export affordances.
+  - `pages/barcode_sale_page.dart` — SCR-081 Barcode Sales Screen:
+    - Barcode input with scan affordance.
+    - Cart list with delete action.
+    - Total and Checkout CTAs.
+  - `sales.dart` — barrel export.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/sales` → Sales Dashboard
+  - `/sales/new` → New Sale
+  - `/sales/invoice-preview` → Invoice Preview
+  - `/sales/ledger` → Sales Ledger
+  - `/sales/return` → Sales Return
+  - `/sales/barcode` → Barcode Sale
+  - `/sales/:id` → Sales Details
+- Wired dashboard navigation:
+  - Added a `Sales` quick action to the horizontally-scrollable quick actions row.
+  - Sales quick action opens the Sales Dashboard.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- Status colours: green (completed), orange (draft/pending), red (returned).
+- White cards with subtle outline borders and rounded corners.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- Verified brace/parenthesis/bracket balance across all modified files.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, state management, real GST/pricing engine, barcode scanner, receipt generation, or inventory deduction yet.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/sales lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Savings Scheme (MOD-SAVINGS), Reports & Analytics, Settings, and Staff & RBAC.
+- Implement a shared bottom navigation bar with a `More` menu to consolidate access to all modules.
+
+## 2026-06-22 - Shared Bottom Navigation & More Modules Hub
+
+### Goal
+
+Provide a consistent main navigation shell across the app and consolidate access to all modules in a dedicated `More` screen, while following professional UI standards.
+
+### What Was Done
+
+- Created a reusable shared bottom navigation widget:
+  - `lib/src/core/widgets/app_bottom_nav.dart`
+  - Four items: Dashboard, Girvi, Customers, More.
+  - Bilingual Marathi/English labels with gold selected state and navy ink unselected state.
+- Created the More modules hub:
+  - `lib/src/features/more/pages/more_page.dart`
+  - 2-column grid of module cards: Inventory, Vault, Interest, Compliance, Purchase, Sales, Savings, Reports, Staff, Settings.
+  - Each card has an icon, Marathi/English label, and navigates to the module's route.
+  - `lib/src/features/more/more.dart` barrel export.
+- Added placeholder dashboard pages for the remaining roadmap modules so they can be listed and navigated to:
+  - `lib/src/features/savings/pages/savings_dashboard_page.dart`
+  - `lib/src/features/reports/pages/reports_dashboard_page.dart`
+  - `lib/src/features/staff/pages/staff_dashboard_page.dart`
+  - `lib/src/features/settings/pages/settings_dashboard_page.dart`
+  - Each with a matching theme color file and barrel export.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/more` → More
+  - `/savings` → Savings Dashboard
+  - `/reports` → Reports Dashboard
+  - `/staff` → Staff & RBAC Dashboard
+  - `/settings` → Settings Dashboard
+- Replaced the individual bottom navigation implementations in:
+  - `lib/src/features/dashboard/dashboard_page.dart`
+  - `lib/src/features/girvi/pages/girvi_list_page.dart`
+  - `lib/src/features/customer/pages/customer_list_page.dart`
+  All three now use the shared `AppBottomNav` with correct selected index.
+- The `More` screen also includes the shared bottom navigation with the `More` item selected.
+
+### Design Patterns Followed
+
+- Reusable shared widget in `lib/src/core/widgets/` to avoid duplication.
+- Consistent navy/gold palette, white cards, rounded corners, and soft shadows.
+- Bilingual Marathi-first labels with English sub-labels.
+- Bottom nav available on Dashboard, Girvi List, Customer List, and More screens.
+- Avoided circular imports in the More page by using string route names for primary tabs.
+
+### Verification
+
+- Manually reviewed all new and modified files for syntax and const-correctness.
+- Verified brace/parenthesis/bracket balance across all modified files.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Savings, Reports, Staff & RBAC, and Settings screens are placeholder "coming soon" pages.
+- All other modules remain static UI prototypes with mock data and placeholder actions.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/core lib/src/features/more lib/src/features/dashboard lib/src/features/girvi lib/src/features/customer lib/src/features/savings lib/src/features/reports lib/src/features/staff lib/src/features/settings lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Savings Scheme (MOD-SAVINGS), Reports & Analytics, Settings, and Staff & RBAC.

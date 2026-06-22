@@ -4,12 +4,15 @@ import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_details_page.dart';
 import 'customer_search_page.dart';
 
+/// SCR-010 Customer List / Search
+/// Displays a searchable, filterable list of customers with pagination.
 class CustomerListPage extends StatelessWidget {
   const CustomerListPage({super.key});
 
@@ -33,60 +36,65 @@ class CustomerListPage extends StatelessWidget {
             const SizedBox(height: 8),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 children: const [
-                  _CustomerCard(
-                    name: 'सुरेश पाटील',
-                    nameEn: 'Suresh Patil',
-                    mobile: '+91 98765 43210',
-                    customerId: 'CUST-2026-000101',
-                    activeGirvi: 2,
-                    outstanding: '₹1,25,000',
-                    risk: 'LOW',
+                  _CustomerTile(
+                    name: 'Ramesh Mahajan',
+                    mobile: '98765 43210',
+                    customerId: 'CUS-000101',
+                    active: true,
+                    avatarColor: Color(0xFFFFF7E9),
+                    initialsColor: Color(0xFFE7A726),
                   ),
-                  SizedBox(height: 12),
-                  _CustomerCard(
-                    name: 'मीना जाधव',
-                    nameEn: 'Meena Jadhav',
-                    mobile: '+91 87654 32109',
-                    customerId: 'CUST-2026-000102',
-                    activeGirvi: 1,
-                    outstanding: '₹45,000',
-                    risk: 'LOW',
+                  SizedBox(height: 10),
+                  _CustomerTile(
+                    name: 'Suresh More',
+                    mobile: '87654 32109',
+                    customerId: 'CUS-000102',
+                    active: true,
+                    avatarColor: Color(0xFFF0F4FF),
+                    initialsColor: Color(0xFF5E72E4),
                   ),
-                  SizedBox(height: 12),
-                  _CustomerCard(
-                    name: 'अमोल देशमुख',
-                    nameEn: 'Amol Deshmukh',
-                    mobile: '+91 76543 21098',
-                    customerId: 'CUST-2026-000103',
-                    activeGirvi: 3,
-                    outstanding: '₹2,80,000',
-                    risk: 'MEDIUM',
+                  SizedBox(height: 10),
+                  _CustomerTile(
+                    name: 'Priya Patil',
+                    mobile: '77788 99001',
+                    customerId: 'CUS-000103',
+                    active: true,
+                    avatarColor: Color(0xFFE6F7EF),
+                    initialsColor: Color(0xFF07934A),
                   ),
-                  SizedBox(height: 12),
-                  _CustomerCard(
-                    name: 'सुनीता शिंदे',
-                    nameEn: 'Sunita Shinde',
-                    mobile: '+91 65432 10987',
-                    customerId: 'CUST-2026-000104',
-                    activeGirvi: 0,
-                    outstanding: '₹0',
-                    risk: 'LOW',
+                  SizedBox(height: 10),
+                  _CustomerTile(
+                    name: 'Vikram Jadhav',
+                    mobile: '90909 12345',
+                    customerId: 'CUS-000104',
+                    active: false,
+                    avatarColor: Color(0xFFFFEBEE),
+                    initialsColor: Color(0xFFE21B2D),
                   ),
-                  SizedBox(height: 12),
-                  _CustomerCard(
-                    name: 'राजेंद्र कदम',
-                    nameEn: 'Rajendra Kadam',
-                    mobile: '+91 54321 09876',
-                    customerId: 'CUST-2026-000105',
-                    activeGirvi: 2,
-                    outstanding: '₹3,50,000',
-                    risk: 'HIGH',
+                  SizedBox(height: 10),
+                  _CustomerTile(
+                    name: 'Anil Kadam',
+                    mobile: '70203 45678',
+                    customerId: 'CUS-000105',
+                    active: true,
+                    avatarColor: Color(0xFFFFF3E0),
+                    initialsColor: Color(0xFFEF6C00),
+                  ),
+                  SizedBox(height: 10),
+                  _CustomerTile(
+                    name: 'Meena Deshmukh',
+                    mobile: '98220 33445',
+                    customerId: 'CUS-000106',
+                    active: true,
+                    avatarColor: Color(0xFFF3E5F5),
+                    initialsColor: Color(0xFF8E24AA),
                   ),
                 ],
               ),
             ),
+            const _PaginationFooter(),
             AppBottomNav(
               currentIndex: 2,
               onTap: (index) {
@@ -118,12 +126,18 @@ class _CustomerListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 14, 18, 8),
+      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
       child: Row(
         children: [
-          Expanded(
+          IconButton(
+            onPressed: () =>
+                AppNavigation.popOrGoNamed(context, DashboardPage.routeName),
+            icon: const Icon(Icons.arrow_back, color: CustomerColors.ink),
+            tooltip: 'Back',
+          ),
+          const Expanded(
             child: Text(
-              'ग्राहक यादी / Customer List',
+              'ग्राहक सूची / Customers',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: CustomerColors.ink,
@@ -134,8 +148,8 @@ class _CustomerListHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: () => context.goNamed(CreateCustomerPage.routeName),
-            icon: const Icon(Icons.add_circle, color: CustomerColors.ink),
-            tooltip: 'Filter',
+            icon: const Icon(Icons.add, color: CustomerColors.ink),
+            tooltip: 'Add Customer',
           ),
         ],
       ),
@@ -151,6 +165,7 @@ class _SearchBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -170,15 +185,25 @@ class _SearchBar extends StatelessWidget {
           children: const [
             Icon(Icons.search, color: CustomerColors.muted, size: 22),
             SizedBox(width: 12),
-            Text(
-              'नाव / मोबाईल / आयडी शोधा',
-              style: TextStyle(
-                color: CustomerColors.muted,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            Expanded(
+              child: Text(
+                'नाव, मोबाईल, ग्राहक ID शोधा',
+                style: TextStyle(
+                  color: CustomerColors.muted,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
-            Spacer(),
+            Text(
+              'Search name, mobile, customer ID',
+              style: TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            SizedBox(width: 10),
             Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
           ],
         ),
@@ -195,11 +220,10 @@ class _FilterChips extends StatefulWidget {
 }
 
 class _FilterChipsState extends State<_FilterChips> {
-  final List<String> _labels = const [
-    'सर्व / All',
-    'सक्रिय / Active',
-    'निष्क्रिय / Inactive',
-    'उच्च जोखीम / High Risk',
+  final List<_FilterChipData> _filters = const [
+    _FilterChipData(mr: 'सर्व', en: 'All', count: 156),
+    _FilterChipData(mr: 'सक्रिय', en: 'Active', count: 112),
+    _FilterChipData(mr: 'निष्क्रिय', en: 'Inactive', count: 44),
   ];
   int _selected = 0;
 
@@ -210,15 +234,16 @@ class _FilterChipsState extends State<_FilterChips> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _labels.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemCount: _filters.length,
+        separatorBuilder: (_, _) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final selected = index == _selected;
+          final filter = _filters[index];
           return ChoiceChip(
             label: Text(
-              _labels[index],
+              '${filter.mr} / ${filter.en} (${filter.count})',
               style: TextStyle(
-                color: selected ? CustomerColors.gold : CustomerColors.ink,
+                color: selected ? Colors.white : CustomerColors.ink,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
               ),
@@ -240,35 +265,34 @@ class _FilterChipsState extends State<_FilterChips> {
   }
 }
 
-class _CustomerCard extends StatelessWidget {
-  const _CustomerCard({
+class _FilterChipData {
+  const _FilterChipData({
+    required this.mr,
+    required this.en,
+    required this.count,
+  });
+
+  final String mr;
+  final String en;
+  final int count;
+}
+
+class _CustomerTile extends StatelessWidget {
+  const _CustomerTile({
     required this.name,
-    required this.nameEn,
     required this.mobile,
     required this.customerId,
-    required this.activeGirvi,
-    required this.outstanding,
-    required this.risk,
+    required this.active,
+    required this.avatarColor,
+    required this.initialsColor,
   });
 
   final String name;
-  final String nameEn;
   final String mobile;
   final String customerId;
-  final int activeGirvi;
-  final String outstanding;
-  final String risk;
-
-  Color get _riskColor {
-    switch (risk) {
-      case 'HIGH':
-        return CustomerColors.red;
-      case 'MEDIUM':
-        return CustomerColors.gold;
-      default:
-        return CustomerColors.green;
-    }
-  }
+  final bool active;
+  final Color avatarColor;
+  final Color initialsColor;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +303,7 @@ class _CustomerCard extends StatelessWidget {
       ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -292,116 +316,67 @@ class _CustomerCard extends StatelessWidget {
             ),
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        name,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: CustomerColors.ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        nameEn,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: CustomerColors.muted,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _riskColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    risk,
-                    style: TextStyle(
-                      color: _riskColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
+            _InitialsAvatar(
+              name: name,
+              backgroundColor: avatarColor,
+              foregroundColor: initialsColor,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    name,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: CustomerColors.ink,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w900,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 4),
+                  Text(
+                    '$mobile • $customerId',
+                    style: const TextStyle(
+                      color: CustomerColors.muted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          (active ? CustomerColors.green : CustomerColors.red)
+                              .withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      active ? 'सक्रिय / Active' : 'निष्क्रिय / Inactive',
+                      style: TextStyle(
+                        color: active
+                            ? CustomerColors.green
+                            : CustomerColors.red,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                const Icon(
-                  Icons.phone_outlined,
-                  size: 16,
-                  color: CustomerColors.muted,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  mobile,
-                  style: const TextStyle(
-                    color: CustomerColors.ink,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                const Icon(
-                  Icons.badge_outlined,
-                  size: 16,
-                  color: CustomerColors.muted,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  customerId,
-                  style: const TextStyle(
-                    color: CustomerColors.muted,
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-            const Divider(height: 22, color: CustomerColors.line),
-            Row(
-              children: [
-                Expanded(
-                  child: _SummaryItem(
-                    labelMr: 'सक्रिय गिरवी',
-                    labelEn: 'Active Girvi',
-                    value: activeGirvi.toString(),
-                  ),
-                ),
-                Container(width: 1, height: 30, color: CustomerColors.line),
-                Expanded(
-                  child: _SummaryItem(
-                    labelMr: 'बाकी रक्कम',
-                    labelEn: 'Outstanding',
-                    value: outstanding,
-                  ),
-                ),
-              ],
+            const Icon(
+              Icons.chevron_right,
+              color: CustomerColors.muted,
+              size: 22,
             ),
           ],
         ),
@@ -410,56 +385,95 @@ class _CustomerCard extends StatelessWidget {
   }
 }
 
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({
-    required this.labelMr,
-    required this.labelEn,
-    required this.value,
+class _InitialsAvatar extends StatelessWidget {
+  const _InitialsAvatar({
+    required this.name,
+    required this.backgroundColor,
+    required this.foregroundColor,
   });
 
-  final String labelMr;
-  final String labelEn;
-  final String value;
+  final String name;
+  final Color backgroundColor;
+  final Color foregroundColor;
+
+  String get _initials {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '';
+    if (parts.length == 1) {
+      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '';
+    }
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        Text(
-          labelMr,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 1),
-        Text(
-          labelEn,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 5),
-        Text(
-          value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-            color: CustomerColors.ink,
+    return Container(
+      width: 48,
+      height: 48,
+      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+      child: Center(
+        child: Text(
+          _initials,
+          style: TextStyle(
+            color: foregroundColor,
             fontSize: 16,
             fontWeight: FontWeight.w900,
           ),
         ),
-      ],
+      ),
     );
   }
 }
 
+class _PaginationFooter extends StatelessWidget {
+  const _PaginationFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.chevron_left,
+              color: CustomerColors.muted,
+              size: 22,
+            ),
+            tooltip: 'Previous',
+          ),
+          const SizedBox(width: 8),
+          const Text(
+            'पृष्ठ 1 / 16',
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 13,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          const SizedBox(width: 4),
+          const Text(
+            '• Page 1 of 16',
+            style: TextStyle(
+              color: CustomerColors.muted,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            onPressed: () {},
+            icon: const Icon(
+              Icons.chevron_right,
+              color: CustomerColors.ink,
+              size: 22,
+            ),
+            tooltip: 'Next',
+          ),
+        ],
+      ),
+    );
+  }
+}

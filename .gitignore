@@ -27,6 +27,7 @@ windows/flutter/ephemeral/
 .idea/
 .vscode/
 *.iml
+.venv/
 
 # OS/editor files
 .DS_Store

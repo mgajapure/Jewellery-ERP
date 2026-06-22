@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
@@ -97,6 +96,7 @@ class _AuctionWorkflowPageState extends State<AuctionWorkflowPage> {
           onPressed: () => AppNavigation.popOrGoNamed(
             context,
             GirviDetailsPage.routeName,
+            pathParameters: {'id': _girviId},
           ),
         ),
         title: const Column(
@@ -195,6 +195,7 @@ class _AuctionWorkflowPageState extends State<AuctionWorkflowPage> {
                           AppNavigation.popOrGoNamed(
                             context,
                             GirviDetailsPage.routeName,
+                            pathParameters: {'id': _girviId},
                           );
                         }
                       : null,

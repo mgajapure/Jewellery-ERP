@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../core/widgets/app_bottom_nav.dart';
-import '../compliance/compliance.dart';
-import '../customer/customer.dart';
-import '../girvi/girvi.dart';
-import '../interest/interest.dart';
-import '../more/more.dart';
-import '../purchase/purchase.dart';
-import '../sales/sales.dart';
-import '../vault/vault.dart';
-
-const _navy = Color(0xFF061C49);
-const _gold = Color(0xFFE7A726);
-const _ink = Color(0xFF071A49);
-const _muted = Color(0xFF5E6880);
-const _green = Color(0xFF07934A);
-const _red = Color(0xFFE21B2D);
-const _screenBg = Color(0xFFF8F9FC);
-const _line = Color(0xFFE5E8EF);
+import '../../../../core/di/injection.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/utils/extensions.dart';
+import '../../../../shared/widgets/app_bottom_nav.dart';
+import '../../../../shared/widgets/app_card.dart';
+import '../../../../shared/widgets/app_error_state.dart';
+import '../../../../shared/widgets/app_loader.dart';
+import '../../../compliance/compliance.dart';
+import '../../../customer/customer.dart';
+import '../../../girvi/girvi.dart';
+import '../../../interest/interest.dart';
+import '../../../more/more.dart';
+import '../../../purchase/purchase.dart';
+import '../../../sales/sales.dart';
+import '../../../vault/vault.dart';
+import '../../domain/entities/dashboard_summary.dart';
+import '../bloc/dashboard_bloc.dart';
+import '../bloc/dashboard_event.dart';
+import '../bloc/dashboard_state.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -27,51 +29,79 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<DashboardBloc>()..add(const LoadDashboard()),
+      child: const _DashboardView(),
+    );
+  }
+}
+
+class _DashboardView extends StatelessWidget {
+  const _DashboardView();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: _screenBg,
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: Column(
           children: [
             const _DashboardHeader(),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
-                children: [
-                  const _GoldRateCard(),
-                  const SizedBox(height: 16),
-                  const _SectionHeader(
-                    title: 'मुख्य आकडेवारी / Key Metrics',
-                    trailing: 'आज / Today',
-                  ),
-                  const SizedBox(height: 10),
-                  const _MetricGrid(),
-                  const SizedBox(height: 18),
-                  const _SectionHeader(title: 'जलद कृती / Quick Actions'),
-                  const SizedBox(height: 12),
-                  _QuickActions(
-                    onNewGirviTap: () =>
-                        context.goNamed(CreateGirviWizardPage.routeName),
-                    onSearchCustomerTap: () =>
-                        context.goNamed(CustomerSearchPage.routeName),
-                    onVaultSearchTap: () =>
-                        context.goNamed(VaultSearchPage.routeName),
-                    onInterestCalcTap: () =>
-                        context.goNamed(InterestCalculatorPage.routeName),
-                    onComplianceTap: () =>
-                        context.goNamed(ComplianceDashboardPage.routeName),
-                    onPurchaseTap: () =>
-                        context.goNamed(PurchaseDashboardPage.routeName),
-                    onSalesTap: () =>
-                        context.goNamed(SalesDashboardPage.routeName),
-                  ),
-                  const SizedBox(height: 22),
-                  const _SectionHeader(
-                    title: 'अलीकडील पेमेंट्स / Recent Payments',
-                    trailing: 'सर्व पहा / View All',
-                  ),
-                  const SizedBox(height: 12),
-                  const _RecentPaymentsList(),
-                ],
+              child: BlocBuilder<DashboardBloc, DashboardState>(
+                builder: (context, state) {
+                  return switch (state) {
+                    DashboardInitial() || DashboardLoading() =>
+                      const AppLoader(),
+                    DashboardError(:final message) => AppErrorState(
+                        message: message,
+                        onRetry: () => context
+                            .read<DashboardBloc>()
+                            .add(const LoadDashboard()),
+                      ),
+                    DashboardLoaded(:final summary) => ListView(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+                        children: [
+                          _GoldRateCard(goldRate: summary.goldRate),
+                          const SizedBox(height: 16),
+                          _SectionHeader(
+                            title: 'मुख्य आकडेवारी / Key Metrics',
+                            trailing: 'आज / Today',
+                          ),
+                          const SizedBox(height: 10),
+                          _MetricGrid(summary: summary),
+                          const SizedBox(height: 18),
+                          const _SectionHeader(
+                            title: 'जलद कृती / Quick Actions',
+                          ),
+                          const SizedBox(height: 12),
+                          _QuickActions(
+                            onNewGirviTap: () =>
+                                context.goNamed(CreateGirviWizardPage.routeName),
+                            onSearchCustomerTap: () =>
+                                context.goNamed(CustomerSearchPage.routeName),
+                            onVaultSearchTap: () =>
+                                context.goNamed(VaultSearchPage.routeName),
+                            onInterestCalcTap: () => context
+                                .goNamed(InterestCalculatorPage.routeName),
+                            onComplianceTap: () => context
+                                .goNamed(ComplianceDashboardPage.routeName),
+                            onPurchaseTap: () =>
+                                context.goNamed(PurchaseDashboardPage.routeName),
+                            onSalesTap: () =>
+                                context.goNamed(SalesDashboardPage.routeName),
+                          ),
+                          const SizedBox(height: 22),
+                          const _SectionHeader(
+                            title: 'अलीकडील पेमेंट्स / Recent Payments',
+                            trailing: 'सर्व पहा / View All',
+                          ),
+                          const SizedBox(height: 12),
+                          const _RecentPaymentsList(),
+                        ],
+                      ),
+                  };
+                },
               ),
             ),
             AppBottomNav(
@@ -79,16 +109,12 @@ class DashboardPage extends StatelessWidget {
               onTap: (index) {
                 switch (index) {
                   case 0:
-                    break;
                   case 1:
                     context.goNamed(GirviListPage.routeName);
-                    break;
                   case 2:
                     context.goNamed(CustomerListPage.routeName);
-                    break;
                   case 3:
                     context.goNamed(MorePage.routeName);
-                    break;
                 }
               },
             ),
@@ -110,14 +136,14 @@ class _DashboardHeader extends StatelessWidget {
         children: [
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.menu, color: _ink),
+            icon: const Icon(Icons.menu, color: AppColors.ink),
             tooltip: 'Menu',
           ),
           const Spacer(),
-          const Text(
+          Text(
             'डॅशबोर्ड / Dashboard',
             style: TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
@@ -128,7 +154,7 @@ class _DashboardHeader extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: () {},
-                icon: const Icon(Icons.notifications_none, color: _ink),
+                icon: const Icon(Icons.notifications_none, color: AppColors.ink),
                 tooltip: 'Notifications',
               ),
               Positioned(
@@ -139,7 +165,7 @@ class _DashboardHeader extends StatelessWidget {
                   height: 16,
                   alignment: Alignment.center,
                   decoration: const BoxDecoration(
-                    color: _red,
+                    color: AppColors.danger,
                     shape: BoxShape.circle,
                   ),
                   child: const Text(
@@ -161,14 +187,16 @@ class _DashboardHeader extends StatelessWidget {
 }
 
 class _GoldRateCard extends StatelessWidget {
-  const _GoldRateCard();
+  const _GoldRateCard({required this.goldRate});
+
+  final double goldRate;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
-        color: _navy,
+        color: AppColors.navy,
         borderRadius: BorderRadius.circular(10),
         boxShadow: const [
           BoxShadow(
@@ -182,8 +210,8 @@ class _GoldRateCard extends StatelessWidget {
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Expanded(
+            children: [
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -212,15 +240,15 @@ class _GoldRateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '₹71,850',
-                    style: TextStyle(
-                      color: _gold,
+                    goldRate.toRupeeString(),
+                    style: const TextStyle(
+                      color: AppColors.secondary,
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 8),
-                  Text(
+                  const SizedBox(height: 8),
+                  const Text(
                     '+ ₹320 (0.45%) ↑',
                     style: TextStyle(
                       color: Color(0xFF34D06D),
@@ -233,8 +261,8 @@ class _GoldRateCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 22),
-          Row(
-            children: const [
+          const Row(
+            children: [
               Text(
                 '06 Jun 2026, 09:30 AM',
                 style: TextStyle(color: Colors.white70, fontSize: 12),
@@ -270,7 +298,7 @@ class _SectionHeader extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 14,
               fontWeight: FontWeight.w900,
             ),
@@ -281,7 +309,7 @@ class _SectionHeader extends StatelessWidget {
           Text(
             trailing!,
             style: const TextStyle(
-              color: _muted,
+              color: AppColors.muted,
               fontSize: 12,
               fontWeight: FontWeight.w700,
             ),
@@ -293,7 +321,9 @@ class _SectionHeader extends StatelessWidget {
 }
 
 class _MetricGrid extends StatelessWidget {
-  const _MetricGrid();
+  const _MetricGrid({required this.summary});
+
+  final DashboardSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -304,30 +334,30 @@ class _MetricGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: const [
+      children: [
         _MetricTile(
           titleMr: 'एकूण सक्रिय गिरवी',
           titleEn: 'Active Girvi',
-          value: '128',
+          value: summary.activeGirvi.toString(),
           delta: '+12 आज / today',
         ),
         _MetricTile(
           titleMr: 'एकूण डिस्बर्समेंट',
           titleEn: 'Total Disbursed',
-          value: '₹2.45 Cr',
+          value: summary.loanExposure.toRupeeString(),
           delta: '+₹18.6L आज / today',
         ),
         _MetricTile(
           titleMr: 'आजचे व्याज',
           titleEn: 'Interest Due Today',
-          value: '₹48,760',
+          value: summary.collectionsToday.toRupeeString(),
           delta: '+₹3,250 आज / today',
         ),
         _MetricTile(
           titleMr: 'ओव्हरड्यू खाती',
           titleEn: 'Overdue Accounts',
-          value: '21',
-          valueColor: _red,
+          value: summary.overdue.toString(),
+          valueColor: AppColors.danger,
           delta: '+2 आज / today',
         ),
       ],
@@ -341,7 +371,7 @@ class _MetricTile extends StatelessWidget {
     required this.titleEn,
     required this.value,
     required this.delta,
-    this.valueColor = _ink,
+    this.valueColor = AppColors.ink,
   });
 
   final String titleMr;
@@ -352,20 +382,8 @@ class _MetricTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AppCard(
       padding: const EdgeInsets.fromLTRB(18, 16, 16, 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(9),
-        border: Border.all(color: _line),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -374,7 +392,7 @@ class _MetricTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
@@ -385,7 +403,7 @@ class _MetricTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 12,
               fontWeight: FontWeight.w500,
             ),
@@ -407,7 +425,7 @@ class _MetricTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _green,
+              color: AppColors.success,
               fontSize: 11,
               fontWeight: FontWeight.w800,
             ),
@@ -545,9 +563,9 @@ class _QuickAction extends StatelessWidget {
             height: 54,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: filled ? _navy : Colors.white,
+              color: filled ? AppColors.navy : AppColors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: filled ? _navy : _line),
+              border: Border.all(color: filled ? AppColors.navy : AppColors.line),
               boxShadow: const [
                 BoxShadow(
                   color: Color(0x10000000),
@@ -556,7 +574,8 @@ class _QuickAction extends StatelessWidget {
                 ),
               ],
             ),
-            child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
+            child: Icon(icon,
+                color: filled ? AppColors.white : AppColors.ink, size: 27),
           ),
           const SizedBox(height: 8),
           Text(
@@ -565,7 +584,7 @@ class _QuickAction extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 10,
               fontWeight: FontWeight.w800,
             ),
@@ -577,7 +596,7 @@ class _QuickAction extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: _ink,
+              color: AppColors.ink,
               fontSize: 10,
               fontWeight: FontWeight.w500,
               height: 1.1,
@@ -594,20 +613,9 @@ class _RecentPaymentsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: _line),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x10000000),
-            blurRadius: 12,
-            offset: Offset(0, 5),
-          ),
-        ],
-      ),
-      child: const Column(
+    return AppCard(
+      padding: EdgeInsets.zero,
+      child: Column(
         children: [
           _PaymentTransactionTile(
             customerName: 'सुरेश पाटील',
@@ -676,7 +684,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               color: const Color(0xFFEFF8F3),
               borderRadius: BorderRadius.circular(21),
             ),
-            child: Icon(icon, color: _green, size: 22),
+            child: Icon(icon, color: AppColors.success, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -688,7 +696,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: _ink,
+                    color: AppColors.ink,
                     fontSize: 13,
                     fontWeight: FontWeight.w900,
                   ),
@@ -699,7 +707,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: _muted,
+                    color: AppColors.muted,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -710,7 +718,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: _ink,
+                    color: AppColors.ink,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -725,7 +733,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               Text(
                 amount,
                 style: const TextStyle(
-                  color: _ink,
+                  color: AppColors.ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
                 ),
@@ -734,7 +742,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               Text(
                 time,
                 style: const TextStyle(
-                  color: _muted,
+                  color: AppColors.muted,
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
                 ),
@@ -743,7 +751,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               Text(
                 status,
                 style: const TextStyle(
-                  color: _green,
+                  color: AppColors.success,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
                 ),
@@ -761,7 +769,6 @@ class _ListDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Divider(height: 1, color: _line, indent: 68);
+    return const Divider(height: 1, color: AppColors.line, indent: 68);
   }
 }
-

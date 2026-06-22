@@ -2,7 +2,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth.dart';
 import '../features/customer/customer.dart';
-import '../features/dashboard/dashboard_page.dart';
+import '../features/dashboard/presentation/pages/dashboard_page.dart';
 import '../features/girvi/girvi.dart';
 import '../features/inventory/inventory.dart';
 import '../features/compliance/compliance.dart';

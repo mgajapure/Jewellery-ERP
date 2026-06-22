@@ -12,7 +12,7 @@ import '../features/sales/sales.dart';
 import '../features/vault/vault.dart';
 
 final appRouter = GoRouter(
-  initialLocation: '/splash',
+  initialLocation: '/',
   routes: [
     GoRoute(
       path: '/splash',

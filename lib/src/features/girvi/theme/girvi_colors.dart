@@ -9,6 +9,7 @@ abstract class GirviColors {
   static const muted = Color(0xFF5E6880);
   static const green = Color(0xFF07934A);
   static const red = Color(0xFFE21B2D);
+  static const orange = Color.fromARGB(255, 242, 123, 68);
   static const screenBg = Color(0xFFF8F9FC);
   static const line = Color(0xFFE5E8EF);
   static const cream = Color(0xFFFFF7E9);

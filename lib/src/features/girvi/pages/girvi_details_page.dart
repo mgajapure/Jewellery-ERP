@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jewellery_erp/src/features/girvi/girvi.dart';
 
 import '../theme/girvi_colors.dart';
 
@@ -111,7 +112,10 @@ class _GirviHeaderCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: GirviColors.green.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -282,11 +286,7 @@ class _SummaryGrid extends StatelessWidget {
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       children: const [
-        _SummaryCard(
-          titleMr: 'एकूण वस्तू',
-          titleEn: 'Total Items',
-          value: '2',
-        ),
+        _SummaryCard(titleMr: 'एकूण वस्तू', titleEn: 'Total Items', value: '2'),
         _SummaryCard(
           titleMr: 'एकूण वजन',
           titleEn: 'Total Weight',
@@ -297,11 +297,7 @@ class _SummaryGrid extends StatelessWidget {
           titleEn: 'Valuation',
           value: '₹95,500',
         ),
-        _SummaryCard(
-          titleMr: 'LTV',
-          titleEn: 'Loan to Value',
-          value: '78.5%',
-        ),
+        _SummaryCard(titleMr: 'LTV', titleEn: 'Loan to Value', value: '78.5%'),
       ],
     );
   }
@@ -457,9 +453,7 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
-          side: BorderSide(
-            color: filled ? GirviColors.navy : GirviColors.line,
-          ),
+          side: BorderSide(color: filled ? GirviColors.navy : GirviColors.line),
         ),
       ),
       child: Row(
@@ -637,11 +631,7 @@ class _ItemTile extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.chevron_right,
-            color: GirviColors.muted,
-            size: 22,
-          ),
+          const Icon(Icons.chevron_right, color: GirviColors.muted, size: 22),
         ],
       ),
     );

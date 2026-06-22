@@ -25,7 +25,7 @@ class _RegistrationPendingPageState extends State<RegistrationPendingPage> {
   @override
   void initState() {
     super.initState();
-    _dashboardTimer = Timer(const Duration(seconds: 3), () {
+    _dashboardTimer = Timer(const Duration(seconds: 1), () {
       if (mounted) {
         context.goNamed(DashboardPage.routeName);
       }
@@ -47,7 +47,7 @@ class _RegistrationPendingPageState extends State<RegistrationPendingPage> {
             padding: EdgeInsets.fromLTRB(22, 12, 22, 22),
             child: Column(
               children: [
-                SizedBox(height: 56),
+                SizedBox(height: 10),
                 _PendingBadge(),
                 Spacer(),
                 _PendingSheet(),
@@ -81,7 +81,7 @@ class _PendingBadge extends StatelessWidget {
             child: const Icon(
               Icons.hourglass_empty,
               color: AuthColors.gold,
-              size: 72,
+              size: 32,
             ),
           ),
           const Positioned(

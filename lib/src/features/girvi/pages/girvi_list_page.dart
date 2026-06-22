@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:jewellery_erp/src/features/customer/customer.dart';
+import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
+import 'package:jewellery_erp/src/features/inventory/inventory.dart';
 
 import '../theme/girvi_colors.dart';
 import 'create_girvi_wizard_page.dart';
@@ -90,19 +93,13 @@ class GirviListPage extends StatelessWidget {
                 ],
               ),
             ),
+            _AppBottomNav(
+              onDashboardTap: () => context.goNamed(DashboardPage.routeName),
+              onCustomersTap: () => context.goNamed(CustomerListPage.routeName),
+              onInventoryTap: () =>
+                  context.goNamed(InventoryListPage.routeName),
+            ),
           ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.goNamed(CreateGirviWizardPage.routeName),
-        backgroundColor: GirviColors.navy,
-        icon: const Icon(Icons.add, color: GirviColors.gold),
-        label: const Text(
-          'नवीन गिरवी / New Girvi',
-          style: TextStyle(
-            color: GirviColors.gold,
-            fontWeight: FontWeight.w800,
-          ),
         ),
       ),
     );
@@ -118,11 +115,6 @@ class _GirviListHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 14, 18, 8),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back, color: GirviColors.ink),
-            tooltip: 'Back',
-          ),
           const Expanded(
             child: Text(
               'गिरवी यादी / Girvi List',
@@ -135,9 +127,9 @@ class _GirviListHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.filter_list, color: GirviColors.ink),
-            tooltip: 'Filter',
+            onPressed: () => context.goNamed(CreateGirviWizardPage.routeName),
+            icon: const Icon(Icons.add_circle, color: GirviColors.ink),
+            tooltip: 'नवीन गिरवी / New Girvi',
           ),
         ],
       ),
@@ -353,7 +345,10 @@ class _GirviCard extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: _statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
@@ -503,8 +498,8 @@ class _DaysLeftChip extends StatelessWidget {
     final text = isOverdue
         ? '${-daysLeft} दिवस उशीर / Late'
         : daysLeft == 0
-            ? 'आज देय / Due Today'
-            : '$daysLeft दिवस शिल्लक / Left';
+        ? 'आज देय / Due Today'
+        : '$daysLeft दिवस शिल्लक / Left';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -519,6 +514,123 @@ class _DaysLeftChip extends StatelessWidget {
           fontSize: 10,
           fontWeight: FontWeight.w800,
         ),
+      ),
+    );
+  }
+}
+
+class _AppBottomNav extends StatelessWidget {
+  const _AppBottomNav({
+    required this.onDashboardTap,
+    required this.onCustomersTap,
+    required this.onInventoryTap,
+  });
+
+  final VoidCallback onDashboardTap;
+  final VoidCallback onCustomersTap;
+  final VoidCallback onInventoryTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: 76,
+      padding: const EdgeInsets.only(top: 8),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: _line)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.home_outlined,
+              titleMr: 'डॅशबोर्ड',
+              titleEn: 'Dashboard',
+              onTap: onDashboardTap,
+            ),
+          ),
+          const Expanded(
+            child: _BottomNavItem(
+              icon: Icons.diamond_outlined,
+              titleMr: 'गिरवी',
+              titleEn: 'Girvi',
+              selected: true,
+            ),
+          ),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.groups_outlined,
+              titleMr: 'ग्राहक',
+              titleEn: 'Customers',
+              onTap: onCustomersTap,
+            ),
+          ),
+          Expanded(
+            child: _BottomNavItem(
+              icon: Icons.inventory_2_outlined,
+              titleMr: 'स्टॉक',
+              titleEn: 'Inventory',
+              onTap: onInventoryTap,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+const _gold = Color(0xFFE7A726);
+const _ink = Color(0xFF071A49);
+const _muted = Color(0xFF5E6880);
+const _line = Color(0xFFE5E8EF);
+
+class _BottomNavItem extends StatelessWidget {
+  const _BottomNavItem({
+    required this.icon,
+    required this.titleMr,
+    required this.titleEn,
+    this.selected = false,
+    this.onTap,
+  });
+
+  final IconData icon;
+  final String titleMr;
+  final String titleEn;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = selected ? _gold : _ink;
+
+    return InkWell(
+      onTap: onTap,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: color, size: 22),
+          const SizedBox(height: 3),
+          Text(
+            titleMr,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: color,
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            titleEn,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: selected ? _ink : _muted,
+              fontSize: 8,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ],
       ),
     );
   }

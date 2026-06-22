@@ -112,13 +112,13 @@ class _GirviListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 14, 18, 8),
+      padding: const EdgeInsets.fromLTRB(22, 12, 22, 12),
       child: Row(
         children: [
           const Expanded(
             child: Text(
               'गिरवी यादी / Girvi List',
-              textAlign: TextAlign.center,
+              textAlign: TextAlign.left,
               style: TextStyle(
                 color: GirviColors.ink,
                 fontSize: 16,
@@ -307,65 +307,91 @@ class _GirviCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                CircleAvatar(
+                  radius: 20.0, // Controls the size (diameter will be 80.0)
+                  backgroundColor:
+                      GirviColors.ink, // Placeholder background color
+                  child: CircleAvatar(
+                    radius: 19.0, // Controls the size (diameter will be 80.0)
+                    backgroundColor: GirviColors.screenBg,
+                    child: Icon(
+                      Icons.person,
+                      size: 25.0,
+                      color: GirviColors.ink, // Placeholder icon
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        serialId,
-                        style: const TextStyle(
-                          color: GirviColors.gold,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
-                        ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            customerName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: GirviColors.ink,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 5,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _statusColor.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _statusText,
+                              style: TextStyle(
+                                color: _statusColor,
+                                fontSize: 8,
+                                fontWeight: FontWeight.w800,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 6),
-                      Text(
-                        customerName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: GirviColors.ink,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        customerNameEn,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          color: GirviColors.muted,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
+                      const SizedBox(height: 3),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            customerNameEn,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: GirviColors.muted,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            serialId,
+                            style: const TextStyle(
+                              color: GirviColors.gold,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w900,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 10,
-                    vertical: 5,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _statusColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _statusText,
-                    style: TextStyle(
-                      color: _statusColor,
-                      fontSize: 10,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 14),
+            const Divider(height: 22, color: GirviColors.line),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Expanded(
                   child: _SummaryItem(
@@ -374,7 +400,7 @@ class _GirviCard extends StatelessWidget {
                     value: loanAmount,
                   ),
                 ),
-                Container(width: 1, height: 30, color: GirviColors.line),
+                Container(width: 1, height: 50, color: GirviColors.line),
                 Expanded(
                   child: _SummaryItem(
                     labelMr: 'बाकी रक्कम',
@@ -382,21 +408,25 @@ class _GirviCard extends StatelessWidget {
                     value: outstanding,
                   ),
                 ),
+                Container(width: 1, height: 50, color: GirviColors.line),
+                Expanded(
+                  child: _SummaryItem(
+                    labelMr: 'देय तारीख',
+                    labelEn: 'Due Date',
+                    value: dueDate,
+                  ),
+                ),
               ],
             ),
             const Divider(height: 22, color: GirviColors.line),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 _MetaChip(
                   icon: Icons.diamond_outlined,
                   label: '$items वस्तू / Items',
                 ),
                 const SizedBox(width: 12),
-                _MetaChip(
-                  icon: Icons.calendar_today_outlined,
-                  label: 'देय तारीख / $dueDate',
-                ),
-                const Spacer(),
                 _DaysLeftChip(daysLeft: daysLeft),
               ],
             ),
@@ -433,7 +463,6 @@ class _SummaryItem extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 1),
         Text(
           labelEn,
           maxLines: 1,
@@ -444,14 +473,14 @@ class _SummaryItem extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 2),
         Text(
           value,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: GirviColors.ink,
-            fontSize: 16,
+            fontSize: 12,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -477,7 +506,7 @@ class _MetaChip extends StatelessWidget {
           label,
           style: const TextStyle(
             color: GirviColors.muted,
-            fontSize: 11,
+            fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -496,10 +525,10 @@ class _DaysLeftChip extends StatelessWidget {
     final isOverdue = daysLeft < 0;
     final color = isOverdue ? GirviColors.red : GirviColors.ink;
     final text = isOverdue
-        ? '${-daysLeft} दिवस उशीर / Late'
+        ? '${-daysLeft} दिवस उशीर / Days Late'
         : daysLeft == 0
         ? 'आज देय / Due Today'
-        : '$daysLeft दिवस शिल्लक / Left';
+        : '$daysLeft दिवस शिल्लक / Days Left';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -511,7 +540,7 @@ class _DaysLeftChip extends StatelessWidget {
         text,
         style: TextStyle(
           color: color,
-          fontSize: 10,
+          fontSize: 8,
           fontWeight: FontWeight.w800,
         ),
       ),

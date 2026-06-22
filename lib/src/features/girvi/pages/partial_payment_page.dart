@@ -71,10 +71,7 @@ class _PartialPaymentPageState extends State<PartialPaymentPage> {
             ),
             Text(
               'Partial Payment',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),
@@ -155,10 +152,7 @@ class _PartialPaymentPageState extends State<PartialPaymentPage> {
                       : null,
                   child: const Text(
                     'पेमेंट नोंदा / Record Payment',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
@@ -193,10 +187,7 @@ class _OutstandingCard extends StatelessWidget {
         children: [
           const Text(
             'एकूण बाकी / Total Outstanding',
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.white70,
-            ),
+            style: TextStyle(fontSize: 12, color: Colors.white70),
           ),
           const SizedBox(height: 8),
           Text(
@@ -210,10 +201,7 @@ class _OutstandingCard extends StatelessWidget {
           const SizedBox(height: 12),
           Text(
             'एकत्रित व्याज / Accrued Interest: ₹ ${accruedInterest.toStringAsFixed(2)}',
-            style: const TextStyle(
-              fontSize: 13,
-              color: Colors.white70,
-            ),
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
       ),
@@ -242,10 +230,7 @@ class _SectionTitle extends StatelessWidget {
         ),
         Text(
           titleEn,
-          style: const TextStyle(
-            fontSize: 12,
-            color: GirviColors.muted,
-          ),
+          style: const TextStyle(fontSize: 12, color: GirviColors.muted),
         ),
       ],
     );
@@ -285,10 +270,7 @@ class _InputField extends StatelessWidget {
         children: [
           Text(
             '$labelMr / $labelEn',
-            style: const TextStyle(
-              fontSize: 11,
-              color: GirviColors.muted,
-            ),
+            style: const TextStyle(fontSize: 11, color: GirviColors.muted),
           ),
           TextField(
             controller: controller,
@@ -332,10 +314,7 @@ class _PaymentModeSelector extends StatelessWidget {
         children: [
           const Text(
             'पेमेंट पद्धत / Payment Mode',
-            style: TextStyle(
-              fontSize: 11,
-              color: GirviColors.muted,
-            ),
+            style: TextStyle(fontSize: 11, color: GirviColors.muted),
           ),
           const SizedBox(height: 10),
           Wrap(

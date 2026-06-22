@@ -124,6 +124,7 @@ class _DashboardHeader extends StatelessWidget {
             ],
           ),
         ],
+      ),
     );
   }
 }
@@ -299,7 +300,6 @@ class _MetricGrid extends StatelessWidget {
           delta: '+2 आज / today',
         ),
       ],
-      ),
     );
   }
 }
@@ -388,10 +388,7 @@ class _MetricTile extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({
-    this.onNewGirviTap,
-    this.onSearchCustomerTap,
-  });
+  const _QuickActions({this.onNewGirviTap, this.onSearchCustomerTap});
 
   final VoidCallback? onNewGirviTap;
   final VoidCallback? onSearchCustomerTap;

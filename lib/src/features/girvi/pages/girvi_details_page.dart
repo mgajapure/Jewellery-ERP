@@ -383,41 +383,45 @@ class _ActionButtons extends StatelessWidget {
     return Column(
       children: [
         Row(
-          children: const [
+          children: [
             Expanded(
               child: _ActionButton(
                 icon: Icons.currency_rupee,
                 labelMr: 'पेमेंट नोंद',
                 labelEn: 'Record Payment',
                 filled: true,
+                onTap: () => context.goNamed(PartialPaymentPage.routeName),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _ActionButton(
                 icon: Icons.autorenew,
                 labelMr: 'नूतनीकरण',
                 labelEn: 'Renew',
+                onTap: () => context.goNamed(RenewalPage.routeName),
               ),
             ),
           ],
         ),
         const SizedBox(height: 12),
         Row(
-          children: const [
+          children: [
             Expanded(
               child: _ActionButton(
                 icon: Icons.check_circle_outline,
                 labelMr: 'मुद्दलपरत',
                 labelEn: 'Redeem',
+                onTap: () => context.goNamed(RedemptionPage.routeName),
               ),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
             Expanded(
               child: _ActionButton(
                 icon: Icons.gavel_outlined,
                 labelMr: 'लिलाव',
                 labelEn: 'Auction',
+                onTap: () => context.goNamed(AuctionWorkflowPage.routeName),
               ),
             ),
           ],
@@ -433,17 +437,19 @@ class _ActionButton extends StatelessWidget {
     required this.labelMr,
     required this.labelEn,
     this.filled = false,
+    this.onTap,
   });
 
   final IconData icon;
   final String labelMr;
   final String labelEn;
   final bool filled;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      onPressed: () {},
+      onPressed: onTap,
       style: ElevatedButton.styleFrom(
         backgroundColor: filled ? GirviColors.navy : Colors.white,
         foregroundColor: filled ? GirviColors.gold : GirviColors.ink,

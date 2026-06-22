@@ -368,3 +368,306 @@ Continue the frontend implementation after Vault Management by building the Inte
 - Run `dart format lib/src/features/interest lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
 - Run `flutter analyze` and fix any reported issues.
 - Continue with the next modules in the frontend roadmap: Compliance (MOD-COMPLIANCE) and Payments, followed by Inventory, Purchase, and Sales.
+
+## 2026-06-22 - Compliance Module Screens (MOD-COMPLIANCE)
+
+### Goal
+
+Continue the frontend implementation after Interest Engine by building the Compliance module screens, following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Created a new compliance feature under `lib/src/features/compliance/`.
+- Added shared compliance colours in `lib/src/features/compliance/theme/compliance_colors.dart` matching the dashboard palette.
+- Created a barrel export at `lib/src/features/compliance/compliance.dart`.
+- Implemented SCR-078 Compliance Dashboard (`compliance_dashboard_page.dart`):
+  - Compliance health score card with status indicator.
+  - Metrics grid: Active Girvi, LTV Violations, Pending KFS, Insurance Expiry, Auction Notices, Gold Return Due.
+  - Alerts & violations list with severity indicators.
+  - Form action cards for Form 6, Form 9, Forms 11 & 12, and Form 13.
+- Implemented SCR-036 Form 6 Generator (`form6_generator_page.dart`):
+  - Inputs for license number, business name, owner name, and address.
+  - Live preview card.
+  - Preview and Generate Form 6 actions.
+- Implemented SCR-037 Form 9 Register (`form9_register_page.dart`):
+  - Date range filters.
+  - Daily lending register table with Girvi count, loans, payments.
+  - Summary footer and PDF/Excel export actions.
+- Implemented SCR-038 Forms 11 & 12 (`forms11_12_page.dart`):
+  - Tabbed view for Form 11 (pledged articles register) and Form 12 (loan transaction register).
+  - Form 11 cards with customer, items, weight, vault location.
+  - Form 12 cards with loan, interest, payments, outstanding.
+  - PDF and print actions.
+- Implemented SCR-039 Form 13 Generator (`form13_generator_page.dart`):
+  - Financial year and branch selectors.
+  - Generated summary grid: total loans, principal, interest, active/closed/auction accounts.
+  - Generate Form 13 PDF action.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/compliance` → Compliance Dashboard
+  - `/compliance/form6` → Form 6 Generator
+  - `/compliance/form9` → Form 9 Register
+  - `/compliance/forms11-12` → Forms 11 & 12
+  - `/compliance/form13` → Form 13 Generator
+- Wired dashboard navigation:
+  - Made the quick action row horizontally scrollable.
+  - Added a new `Compliance` quick action that opens the Compliance Dashboard.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- White cards with subtle outline borders and rounded corners.
+- Severity colours: red (high), orange (medium), green (low/normal).
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, real PDF generation, date pickers, or state management yet.
+- KFS engine, LTV engine, auction compliance, insurance compliance, and gold return tracking are not yet wired.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/compliance lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Payments (Partial Payment, Renewal, Redemption), Inventory (MOD-INVENTORY), Purchase (MOD-PURCHASE), and Sales (MOD-SALES).
+
+## 2026-06-22 - Girvi Payment & Lifecycle Screens
+
+### Goal
+
+Continue the frontend implementation after Compliance by building the Girvi payment and lifecycle screens (Partial Payment, Renewal, Redemption), following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Added three new screens under `lib/src/features/girvi/pages/`:
+  - `partial_payment_page.dart` — SCR-028 Partial Payment:
+    - Outstanding balance card.
+    - Amount input with validation (amount <= outstanding).
+    - Payment mode selector: Cash / UPI / Bank Transfer / Cheque.
+    - Remarks input.
+    - Record Payment CTA.
+  - `renewal_page.dart` — SCR-029 Renewal:
+    - Current contract card with Girvi ID and outstanding.
+    - New loan amount, interest rate, and extension months inputs.
+    - Live renewal summary with principal, interest, and total due.
+    - Renew Contract CTA.
+  - `redemption_page.dart` — SCR-030 Redemption:
+    - Header card with Girvi ID, customer, and full payment due.
+    - Redemption checklist: full payment received, item photo verified, vault released.
+    - Compliance info box about 7-working-day gold return obligation.
+    - Complete Redemption CTA (enabled only when all checklist items are checked).
+- Updated `lib/src/features/girvi/girvi.dart` barrel export to include the new pages.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/girvi/:id/payment` → Partial Payment
+  - `/girvi/:id/renewal` → Renewal
+  - `/girvi/:id/redemption` → Redemption
+- Wired Girvi Details action buttons:
+  - Added `onTap` parameter to `_ActionButton`.
+  - Record Payment now opens Partial Payment.
+  - Renew now opens Renewal.
+  - Redeem now opens Redemption.
+  - Auction remains a placeholder.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- Green CTA for redemption completion.
+- White cards with subtle outline borders and rounded corners.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, receipt generation, photo capture, or state management yet.
+- Interest allocation (interest first, principal second), revaluation engine, and automatic vault release are not yet wired.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/girvi lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Auction Workflow (SCR-031), Due & Overdue Management (SCR-073), Inventory (MOD-INVENTORY), Purchase (MOD-PURCHASE), and Sales (MOD-SALES).
+
+## 2026-06-22 - Auction Workflow & Due/Overdue Management
+
+### Goal
+
+Continue the frontend implementation after Payments by building the Auction Workflow and Due & Overdue Management screens, following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Added two new screens under `lib/src/features/girvi/pages/`:
+  - `auction_workflow_page.dart` — SCR-031 Auction Workflow:
+    - Header card with Girvi ID, outstanding, and penalty.
+    - Six-step auction workflow: Generate Notice → Notify Borrower → Track Delivery → Wait Statutory Period → Schedule Auction → Record Sale.
+    - Tap-to-progress step tiles with completed/active states.
+    - Sale details form: sale amount, buyer name, buyer mobile.
+    - Surplus/shortfall calculation card.
+    - Complete Auction CTA.
+  - `due_overdue_page.dart` — SCR-073 Due & Overdue Management:
+    - Tabbed view: Due Today, Due This Week, Overdue.
+    - Contract cards with Girvi ID, customer, mobile, amount, and due status.
+    - Quick action chips: Call, WhatsApp, Follow-up, Reminder.
+- Updated `lib/src/features/girvi/girvi.dart` barrel export to include the new pages.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/girvi/:id/auction` → Auction Workflow
+  - `/due-overdue` → Due & Overdue Management
+- Wired Girvi Details action button:
+  - Auction button now opens Auction Workflow.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces; red for auction/urgent actions.
+- White cards with subtle outline borders and rounded corners.
+- Step indicators with gold active state and green completed state.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, real phone/WhatsApp integration, notice generation, or auction closure yet.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/girvi lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Inventory (MOD-INVENTORY), Purchase (MOD-PURCHASE), and Sales (MOD-SALES).
+
+## 2026-06-22 - Inventory Module Screens (MOD-INVENTORY)
+
+### Goal
+
+Continue the frontend implementation after Girvi lifecycle screens by building the Inventory module, replacing the existing stub with full Inventory List and Item Details screens.
+
+### What Was Done
+
+- Created a proper inventory feature structure under `lib/src/features/inventory/`:
+  - `theme/inventory_colors.dart` — shared navy/gold/green/red/orange/blue palette.
+  - `pages/inventory_list_page.dart` — SCR-048 Inventory List:
+    - Search bar with barcode scan affordance.
+    - Filter chips: All / Available / Reserved / Sold / Low Stock.
+    - Inventory cards with barcode, item name, category, weight, purity, selling price, and status badge.
+    - Quick action icons for view and print barcode.
+    - Floating action button to add a new item.
+  - `pages/inventory_details_page.dart` — SCR-049 Inventory Item Details:
+    - Header card with item name, barcode, selling price, and status.
+    - Basic Details section.
+    - Jewellery Details section (metal type, gross/net weight, purity, making charges).
+    - Pricing section with cost price, selling price, and profit margin.
+    - Image gallery placeholders.
+    - Movement history timeline.
+    - Bottom-sheet actions: Reserve and Mark Sold.
+  - `inventory.dart` — barrel export.
+- Removed the old `inventory_page.dart` stub.
+- Updated `lib/src/app/app_router.dart`:
+  - `/inventory` now points to `InventoryListPage`.
+  - Added `/inventory/:id` → Inventory Item Details.
+- Wired dashboard navigation:
+  - Replaced the placeholder `More` bottom-nav item with `Inventory`.
+  - Inventory bottom-nav tab now opens the Inventory List.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- Status colours: green (available), orange (reserved), red (sold), blue (low stock).
+- White cards with subtle outline borders and rounded corners.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, barcode scanning, image capture, stock reservation, or sales marking yet.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/inventory lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Purchase (MOD-PURCHASE), Sales (MOD-SALES), Savings (MOD-SAVINGS), and Reports.
+
+## 2026-06-22 - Purchase Module Screens (MOD-PURCHASE)
+
+### Goal
+
+Continue the frontend implementation after Inventory by building the Purchase module screens, following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Created a new purchase feature under `lib/src/features/purchase/`:
+  - `theme/purchase_colors.dart` — shared navy/gold/green/red/orange/blue palette.
+  - `pages/purchase_dashboard_page.dart` — SCR-050 Purchase Dashboard:
+    - Six metric cards: Today's Purchases, Purchase Value, Pending Approvals, Suppliers, Scrap Purchases, Inventory Added.
+    - Quick actions for New Purchase, Purchase Ledger, Suppliers, and Reports.
+  - `pages/new_purchase_page.dart` — SCR-058 New Purchase Entry:
+    - Purchase type, bill number, supplier details, metal/item details, weights, purity, rate, amount, and payment mode.
+    - Cancel and Save CTAs.
+  - `pages/purchase_details_page.dart` — SCR-059 Purchase Details:
+    - Status header with purchase ID and date.
+    - Summary card with amount, net weight, purity, and rate.
+    - Supplier, item, and payment detail tiles.
+    - Print and Edit actions.
+  - `pages/supplier_management_page.dart` — SCR-060 Supplier Management:
+    - Search bar and supplier cards with name, mobile, GST, balance due, and active/inactive status.
+    - Floating action button to add a supplier.
+  - `pages/purchase_ledger_page.dart` — SCR-061 Purchase Ledger:
+    - Total purchase header card.
+    - Transaction list with date, ID, supplier, type, weight, amount, and payment mode.
+    - Tap navigates to Purchase Details.
+  - `purchase.dart` — barrel export.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/purchase` → Purchase Dashboard
+  - `/purchase/new` → New Purchase Entry
+  - `/purchase/ledger` → Purchase Ledger
+  - `/purchase/suppliers` → Supplier Management
+  - `/purchase/:id` → Purchase Details
+- Wired dashboard navigation:
+  - Added a `Purchase` quick action to the horizontally-scrollable quick actions row.
+  - Purchase quick action opens the Purchase Dashboard.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- Status colours: green (active/approved), orange (pending), muted (inactive).
+- White cards with subtle outline borders and rounded corners.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- Verified brace/parenthesis/bracket balance across all modified files.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, state management, form validation, or real supplier/purchase APIs yet.
+- Reports quick action is not yet wired to a reports module.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/purchase lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Sales (MOD-SALES), Savings Scheme (MOD-SAVINGS), Reports & Analytics, and Settings.

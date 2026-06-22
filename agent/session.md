@@ -259,3 +259,112 @@ Build the Girvi Core module frontend screens after the Customer module, followin
 - Run `dart format lib/src/features/girvi lib/src/features/dashboard lib/src/app/app_router.dart` when the SDK is available.
 - Run `flutter analyze` and fix any reported issues.
 - Continue with the next modules in the frontend roadmap: Vault Management (MOD-VAULT) or Interest Engine (MOD-INTEREST), followed by Compliance and Payments.
+
+## 2026-06-22 - Vault Management Module Screens (MOD-VAULT)
+
+### Goal
+
+Continue the frontend implementation after Girvi Core by building the Vault Management module screens, following the same bilingual Marathi/English navy-and-gold design system and wiring the dashboard's quick actions.
+
+### What Was Done
+
+- Created a new vault feature under `lib/src/features/vault/`.
+- Added shared vault colours in `lib/src/features/vault/theme/vault_colors.dart` matching the dashboard palette.
+- Created a barrel export at `lib/src/features/vault/vault.dart`.
+- Implemented SCR-034 Vault Assignment (`vault_assignment_page.dart`):
+  - Navy coordinate preview card.
+  - Cascading dropdowns for Vault → Safe → Tray → Slot.
+  - Real-time coordinate generation in `VA-A/SF-02/TR-05/SL-18` format.
+  - Slot availability indicator with available/occupied states.
+  - Full-width navy CTA to confirm assignment.
+- Implemented SCR-035 Vault Search & Occupancy (`vault_search_page.dart`):
+  - Search bar with mode chips: Girvi ID / Customer / Mobile / Serial ID / QR.
+  - Occupancy summary card with total, occupied, available slots and percentage.
+  - Vault occupancy heat map with colour-coded progress bars.
+  - Search result cards with customer, Girvi ID, serial ID, mobile, status, coordinate, and quick actions.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/vault/assign` → Vault Assignment
+  - `/vault/search` → Vault Search & Occupancy
+- Wired dashboard navigation:
+  - Replaced the placeholder `Due List` quick action with `Vault Search`.
+  - `Vault Search` quick action now opens Vault Search & Occupancy.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- White cards with subtle outline borders and rounded corners.
+- Occupancy status colours: green (normal), orange (warning), red (critical).
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, state management, or form validation yet.
+- QR scanner, automatic slot release, insurance mapping, movement history, and vault configuration screens are not yet implemented.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/vault lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Interest Engine (MOD-INTEREST), Compliance (MOD-COMPLIANCE), and Payments.
+
+## 2026-06-22 - Interest Engine Module Screens (MOD-INTEREST)
+
+### Goal
+
+Continue the frontend implementation after Vault Management by building the Interest Engine module screens, following the same bilingual Marathi/English navy-and-gold design system.
+
+### What Was Done
+
+- Created a new interest feature under `lib/src/features/interest/`.
+- Added shared interest colours in `lib/src/features/interest/theme/interest_colors.dart` matching the dashboard palette.
+- Created a barrel export at `lib/src/features/interest/interest.dart`.
+- Implemented SCR-032 Interest Calculator (`interest_calculator_page.dart`):
+  - Principal amount input.
+  - Interest type selector: Simple / Katmiti / Daily.
+  - Interest rate and days inputs.
+  - Start date picker placeholder.
+  - Live calculation result card showing principal, accrued interest, penalty, and total due.
+  - Save snapshot and Calculate actions.
+- Implemented SCR-033 Interest Ledger & Breakdown (`interest_ledger_page.dart`):
+  - Navy header card with Girvi ID, customer, principal, interest type, and rate.
+  - Summary grid: Principal, Interest, Penalty, Outstanding.
+  - Ledger rows with date, type badge, opening/closing principal, interest, penalty, and payment.
+  - Print and share actions in the app bar.
+- Updated `lib/src/app/app_router.dart` with routes for:
+  - `/interest/calculator` → Interest Calculator
+  - `/interest/ledger` → Interest Ledger
+- Wired dashboard navigation:
+  - Replaced the placeholder `Record Payment` quick action with `Interest Calc`.
+  - `Interest Calc` quick action now opens the Interest Calculator.
+
+### Design Patterns Followed
+
+- Bilingual Marathi-first labels with English sub-labels.
+- Navy (`#061C49`) primary surfaces and CTAs; gold (`#E7A726`) accents.
+- White cards with subtle outline borders and rounded corners.
+- Result/summary cards with colour-coded values.
+- Private helper widgets scoped inside page files, matching existing modules.
+
+### Verification
+
+- Manually reviewed all new files for syntax and const-correctness.
+- `dart format` and `flutter analyze` could not be run because neither the Flutter nor Dart SDK is installed in this environment.
+
+### Known Issues
+
+- Screens are static UI prototypes using mock data; no backend integration, real date picker, or state management yet.
+- Interest formulas are simplified for demonstration; actual server-side calculation engine and Katmiti/Daily logic are not yet wired.
+- The widget test in `test/widget_test.dart` is still out of sync with the current UI.
+
+### Next Steps
+
+- Run `dart format lib/src/features/interest lib/src/features/dashboard lib/src/app/app_router.dart` once the SDK is available.
+- Run `flutter analyze` and fix any reported issues.
+- Continue with the next modules in the frontend roadmap: Compliance (MOD-COMPLIANCE) and Payments, followed by Inventory, Purchase, and Sales.

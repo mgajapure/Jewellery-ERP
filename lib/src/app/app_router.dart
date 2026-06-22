@@ -5,6 +5,8 @@ import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/girvi/girvi.dart';
 import '../features/inventory/inventory_page.dart';
+import '../features/interest/interest.dart';
+import '../features/vault/vault.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/splash',
@@ -73,6 +75,26 @@ final appRouter = GoRouter(
       path: '/girvi/:id',
       name: GirviDetailsPage.routeName,
       builder: (context, state) => const GirviDetailsPage(),
+    ),
+    GoRoute(
+      path: '/vault/assign',
+      name: VaultAssignmentPage.routeName,
+      builder: (context, state) => const VaultAssignmentPage(),
+    ),
+    GoRoute(
+      path: '/vault/search',
+      name: VaultSearchPage.routeName,
+      builder: (context, state) => const VaultSearchPage(),
+    ),
+    GoRoute(
+      path: '/interest/calculator',
+      name: InterestCalculatorPage.routeName,
+      builder: (context, state) => const InterestCalculatorPage(),
+    ),
+    GoRoute(
+      path: '/interest/ledger',
+      name: InterestLedgerPage.routeName,
+      builder: (context, state) => const InterestLedgerPage(),
     ),
   ],
 );

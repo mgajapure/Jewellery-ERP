@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 
 import '../customer/customer.dart';
 import '../girvi/girvi.dart';
+import '../interest/interest.dart';
+import '../vault/vault.dart';
 
 const _navy = Color(0xFF061C49);
 const _gold = Color(0xFFE7A726);
@@ -46,6 +48,10 @@ class DashboardPage extends StatelessWidget {
                         context.goNamed(CreateGirviWizardPage.routeName),
                     onSearchCustomerTap: () =>
                         context.goNamed(CustomerSearchPage.routeName),
+                    onVaultSearchTap: () =>
+                        context.goNamed(VaultSearchPage.routeName),
+                    onInterestCalcTap: () =>
+                        context.goNamed(InterestCalculatorPage.routeName),
                   ),
                   const SizedBox(height: 22),
                   const _SectionHeader(
@@ -391,10 +397,14 @@ class _QuickActions extends StatelessWidget {
   const _QuickActions({
     this.onNewGirviTap,
     this.onSearchCustomerTap,
+    this.onVaultSearchTap,
+    this.onInterestCalcTap,
   });
 
   final VoidCallback? onNewGirviTap;
   final VoidCallback? onSearchCustomerTap;
+  final VoidCallback? onVaultSearchTap;
+  final VoidCallback? onInterestCalcTap;
 
   @override
   Widget build(BuildContext context) {
@@ -421,17 +431,19 @@ class _QuickActions extends StatelessWidget {
         SizedBox(width: 10),
         Expanded(
           child: _QuickAction(
-            icon: Icons.calendar_month_outlined,
-            titleMr: 'देय यादी',
-            titleEn: 'Due List',
+            icon: Icons.account_balance,
+            titleMr: 'तिजोरी शोध',
+            titleEn: 'Vault Search',
+            onTap: onVaultSearchTap,
           ),
         ),
         SizedBox(width: 10),
         Expanded(
           child: _QuickAction(
-            icon: Icons.currency_rupee,
-            titleMr: 'पेमेंट नोंद',
-            titleEn: 'Record Payment',
+            icon: Icons.calculate_outlined,
+            titleMr: 'व्याज गणना',
+            titleEn: 'Interest Calc',
+            onTap: onInterestCalcTap,
           ),
         ),
       ],

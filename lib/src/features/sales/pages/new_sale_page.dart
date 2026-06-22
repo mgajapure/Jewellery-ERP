@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/sales_colors.dart';
+import 'sales_dashboard_page.dart';
 
 /// SCR-053 New Sale
 ///
@@ -73,7 +75,10 @@ class _NewSalePageState extends State<NewSalePage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            SalesDashboardPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,

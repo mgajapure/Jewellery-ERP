@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/purchase_colors.dart';
+import 'purchase_dashboard_page.dart';
 
 /// SCR-058 New Purchase Entry
 ///
@@ -50,7 +52,7 @@ class _NewPurchasePageState extends State<NewPurchasePage> {
   void _save() {
     if (_formKey.currentState?.validate() ?? false) {
       // TODO: integrate purchase creation API.
-      context.pop();
+      AppNavigation.popOrGoNamed(context, PurchaseDashboardPage.routeName);
     }
   }
 
@@ -64,7 +66,10 @@ class _NewPurchasePageState extends State<NewPurchasePage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            PurchaseDashboardPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -216,7 +221,10 @@ class _NewPurchasePageState extends State<NewPurchasePage> {
                 children: [
                   Expanded(
                     child: OutlinedButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => AppNavigation.popOrGoNamed(
+                        context,
+                        PurchaseDashboardPage.routeName,
+                      ),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: PurchaseColors.navy,
                         side: const BorderSide(color: PurchaseColors.navy),

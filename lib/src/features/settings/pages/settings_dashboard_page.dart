@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../../settings/theme/settings_colors.dart';
 
 class SettingsDashboardPage extends StatelessWidget {
@@ -12,42 +12,27 @@ class SettingsDashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SettingsColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SettingsColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'सेटिंग्ज',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            AppHeader(
+              titleMr: 'सेटिंग्ज',
+              titleEn: 'Settings',
+              showBackButton: true,
+              backFallbackRoute: 'more',
             ),
-            Text(
-              'Settings',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+            const Expanded(
+              child: Center(
+                child: Text(
+                  'Settings module coming soon',
+                  style: TextStyle(
+                    color: SettingsColors.muted,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ],
-        ),
-      ),
-      body: const Center(
-        child: Text(
-          'Settings module coming soon',
-          style: TextStyle(
-            color: SettingsColors.muted,
-            fontSize: 16,
-          ),
         ),
       ),
     );

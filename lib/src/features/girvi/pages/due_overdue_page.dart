@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../theme/girvi_colors.dart';
 
 /// SCR-073 Due & Overdue Management
@@ -89,61 +89,64 @@ class _DueOverduePageState extends State<DueOverduePage>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GirviColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: GirviColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'देय व मुदतीपूर्व व्यवस्थापन',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Due & Overdue',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: GirviColors.gold,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Today'),
-            Tab(text: 'This Week'),
-            Tab(text: 'Overdue'),
-          ],
-        ),
-      ),
       body: SafeArea(
-        child: TabBarView(
-          controller: _tabController,
+        child: Column(
           children: [
-            _DueList(
-              items: _dueToday,
-              statusColor: GirviColors.gold,
+            AppHeader(
+              titleMr: 'देय व मुदतीपूर्व',
+              titleEn: 'Due & Overdue',
+              showBackButton: true,
+              backFallbackRoute: 'girvi-list',
             ),
-            _DueList(
-              items: _dueThisWeek,
-              statusColor: GirviColors.orange,
+            Container(
+              margin: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+              decoration: BoxDecoration(
+                color: GirviColors.navy,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: TabBar(
+                controller: _tabController,
+                indicator: BoxDecoration(
+                  color: GirviColors.gold,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelColor: GirviColors.navy,
+                unselectedLabelColor: Colors.white70,
+                labelStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+                dividerColor: Colors.transparent,
+                tabs: const [
+                  Tab(text: 'Today'),
+                  Tab(text: 'This Week'),
+                  Tab(text: 'Overdue'),
+                ],
+              ),
             ),
-            _DueList(
-              items: _overdue,
-              statusColor: GirviColors.red,
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _DueList(
+                    items: _dueToday,
+                    statusColor: GirviColors.gold,
+                  ),
+                  _DueList(
+                    items: _dueThisWeek,
+                    statusColor: GirviColors.orange,
+                  ),
+                  _DueList(
+                    items: _overdue,
+                    statusColor: GirviColors.red,
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -167,7 +170,7 @@ class _DueList extends StatelessWidget {
       return const _EmptyState();
     }
     return ListView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       children: items
           .map((item) => _DueCard(item: item, statusColor: statusColor))
           .toList(),
@@ -186,91 +189,98 @@ class _DueCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: GirviColors.line),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                item['girviId'] as String,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: GirviColors.navy,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: statusColor.withAlpha(15),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  item['dueDate'] as String,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: statusColor,
+    return InkWell(
+      onTap: () {
+        // TODO: open girvi details.
+      },
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: GirviColors.line),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x10000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  item['girviId'] as String,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                    color: GirviColors.navy,
                   ),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          _InfoRow(icon: Icons.person_outline, text: item['customer'] as String),
-          const SizedBox(height: 6),
-          _InfoRow(icon: Icons.phone_outlined, text: item['mobile'] as String),
-          const SizedBox(height: 6),
-          _InfoRow(
-            icon: Icons.currency_rupee,
-            text: '₹ ${(item['amount'] as double).toStringAsFixed(2)}',
-          ),
-          const SizedBox(height: 14),
-          Row(
-            children: [
-              _ActionChip(
-                icon: Icons.phone,
-                label: 'Call',
-                onTap: () {
-                  // TODO: initiate phone call.
-                },
-              ),
-              const SizedBox(width: 8),
-              _ActionChip(
-                icon: Icons.message_outlined,
-                label: 'WhatsApp',
-                onTap: () {
-                  // TODO: open WhatsApp.
-                },
-              ),
-              const SizedBox(width: 8),
-              _ActionChip(
-                icon: Icons.note_alt_outlined,
-                label: 'Follow-up',
-                onTap: () {
-                  // TODO: record follow-up.
-                },
-              ),
-              const SizedBox(width: 8),
-              _ActionChip(
-                icon: Icons.alarm_outlined,
-                label: 'Reminder',
-                onTap: () {
-                  // TODO: create reminder.
-                },
-              ),
-            ],
-          ),
-        ],
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  decoration: BoxDecoration(
+                    color: statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    item['dueDate'] as String,
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                      color: statusColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _InfoRow(icon: Icons.person_outline, text: item['customer'] as String),
+            const SizedBox(height: 6),
+            _InfoRow(icon: Icons.phone_outlined, text: item['mobile'] as String),
+            const SizedBox(height: 6),
+            _InfoRow(
+              icon: Icons.currency_rupee,
+              text:
+                  '₹ ${(item['amount'] as double).toStringAsFixed(2)}',
+            ),
+            const Divider(height: 22, color: GirviColors.line),
+            Row(
+              children: [
+                _ActionChip(
+                  icon: Icons.phone,
+                  label: 'Call',
+                  onTap: () {
+                    // TODO: initiate phone call.
+                  },
+                ),
+                const SizedBox(width: 8),
+                _ActionChip(
+                  icon: Icons.message_outlined,
+                  label: 'WhatsApp',
+                  onTap: () {
+                    // TODO: open WhatsApp.
+                  },
+                ),
+                const SizedBox(width: 8),
+                _ActionChip(
+                  icon: Icons.alarm_outlined,
+                  label: 'Reminder',
+                  onTap: () {
+                    // TODO: create reminder.
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -293,6 +303,7 @@ class _InfoRow extends StatelessWidget {
           style: const TextStyle(
             fontSize: 13,
             color: GirviColors.ink,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -317,7 +328,7 @@ class _ActionChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: GirviColors.screenBg,
           borderRadius: BorderRadius.circular(8),
@@ -332,7 +343,7 @@ class _ActionChip extends StatelessWidget {
               label,
               style: const TextStyle(
                 fontSize: 11,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w700,
                 color: GirviColors.ink,
               ),
             ),
@@ -355,14 +366,14 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.check_circle_outline,
             size: 64,
-            color: GirviColors.muted.withAlpha(120),
+            color: GirviColors.muted.withValues(alpha: 0.5),
           ),
           const SizedBox(height: 12),
           const Text(
             'कोणतेही नोंद नाही',
             style: TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w800,
               color: GirviColors.ink,
             ),
           ),
@@ -372,6 +383,7 @@ class _EmptyState extends StatelessWidget {
             style: TextStyle(
               fontSize: 13,
               color: GirviColors.muted,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],

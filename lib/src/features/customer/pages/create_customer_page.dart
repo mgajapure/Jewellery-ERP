@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/customer_colors.dart';
 import 'customer_details_page.dart';
+import 'customer_list_page.dart';
 
 class CreateCustomerPage extends StatefulWidget {
   const CreateCustomerPage({super.key});
@@ -206,7 +208,10 @@ class _CreateCustomerHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => AppNavigation.popOrGoNamed(
+              context,
+              CustomerListPage.routeName,
+            ),
             icon: const Icon(Icons.arrow_back, color: CustomerColors.ink),
             tooltip: 'Back',
           ),

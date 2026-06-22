@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/compliance_colors.dart';
+import 'compliance_dashboard_page.dart';
 
 /// SCR-038 Forms 11 & 12
 ///
@@ -80,7 +81,10 @@ class _Forms11_12PageState extends State<Forms11_12Page>
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            ComplianceDashboardPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,

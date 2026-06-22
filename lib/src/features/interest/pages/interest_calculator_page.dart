@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../theme/interest_colors.dart';
 
 /// SCR-032 Interest Calculator
@@ -74,42 +74,18 @@ class _InterestCalculatorPageState extends State<InterestCalculatorPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: InterestColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: InterestColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'व्याज कॅल्क्युलेटर',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Interest Calculator',
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
+            AppHeader(
+              titleMr: 'व्याज कॅल्क्युलेटर',
+              titleEn: 'Interest Calculator',
+              showBackButton: true,
+              backFallbackRoute: 'more',
+            ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -177,7 +153,8 @@ class _InterestCalculatorPageState extends State<InterestCalculatorPage> {
                     ),
                     const SizedBox(height: 24),
                     _InfoBox(
-                      textMr: 'गणना अचूकपणे तपासा. सर्व व्याज नोंदी अचल असतात.',
+                      textMr:
+                          'गणना अचूकपणे तपासा. सर्व व्याज नोंदी अचल असतात.',
                       textEn:
                           'Verify calculations carefully. All interest records are immutable.',
                     ),
@@ -256,8 +233,8 @@ class _SectionTitle extends StatelessWidget {
         Text(
           titleMr,
           style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
             color: InterestColors.ink,
           ),
         ),
@@ -266,6 +243,7 @@ class _SectionTitle extends StatelessWidget {
           style: const TextStyle(
             fontSize: 12,
             color: InterestColors.muted,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ],
@@ -298,8 +276,15 @@ class _InputField extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: InterestColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -309,6 +294,7 @@ class _InputField extends StatelessWidget {
             style: const TextStyle(
               fontSize: 11,
               color: InterestColors.muted,
+              fontWeight: FontWeight.w700,
             ),
           ),
           TextField(
@@ -345,13 +331,20 @@ class _DatePickerField extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(color: InterestColors.line),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x10000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -361,6 +354,7 @@ class _DatePickerField extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 11,
                 color: InterestColors.muted,
+                fontWeight: FontWeight.w700,
               ),
             ),
             const SizedBox(height: 4),
@@ -371,7 +365,7 @@ class _DatePickerField extends StatelessWidget {
                   value,
                   style: const TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                     color: InterestColors.ink,
                   ),
                 ),
@@ -406,8 +400,15 @@ class _InterestTypeSelector extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: InterestColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -417,6 +418,7 @@ class _InterestTypeSelector extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               color: InterestColors.muted,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 10),
@@ -435,7 +437,7 @@ class _InterestTypeSelector extends StatelessWidget {
                     labelStyle: TextStyle(
                       color: isSelected ? Colors.white : InterestColors.ink,
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w700,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
@@ -489,10 +491,15 @@ class _ResultCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               color: Colors.white70,
+              fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 16),
-          _ResultRow(labelMr: 'मूळ रक्कम', labelEn: 'Principal', value: _format(principal)),
+          _ResultRow(
+            labelMr: 'मूळ रक्कम',
+            labelEn: 'Principal',
+            value: _format(principal),
+          ),
           const Divider(color: Colors.white24, height: 24),
           _ResultRow(
             labelMr: 'एकत्रित व्याज',
@@ -549,6 +556,7 @@ class _ResultRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 13,
                 color: Colors.white,
+                fontWeight: FontWeight.w700,
               ),
             ),
             Text(
@@ -556,6 +564,7 @@ class _ResultRow extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 11,
                 color: Colors.white70,
+                fontWeight: FontWeight.w600,
               ),
             ),
           ],
@@ -586,7 +595,7 @@ class _InfoBox extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: InterestColors.cream,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: InterestColors.gold.withAlpha(40)),
       ),
       child: Row(
@@ -606,7 +615,7 @@ class _InfoBox extends StatelessWidget {
                   textMr,
                   style: const TextStyle(
                     fontSize: 13,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w700,
                     color: InterestColors.ink,
                   ),
                 ),
@@ -616,6 +625,7 @@ class _InfoBox extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     color: InterestColors.muted,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],

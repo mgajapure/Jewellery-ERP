@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
+import 'girvi_details_page.dart';
 
 /// SCR-029 Renewal
 ///
@@ -66,7 +68,10 @@ class _RenewalPageState extends State<RenewalPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
+          onPressed: () => AppNavigation.popOrGoNamed(
+            context,
+            GirviDetailsPage.routeName,
+          ),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,7 +181,10 @@ class _RenewalPageState extends State<RenewalPage> {
                   ),
                   onPressed: () {
                     // TODO: create renewal contract and generate receipt.
-                    context.pop();
+                    AppNavigation.popOrGoNamed(
+                      context,
+                      GirviDetailsPage.routeName,
+                    );
                   },
                   icon: const Icon(Icons.receipt_long_outlined, size: 20),
                   label: const Text(

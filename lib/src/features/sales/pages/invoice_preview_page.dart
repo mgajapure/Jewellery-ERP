@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../domain/entities/sale_order.dart';
 import '../theme/sales_colors.dart';
-import 'sales_dashboard_page.dart';
 
 /// SCR-054 Invoice Preview
-///
-/// Preview GST invoice before finalizing sale.
 class InvoicePreviewPage extends StatelessWidget {
-  const InvoicePreviewPage({super.key});
+  const InvoicePreviewPage({super.key, required this.order});
 
   static const routeName = 'invoice-preview';
+
+  final SaleOrder order;
 
   @override
   Widget build(BuildContext context) {
@@ -23,10 +24,8 @@ class InvoicePreviewPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            SalesDashboardPage.routeName,
-          ),
+          onPressed: () =>
+              AppNavigation.popOrGoNamed(context, 'sales-dashboard'),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -34,17 +33,13 @@ class InvoicePreviewPage extends StatelessWidget {
             Text(
               'इन्व्हॉईस पूर्वावलोकन',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
             ),
             Text(
               'Invoice Preview',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),
@@ -52,95 +47,126 @@ class InvoicePreviewPage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _InvoiceHeader(
-                invoiceNo: 'INV-2026-000102',
-                date: '22 Jun 2026',
-                status: 'Draft',
-              ),
-              const SizedBox(height: 16),
-              _PartyCard(
-                titleMr: 'व्यवसाय',
-                titleEn: 'Business',
-                name: 'Shree Jewellers',
-                details: 'GST: 27ABCDE1234F1Z5\nPune, Maharashtra',
-              ),
-              const SizedBox(height: 12),
-              _PartyCard(
-                titleMr: 'ग्राहक',
-                titleEn: 'Customer',
-                name: 'Ramesh Patil',
-                details: '+91 98765 43210\nPune',
-              ),
-              const SizedBox(height: 20),
-              _SectionTitle(titleMr: 'वस्तू तपशील', titleEn: 'Item Breakdown'),
-              _ItemRow(
-                name: 'Gold Chain 22K',
-                details: '24.50 g • 91.6%',
-                taxable: 125000,
-                gst: 3750,
-                total: 128750,
-              ),
-              _ItemRow(
-                name: 'Gold Ring 22K',
-                details: '8.20 g • 91.6%',
-                taxable: 42000,
-                gst: 1260,
-                total: 43260,
-              ),
-              const Divider(color: SalesColors.line),
-              _SummaryRow(label: 'Taxable Amount', value: '₹ 1,67,000'),
-              _SummaryRow(label: 'CGST 1.5%', value: '₹ 2,505'),
-              _SummaryRow(label: 'SGST 1.5%', value: '₹ 2,505'),
-              _SummaryRow(label: 'Discount', value: '- ₹ 0'),
-              const Divider(color: SalesColors.line),
-              _SummaryRow(label: 'Total Invoice', value: '₹ 1,72,010', bold: true),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: print invoice.
-                      },
-                      icon: const Icon(Icons.print_outlined),
-                      label: const Text('प्रिंट / Print'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: SalesColors.navy,
-                        side: const BorderSide(color: SalesColors.navy),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        context.goNamed('sales-details');
-                      },
-                      icon: const Icon(Icons.check),
-                      label: const Text('विक्री निश्चित / Finalize'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: SalesColors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
+          child: _InvoiceBody(order: order),
         ),
       ),
+    );
+  }
+}
+
+class _InvoiceBody extends StatelessWidget {
+  const _InvoiceBody({required this.order});
+
+  final SaleOrder order;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFmt = DateFormat('dd MMM yyyy');
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _InvoiceHeader(
+          invoiceNo: order.invoiceNo,
+          date: dateFmt.format(order.date),
+          status: '${order.status.labelMr} / ${order.status.labelEn}',
+          statusColor: order.status == SaleStatus.draft
+              ? SalesColors.orange
+              : SalesColors.green,
+        ),
+        const SizedBox(height: 16),
+        _PartyCard(
+          titleMr: 'व्यवसाय',
+          titleEn: 'Business',
+          name: 'Shree Jewellers',
+          details: 'GST: 27ABCDE1234F1Z5\nPune, Maharashtra',
+        ),
+        const SizedBox(height: 12),
+        _PartyCard(
+          titleMr: 'ग्राहक',
+          titleEn: 'Customer',
+          name: order.customerName,
+          details: order.customerMobile.isNotEmpty
+              ? order.customerMobile
+              : 'Walk-in Customer',
+        ),
+        const SizedBox(height: 20),
+        _SectionTitle(titleMr: 'वस्तू तपशील', titleEn: 'Item Breakdown'),
+        ...order.items.map(
+          (item) => _ItemRow(
+            name: item.name,
+            details:
+                '${item.grossWeight.toStringAsFixed(2)} g • ${item.purity.toStringAsFixed(1)}%',
+            taxable: item.taxableAmount,
+            gst: item.gst,
+            total: item.totalAmount,
+          ),
+        ),
+        const Divider(color: SalesColors.line),
+        _SummaryRow(
+          label: 'Taxable Amount',
+          value: '₹${amtFmt.format(order.subtotal - order.discount)}',
+        ),
+        _SummaryRow(
+          label: 'CGST 1.5%',
+          value: '₹${amtFmt.format(order.cgst)}',
+        ),
+        _SummaryRow(
+          label: 'SGST 1.5%',
+          value: '₹${amtFmt.format(order.sgst)}',
+        ),
+        _SummaryRow(
+          label: 'Discount',
+          value: '- ₹${amtFmt.format(order.discount)}',
+        ),
+        const Divider(color: SalesColors.line),
+        _SummaryRow(
+          label: 'Total Invoice',
+          value: '₹${amtFmt.format(order.totalAmount)}',
+          bold: true,
+        ),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {},
+                icon: const Icon(Icons.print_outlined),
+                label: const Text('प्रिंट / Print'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: SalesColors.navy,
+                  side: const BorderSide(color: SalesColors.navy),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => context.goNamed(
+                  'sales-details',
+                  pathParameters: {'id': order.invoiceNo},
+                  extra: order,
+                ),
+                icon: const Icon(Icons.check),
+                label: const Text('विक्री निश्चित / Finalize'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: SalesColors.green,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
@@ -150,11 +176,13 @@ class _InvoiceHeader extends StatelessWidget {
     required this.invoiceNo,
     required this.date,
     required this.status,
+    required this.statusColor,
   });
 
   final String invoiceNo;
   final String date;
   final String status;
+  final Color statusColor;
 
   @override
   Widget build(BuildContext context) {
@@ -181,17 +209,15 @@ class _InvoiceHeader extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 date,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: SalesColors.orange,
+              color: statusColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -236,10 +262,7 @@ class _PartyCard extends StatelessWidget {
         children: [
           Text(
             '$titleMr / $titleEn',
-            style: const TextStyle(
-              fontSize: 12,
-              color: SalesColors.muted,
-            ),
+            style: const TextStyle(fontSize: 12, color: SalesColors.muted),
           ),
           const SizedBox(height: 6),
           Text(
@@ -253,10 +276,7 @@ class _PartyCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             details,
-            style: const TextStyle(
-              fontSize: 12,
-              color: SalesColors.ink,
-            ),
+            style: const TextStyle(fontSize: 12, color: SalesColors.ink),
           ),
         ],
       ),
@@ -316,6 +336,7 @@ class _ItemRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: const BoxDecoration(
@@ -338,10 +359,8 @@ class _ItemRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   details,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: SalesColors.muted,
-                  ),
+                  style:
+                      const TextStyle(fontSize: 11, color: SalesColors.muted),
                 ),
               ],
             ),
@@ -350,21 +369,17 @@ class _ItemRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                '₹ ${taxable.toStringAsFixed(0)}',
+                '₹${amtFmt.format(taxable)}',
                 style: const TextStyle(
-                  fontSize: 12,
-                  color: SalesColors.muted,
-                ),
+                    fontSize: 12, color: SalesColors.muted),
               ),
               Text(
-                '+ ₹ ${gst.toStringAsFixed(0)} GST',
+                '+ ₹${amtFmt.format(gst)} GST',
                 style: const TextStyle(
-                  fontSize: 11,
-                  color: SalesColors.muted,
-                ),
+                    fontSize: 11, color: SalesColors.muted),
               ),
               Text(
-                '₹ ${total.toStringAsFixed(0)}',
+                '₹${amtFmt.format(total)}',
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w700,

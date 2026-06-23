@@ -127,6 +127,51 @@ class MockInterceptor extends Interceptor {
         return {'success': true, 'data': entry};
       }
 
+      // Sales — create new sale
+      if (path == ApiEndpoints.sales) {
+        final body = _extractBody(options) ?? {};
+        final now = DateTime.now();
+        final invoiceNo =
+            'INV-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(100 + _salesLedger.length).toString().padLeft(6, '0')}';
+        final itemIds =
+            (body['itemIds'] as List?)?.cast<String>() ?? <String>[];
+        final discount = (body['discount'] as num?)?.toDouble() ?? 0.0;
+        final items = itemIds.isEmpty
+            ? [_inventoryItems.first]
+            : itemIds
+                .map((id) => _inventoryItems.firstWhere(
+                    (i) => i['id'] == id,
+                    orElse: () => _inventoryItems.first))
+                .toList();
+        final subtotal = items.fold<double>(
+            0, (s, i) => s + (i['taxableAmount'] as num).toDouble());
+        final taxable = subtotal - discount;
+        final cgst = taxable * 0.015;
+        final sgst = taxable * 0.015;
+        final order = {
+          'invoiceNo': invoiceNo,
+          'date': now.toIso8601String(),
+          'customerId': body['customerId'] ?? 'walk-in',
+          'customerName': body['customerName'] ?? 'Walk-in Customer',
+          'customerMobile': body['customerMobile'] ?? '',
+          'items': items,
+          'subtotal': subtotal,
+          'discount': discount,
+          'cgst': cgst,
+          'sgst': sgst,
+          'totalAmount': taxable + cgst + sgst,
+          'paymentMode': body['paymentMode'] ?? 'CASH',
+          'status': 'COMPLETED',
+          'createdAt': now.toIso8601String(),
+        };
+        return {'success': true, 'data': order};
+      }
+
+      // Sales return
+      if (path == ApiEndpoints.salesReturn) {
+        return {'success': true, 'message': 'Return processed.'};
+      }
+
       // Vault — assign slot
       if (path == ApiEndpoints.vaultAssign) {
         final coordinate =
@@ -206,6 +251,27 @@ class MockInterceptor extends Interceptor {
               (r['serialId'] as String).toLowerCase().contains(q);
         }).toList();
         return {'success': true, 'data': filtered};
+
+      case ApiEndpoints.salesDashboard:
+        return {'success': true, 'data': _salesDashboardStats};
+
+      case ApiEndpoints.salesLedger:
+        final sFilter = (query['filter'] as String? ?? '').toUpperCase();
+        final sQ = (query['q'] as String? ?? '').toLowerCase();
+        var orders = _salesLedger.toList();
+        if (sFilter.isNotEmpty) {
+          orders =
+              orders.where((o) => o['status'] == sFilter).toList();
+        }
+        if (sQ.isNotEmpty) {
+          orders = orders.where((o) {
+            return (o['customerName'] as String)
+                    .toLowerCase()
+                    .contains(sQ) ||
+                (o['invoiceNo'] as String).toLowerCase().contains(sQ);
+          }).toList();
+        }
+        return {'success': true, 'data': orders};
 
       case ApiEndpoints.purchaseDashboard:
         return {'success': true, 'data': _purchaseDashboardStats};
@@ -378,6 +444,29 @@ class MockInterceptor extends Interceptor {
           if (girvi.isNotEmpty) {
             return {'success': true, 'data': girvi};
           }
+        }
+
+        if (path.startsWith('/sales/') &&
+            !path.contains('/return') &&
+            path.split('/').length == 3) {
+          final invoiceNo = path.split('/')[2];
+          final order = _salesLedger.firstWhere(
+            (o) => o['invoiceNo'] == invoiceNo,
+            orElse: () => _salesLedger.first,
+          );
+          return {'success': true, 'data': order};
+        }
+
+        if (path.startsWith('/inventory/barcode/')) {
+          final barcode = path.split('/').last;
+          final item = _inventoryItems.firstWhere(
+            (i) => i['barcode'] == barcode,
+            orElse: () => <String, dynamic>{},
+          );
+          if (item.isNotEmpty) {
+            return {'success': true, 'data': item};
+          }
+          return {'success': false, 'message': 'Item not found.'};
         }
 
         if (path.startsWith('/purchases/')) {
@@ -582,6 +671,199 @@ class MockInterceptor extends Interceptor {
       'gstNo': '27PQRST3456U4V8',
       'balanceDue': 0.0,
       'status': 'INACTIVE',
+    },
+  ];
+
+  static final Map<String, dynamic> _salesDashboardStats = {
+    'todaySales': 12,
+    'todayRevenue': 380000.0,
+    'monthlyRevenue': 2850000.0,
+    'avgInvoice': 31750.0,
+    'topCategory': 'Gold Chain',
+    'pendingReturns': 2,
+  };
+
+  static final List<Map<String, dynamic>> _salesLedger = [
+    {
+      'invoiceNo': 'INV-2026-000102',
+      'date': '2026-06-22T00:00:00Z',
+      'customerId': 'cust-001',
+      'customerName': 'Ramesh Patil',
+      'customerMobile': '+91 98765 43210',
+      'items': [
+        {
+          'id': 'inv-1001',
+          'name': 'Gold Chain 22K',
+          'barcode': 'ITM-1001',
+          'grossWeight': 24.50,
+          'netWeight': 24.20,
+          'purity': 91.6,
+          'taxableAmount': 125000.0,
+          'gst': 3750.0,
+          'totalAmount': 128750.0,
+        },
+        {
+          'id': 'inv-1002',
+          'name': 'Gold Ring 22K',
+          'barcode': 'ITM-1002',
+          'grossWeight': 8.20,
+          'netWeight': 8.00,
+          'purity': 91.6,
+          'taxableAmount': 42000.0,
+          'gst': 1260.0,
+          'totalAmount': 43260.0,
+        },
+      ],
+      'subtotal': 167000.0,
+      'discount': 0.0,
+      'cgst': 2505.0,
+      'sgst': 2505.0,
+      'totalAmount': 172010.0,
+      'paymentMode': 'UPI',
+      'status': 'COMPLETED',
+      'createdAt': '2026-06-22T11:30:00Z',
+    },
+    {
+      'invoiceNo': 'INV-2026-000101',
+      'date': '2026-06-21T00:00:00Z',
+      'customerId': 'cust-002',
+      'customerName': 'Meena Jadhav',
+      'customerMobile': '+91 87654 32109',
+      'items': [
+        {
+          'id': 'inv-1003',
+          'name': 'Gold Earrings 22K',
+          'barcode': 'ITM-1003',
+          'grossWeight': 6.50,
+          'netWeight': 6.20,
+          'purity': 91.6,
+          'taxableAmount': 40000.0,
+          'gst': 1200.0,
+          'totalAmount': 41200.0,
+        },
+      ],
+      'subtotal': 40000.0,
+      'discount': 500.0,
+      'cgst': 593.0,
+      'sgst': 593.0,
+      'totalAmount': 40686.0,
+      'paymentMode': 'CASH',
+      'status': 'COMPLETED',
+      'createdAt': '2026-06-21T14:20:00Z',
+    },
+    {
+      'invoiceNo': 'INV-2026-000100',
+      'date': '2026-06-20T00:00:00Z',
+      'customerId': 'cust-003',
+      'customerName': 'Amol Deshmukh',
+      'customerMobile': '+91 76543 21098',
+      'items': [
+        {
+          'id': 'inv-1004',
+          'name': 'Gold Necklace 22K',
+          'barcode': 'ITM-1004',
+          'grossWeight': 45.00,
+          'netWeight': 44.50,
+          'purity': 91.6,
+          'taxableAmount': 275000.0,
+          'gst': 8250.0,
+          'totalAmount': 283250.0,
+        },
+      ],
+      'subtotal': 275000.0,
+      'discount': 0.0,
+      'cgst': 4125.0,
+      'sgst': 4125.0,
+      'totalAmount': 283250.0,
+      'paymentMode': 'BANK_TRANSFER',
+      'status': 'RETURNED',
+      'createdAt': '2026-06-20T10:00:00Z',
+    },
+    {
+      'invoiceNo': 'INV-2026-000099',
+      'date': '2026-06-19T00:00:00Z',
+      'customerId': 'cust-004',
+      'customerName': 'Suresh Patil',
+      'customerMobile': '+91 65432 10987',
+      'items': [
+        {
+          'id': 'inv-1005',
+          'name': 'Gold Bangle 22K',
+          'barcode': 'ITM-1005',
+          'grossWeight': 20.00,
+          'netWeight': 19.80,
+          'purity': 91.6,
+          'taxableAmount': 125000.0,
+          'gst': 3750.0,
+          'totalAmount': 128750.0,
+        },
+      ],
+      'subtotal': 125000.0,
+      'discount': 0.0,
+      'cgst': 1875.0,
+      'sgst': 1875.0,
+      'totalAmount': 128750.0,
+      'paymentMode': 'UPI',
+      'status': 'COMPLETED',
+      'createdAt': '2026-06-19T09:15:00Z',
+    },
+  ];
+
+  static final List<Map<String, dynamic>> _inventoryItems = [
+    {
+      'id': 'inv-1001',
+      'name': 'Gold Chain 22K',
+      'barcode': 'ITM-1001',
+      'grossWeight': 24.50,
+      'netWeight': 24.20,
+      'purity': 91.6,
+      'taxableAmount': 125000.0,
+      'gst': 3750.0,
+      'totalAmount': 128750.0,
+    },
+    {
+      'id': 'inv-1002',
+      'name': 'Gold Ring 22K',
+      'barcode': 'ITM-1002',
+      'grossWeight': 8.20,
+      'netWeight': 8.00,
+      'purity': 91.6,
+      'taxableAmount': 42000.0,
+      'gst': 1260.0,
+      'totalAmount': 43260.0,
+    },
+    {
+      'id': 'inv-1003',
+      'name': 'Gold Earrings 22K',
+      'barcode': 'ITM-1003',
+      'grossWeight': 6.50,
+      'netWeight': 6.20,
+      'purity': 91.6,
+      'taxableAmount': 40000.0,
+      'gst': 1200.0,
+      'totalAmount': 41200.0,
+    },
+    {
+      'id': 'inv-1004',
+      'name': 'Gold Necklace 22K',
+      'barcode': 'ITM-1004',
+      'grossWeight': 45.00,
+      'netWeight': 44.50,
+      'purity': 91.6,
+      'taxableAmount': 275000.0,
+      'gst': 8250.0,
+      'totalAmount': 283250.0,
+    },
+    {
+      'id': 'inv-1005',
+      'name': 'Gold Bangle 22K',
+      'barcode': 'ITM-1005',
+      'grossWeight': 20.00,
+      'netWeight': 19.80,
+      'purity': 91.6,
+      'taxableAmount': 125000.0,
+      'gst': 3750.0,
+      'totalAmount': 128750.0,
     },
   ];
 

@@ -49,4 +49,13 @@ class ApiEndpoints {
   static const String purchaseLedger = '/purchases/ledger';
   static String purchaseById(String id) => '/purchases/$id';
   static const String suppliers = '/suppliers';
+
+  // Sales
+  static const String sales = '/sales';
+  static const String salesDashboard = '/sales/dashboard';
+  static const String salesLedger = '/sales/ledger';
+  static String saleById(String invoiceNo) => '/sales/$invoiceNo';
+  static const String salesReturn = '/sales/return';
+  static String inventoryItemByBarcode(String barcode) =>
+      '/inventory/barcode/$barcode';
 }

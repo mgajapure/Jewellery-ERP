@@ -56,6 +56,19 @@ import '../../features/purchase/presentation/bloc/new_purchase_bloc.dart'
     as _i705;
 import '../../features/purchase/presentation/bloc/supplier_bloc.dart'
     as _i706;
+import '../../features/sales/data/repositories/sales_repository_impl.dart'
+    as _i801;
+import '../../features/sales/domain/repositories/sales_repository.dart'
+    as _i802;
+import '../../features/sales/presentation/bloc/sales_dashboard_bloc.dart'
+    as _i803;
+import '../../features/sales/presentation/bloc/sales_ledger_bloc.dart'
+    as _i804;
+import '../../features/sales/presentation/bloc/new_sale_bloc.dart' as _i805;
+import '../../features/sales/presentation/bloc/sales_return_bloc.dart'
+    as _i806;
+import '../../features/sales/presentation/bloc/barcode_sale_bloc.dart'
+    as _i807;
 import '../../features/vault/data/repositories/vault_repository_impl.dart'
     as _i601;
 import '../../features/vault/domain/repositories/vault_repository.dart'
@@ -165,6 +178,25 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.factory<_i706.SupplierBloc>(
     () => _i706.SupplierBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  // Sales
+  gh.lazySingleton<_i802.SalesRepository>(
+    () => _i801.SalesRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i803.SalesDashboardBloc>(
+    () => _i803.SalesDashboardBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i804.SalesLedgerBloc>(
+    () => _i804.SalesLedgerBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i805.NewSaleBloc>(
+    () => _i805.NewSaleBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i806.SalesReturnBloc>(
+    () => _i806.SalesReturnBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i807.BarcodeSaleBloc>(
+    () => _i807.BarcodeSaleBloc(repository: gh<_i802.SalesRepository>()),
   );
   // Vault
   gh.lazySingleton<_i602.VaultRepository>(

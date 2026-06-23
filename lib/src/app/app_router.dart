@@ -201,7 +201,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/sales/invoice-preview',
       name: InvoicePreviewPage.routeName,
-      builder: (context, state) => const InvoicePreviewPage(),
+      builder: (context, state) => InvoicePreviewPage(
+        order: state.extra! as SaleOrder,
+      ),
     ),
     GoRoute(
       path: '/sales/ledger',
@@ -221,7 +223,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/sales/:id',
       name: SalesDetailsPage.routeName,
-      builder: (context, state) => const SalesDetailsPage(),
+      builder: (context, state) => SalesDetailsPage(
+        order: state.extra! as SaleOrder,
+      ),
     ),
     GoRoute(
       path: '/more',

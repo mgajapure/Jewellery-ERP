@@ -1,45 +1,67 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../presentation/bloc/sales_return_bloc.dart';
 import '../theme/sales_colors.dart';
-import 'sales_dashboard_page.dart';
 
 /// SCR-056 Sales Return
-///
-/// Process full, partial, or exchange returns against an invoice.
-class SalesReturnPage extends StatefulWidget {
+class SalesReturnPage extends StatelessWidget {
   const SalesReturnPage({super.key});
 
   static const routeName = 'sales-return';
 
   @override
-  State<SalesReturnPage> createState() => _SalesReturnPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<SalesReturnBloc>(),
+      child: BlocListener<SalesReturnBloc, SalesReturnState>(
+        listener: (context, state) {
+          if (state is SalesReturnSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('परतावा प्रक्रिया यशस्वी / Return processed.'),
+                backgroundColor: SalesColors.green,
+              ),
+            );
+            AppNavigation.popOrGoNamed(context, 'sales-dashboard');
+          }
+          if (state is SalesReturnError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: SalesColors.red,
+              ),
+            );
+          }
+        },
+        child: const _SalesReturnScaffold(),
+      ),
+    );
+  }
 }
 
-class _SalesReturnPageState extends State<SalesReturnPage> {
-  final _invoiceController = TextEditingController(text: 'INV-2026-000102');
-  final _reasonController = TextEditingController();
+class _SalesReturnScaffold extends StatefulWidget {
+  const _SalesReturnScaffold();
 
+  @override
+  State<_SalesReturnScaffold> createState() => _SalesReturnScaffoldState();
+}
+
+class _SalesReturnScaffoldState extends State<_SalesReturnScaffold> {
+  final _invoiceCtrl =
+      TextEditingController(text: 'INV-2026-000102');
+  final _reasonCtrl = TextEditingController();
   String _returnType = 'Full Return';
   String _inventoryStatus = 'Available';
-  final bool _managerApproved = false;
-
-  final List<Map<String, dynamic>> _invoiceItems = const [
-    {'name': 'Gold Chain 22K', 'barcode': 'ITM-1001', 'price': '₹ 1,28,750'},
-    {'name': 'Gold Ring 22K', 'barcode': 'ITM-1002', 'price': '₹ 43,260'},
-  ];
 
   @override
   void dispose() {
-    _invoiceController.dispose();
-    _reasonController.dispose();
+    _invoiceCtrl.dispose();
+    _reasonCtrl.dispose();
     super.dispose();
-  }
-
-  void _processReturn() {
-    // TODO: integrate return API.
-    AppNavigation.popOrGoNamed(context, SalesDashboardPage.routeName);
   }
 
   @override
@@ -52,10 +74,8 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            SalesDashboardPage.routeName,
-          ),
+          onPressed: () =>
+              AppNavigation.popOrGoNamed(context, 'sales-dashboard'),
         ),
         title: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -63,163 +83,232 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
             Text(
               'विक्री परतावा',
               style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white),
             ),
             Text(
               'Sales Return',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.white70),
             ),
           ],
         ),
       ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SectionTitle(titleMr: 'इन्व्हॉईस शोधा', titleEn: 'Find Invoice'),
-                    Row(
+        child: BlocBuilder<SalesReturnBloc, SalesReturnState>(
+          builder: (context, state) {
+            final isSubmitting = state is SalesReturnSubmitting;
+            return Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: TextField(
-                            controller: _invoiceController,
-                            decoration: _inputDecoration('इन्व्हॉईस क्र. / Invoice No.'),
+                        _SectionTitle(
+                            titleMr: 'इन्व्हॉईस शोधा',
+                            titleEn: 'Find Invoice'),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: _invoiceCtrl,
+                                decoration: _inputDecoration(
+                                    'इन्व्हॉईस क्र. / Invoice No.'),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            ElevatedButton(
+                              onPressed: state is SalesReturnLookupLoading
+                                  ? null
+                                  : () => context
+                                      .read<SalesReturnBloc>()
+                                      .add(SalesReturnInvoiceLookupStarted(
+                                        invoiceNo: _invoiceCtrl.text.trim(),
+                                      )),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: SalesColors.navy,
+                                foregroundColor: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 14, horizontal: 18),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(12),
+                                ),
+                              ),
+                              child: state is SalesReturnLookupLoading
+                                  ? const SizedBox(
+                                      height: 18,
+                                      width: 18,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : const Text('शोधा'),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 20),
+                        _SectionTitle(
+                            titleMr: 'परतावा प्रकार',
+                            titleEn: 'Return Type'),
+                        _DropdownField(
+                          labelMr: 'परतावा प्रकार',
+                          labelEn: 'Return Type',
+                          value: _returnType,
+                          options: const [
+                            'Full Return',
+                            'Partial Return',
+                            'Exchange',
+                          ],
+                          onChanged: (v) {
+                            if (v != null)
+                              setState(() => _returnType = v);
+                          },
+                        ),
+                        if (state is SalesReturnLookupLoaded) ...[
+                          const SizedBox(height: 20),
+                          _SectionTitle(
+                              titleMr: 'वस्तू निवडा',
+                              titleEn: 'Select Items'),
+                          ...state.order.items.map(
+                            (item) => _ReturnItemTile(
+                              name: item.name,
+                              barcode: item.barcode,
+                              price: item.totalAmount,
+                              selected: state.selectedItemIds
+                                  .contains(item.id),
+                              onToggle: () => context
+                                  .read<SalesReturnBloc>()
+                                  .add(SalesReturnItemToggled(
+                                      itemId: item.id)),
+                            ),
+                          ),
+                        ],
+                        const SizedBox(height: 20),
+                        _SectionTitle(
+                            titleMr: 'परतावा कारण',
+                            titleEn: 'Return Reason'),
+                        TextField(
+                          controller: _reasonCtrl,
+                          maxLines: 3,
+                          decoration:
+                              _inputDecoration('कारण / Reason'),
+                        ),
+                        const SizedBox(height: 20),
+                        _SectionTitle(
+                            titleMr: 'स्टॉक स्थिती',
+                            titleEn: 'Inventory Status'),
+                        _DropdownField(
+                          labelMr: 'स्टॉक स्थिती',
+                          labelEn: 'Inventory Status',
+                          value: _inventoryStatus,
+                          options: const [
+                            'Available',
+                            'Damaged',
+                            'Repair',
+                          ],
+                          onChanged: (v) {
+                            if (v != null)
+                              setState(() => _inventoryStatus = v);
+                          },
+                        ),
+                        const SizedBox(height: 20),
+                        Container(
+                          padding: const EdgeInsets.all(14),
+                          decoration: BoxDecoration(
+                            color: SalesColors.cream,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(Icons.info_outline,
+                                  color: SalesColors.navy),
+                              SizedBox(width: 10),
+                              Expanded(
+                                child: Text(
+                                  'महत्त्वाचे / Important: Returns above the configured threshold require manager approval.',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: SalesColors.ink,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        ElevatedButton(
-                          onPressed: () {
-                            // TODO: fetch invoice.
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: SalesColors.navy,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 18),
+                      ],
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border:
+                        Border(top: BorderSide(color: SalesColors.line)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => AppNavigation.popOrGoNamed(
+                              context, 'sales-dashboard'),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: SalesColors.navy,
+                            side: const BorderSide(
+                                color: SalesColors.navy),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('शोधा'),
+                          child: const Text('रद्द / Cancel'),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 20),
-                    _SectionTitle(titleMr: 'परतावा प्रकार', titleEn: 'Return Type'),
-                    _DropdownField(
-                      labelMr: 'परतावा प्रकार',
-                      labelEn: 'Return Type',
-                      value: _returnType,
-                      options: const ['Full Return', 'Partial Return', 'Exchange'],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _returnType = value);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    _SectionTitle(titleMr: 'वस्तू निवडा', titleEn: 'Select Items'),
-                    ..._invoiceItems.map((item) => _ReturnItemTile(item: item)),
-                    const SizedBox(height: 20),
-                    _SectionTitle(titleMr: 'परतावा कारण', titleEn: 'Return Reason'),
-                    TextField(
-                      controller: _reasonController,
-                      maxLines: 3,
-                      decoration: _inputDecoration('कारण / Reason'),
-                    ),
-                    const SizedBox(height: 20),
-                    _SectionTitle(titleMr: 'स्टॉक स्थिती', titleEn: 'Inventory Status'),
-                    _DropdownField(
-                      labelMr: 'स्टॉक स्थिती',
-                      labelEn: 'Inventory Status',
-                      value: _inventoryStatus,
-                      options: const ['Available', 'Damaged', 'Repair'],
-                      onChanged: (value) {
-                        if (value != null) {
-                          setState(() => _inventoryStatus = value);
-                        }
-                      },
-                    ),
-                    const SizedBox(height: 20),
-                    Container(
-                      padding: const EdgeInsets.all(14),
-                      decoration: BoxDecoration(
-                        color: SalesColors.cream,
-                        borderRadius: BorderRadius.circular(12),
                       ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.info_outline, color: SalesColors.navy),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text(
-                              'महत्त्वाचे / Important: Returns above the configured threshold require manager approval.',
-                              style: TextStyle(
-                                fontSize: 12,
-                                color: SalesColors.ink,
-                              ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: isSubmitting ||
+                                  state is! SalesReturnLookupLoaded
+                              ? null
+                              : () => context.read<SalesReturnBloc>().add(
+                                    SalesReturnSubmitted(
+                                      reason: _reasonCtrl.text.trim(),
+                                      returnType: _returnType,
+                                      inventoryStatus: _inventoryStatus,
+                                    ),
+                                  ),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: SalesColors.red,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                        ],
+                          child: isSubmitting
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('परतावा / Return'),
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: SalesColors.line)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () => AppNavigation.popOrGoNamed(
-                        context,
-                        SalesDashboardPage.routeName,
-                      ),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: SalesColors.navy,
-                        side: const BorderSide(color: SalesColors.navy),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('रद्द / Cancel'),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _processReturn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: SalesColors.red,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('परतावा / Return'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+              ],
+            );
+          },
         ),
       ),
     );
@@ -240,48 +329,56 @@ class _SalesReturnPageState extends State<SalesReturnPage> {
       ),
       focusedBorder: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
-        borderSide: const BorderSide(color: SalesColors.navy, width: 1.5),
+        borderSide:
+            const BorderSide(color: SalesColors.navy, width: 1.5),
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+      contentPadding:
+          const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
     );
   }
 }
 
-class _ReturnItemTile extends StatefulWidget {
-  const _ReturnItemTile({required this.item});
+class _ReturnItemTile extends StatelessWidget {
+  const _ReturnItemTile({
+    required this.name,
+    required this.barcode,
+    required this.price,
+    required this.selected,
+    required this.onToggle,
+  });
 
-  final Map<String, dynamic> item;
-
-  @override
-  State<_ReturnItemTile> createState() => _ReturnItemTileState();
-}
-
-class _ReturnItemTileState extends State<_ReturnItemTile> {
-  bool _selected = false;
+  final String name;
+  final String barcode;
+  final double price;
+  final bool selected;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: _selected ? SalesColors.navy : SalesColors.line),
+        border: Border.all(
+          color: selected ? SalesColors.navy : SalesColors.line,
+        ),
       ),
       child: Row(
         children: [
           Checkbox(
-            value: _selected,
+            value: selected,
             activeColor: SalesColors.navy,
-            onChanged: (value) => setState(() => _selected = value ?? false),
+            onChanged: (_) => onToggle(),
           ),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  widget.item['name'] as String,
+                  name,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -290,7 +387,7 @@ class _ReturnItemTileState extends State<_ReturnItemTile> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${widget.item['barcode']}',
+                  barcode,
                   style: const TextStyle(
                     fontSize: 12,
                     color: SalesColors.muted,
@@ -300,7 +397,7 @@ class _ReturnItemTileState extends State<_ReturnItemTile> {
             ),
           ),
           Text(
-            widget.item['price'] as String,
+            '₹${amtFmt.format(price)}',
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w700,
@@ -382,16 +479,15 @@ class _DropdownField extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: SalesColors.navy, width: 1.5),
+          borderSide:
+              const BorderSide(color: SalesColors.navy, width: 1.5),
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       ),
-      items: options.map((option) {
-        return DropdownMenuItem<String>(
-          value: option,
-          child: Text(option),
-        );
-      }).toList(),
+      items: options
+          .map((o) => DropdownMenuItem(value: o, child: Text(o)))
+          .toList(),
       onChanged: onChanged,
     );
   }

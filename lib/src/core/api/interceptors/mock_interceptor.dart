@@ -214,6 +214,20 @@ class MockInterceptor extends Interceptor {
         };
       }
 
+      // Compliance — generate form
+      if (path == ApiEndpoints.complianceGenerate) {
+        final body = _extractBody(options) ?? {};
+        final formType = body['form'] as String? ?? '';
+        return {
+          'success': true,
+          'data': {
+            'formType': formType,
+            'generatedAt': DateTime.now().toIso8601String(),
+            'fileUrl': 'mock://${formType.toLowerCase()}_${DateTime.now().millisecondsSinceEpoch}.pdf',
+          },
+        };
+      }
+
       // Inventory — create new item
       if (path == ApiEndpoints.inventory) {
         final body = _extractBody(options) ?? {};
@@ -288,6 +302,25 @@ class MockInterceptor extends Interceptor {
     }
 
     switch (path) {
+      case ApiEndpoints.savingsDashboard:
+        return {'success': true, 'data': _savingsDashboard};
+
+      case ApiEndpoints.reportsDashboard:
+        final p = (query['period'] as String? ?? 'month');
+        return {'success': true, 'data': _reportsDashboard(p)};
+
+      case ApiEndpoints.complianceDashboard:
+        return {'success': true, 'data': _complianceDashboard};
+
+      case ApiEndpoints.complianceForm9:
+        return {
+          'success': true,
+          'data': {
+            'period': '01 Jan 2026 – 31 Jan 2026',
+            'rows': _form9Rows,
+          },
+        };
+
       case ApiEndpoints.vaults:
         return {'success': true, 'data': _vaultOccupancy};
 
@@ -1603,4 +1636,213 @@ class MockInterceptor extends Interceptor {
       'payments': [],
     },
   ];
+
+  static const Map<String, dynamic> _complianceDashboard = {
+    'healthScore': 94,
+    'metrics': [
+      {'labelMr': 'सक्रिय गिरवी', 'labelEn': 'Active Girvi', 'value': '124', 'color': 0xFF061C49},
+      {'labelMr': 'LTV उल्लंघने', 'labelEn': 'LTV Violations', 'value': '2', 'color': 0xFFE21B2D},
+      {'labelMr': 'प्रलंबित KFS', 'labelEn': 'Pending KFS', 'value': '5', 'color': 0xFFF59E0B},
+      {'labelMr': 'विमा कालबाह्य', 'labelEn': 'Insurance Expiry', 'value': '1', 'color': 0xFFE21B2D},
+      {'labelMr': 'लिलाव सूचना', 'labelEn': 'Auction Notices', 'value': '3', 'color': 0xFFF59E0B},
+      {'labelMr': 'सोने परत देय', 'labelEn': 'Gold Return Due', 'value': '7', 'color': 0xFF07934A},
+    ],
+    'alerts': [
+      {
+        'title': 'LTV violation detected',
+        'subtitle': 'GRV-2026-000055 exceeds 85% LTV limit',
+        'severity': 'high',
+        'time': '2h ago',
+      },
+      {
+        'title': 'Insurance expiring soon',
+        'subtitle': 'Vault-B policy expires on 30 Jun 2026',
+        'severity': 'medium',
+        'time': '1d ago',
+      },
+      {
+        'title': 'KFS pending acknowledgement',
+        'subtitle': '3 customers have not acknowledged KFS',
+        'severity': 'medium',
+        'time': '2d ago',
+      },
+      {
+        'title': 'Gold return window closing',
+        'subtitle': 'GRV-2026-000021 return due in 2 days',
+        'severity': 'low',
+        'time': '3d ago',
+      },
+    ],
+  };
+
+  static const List<Map<String, dynamic>> _form9Rows = [
+    {'date': '01 Jan 2026', 'girviCount': 4, 'totalLoan': 185000.0, 'payments': 12000.0, 'interest': 2100.0},
+    {'date': '02 Jan 2026', 'girviCount': 2, 'totalLoan': 75000.0, 'payments': 5000.0, 'interest': 950.0},
+    {'date': '03 Jan 2026', 'girviCount': 5, 'totalLoan': 220000.0, 'payments': 15000.0, 'interest': 2800.0},
+    {'date': '04 Jan 2026', 'girviCount': 3, 'totalLoan': 140000.0, 'payments': 8000.0, 'interest': 1650.0},
+    {'date': '05 Jan 2026', 'girviCount': 6, 'totalLoan': 310000.0, 'payments': 22000.0, 'interest': 3200.0},
+    {'date': '06 Jan 2026', 'girviCount': 1, 'totalLoan': 45000.0, 'payments': 3000.0, 'interest': 500.0},
+    {'date': '07 Jan 2026', 'girviCount': 4, 'totalLoan': 190000.0, 'payments': 14000.0, 'interest': 2000.0},
+  ];
+
+  static const Map<String, dynamic> _savingsDashboard = {
+    'activeSubscriptions': 48,
+    'collectedThisMonth': 240000.0,
+    'totalCollected': 1850000.0,
+    'activePlans': 3,
+    'plans': [
+      {
+        'id': 'plan-11',
+        'nameMr': '११ महिन्यांची योजना',
+        'nameEn': '11-Month Gold Scheme',
+        'durationMonths': 11,
+        'monthlyAmount': 5000.0,
+        'bonusMonths': 1,
+        'activeSubscribers': 24,
+        'isActive': true,
+      },
+      {
+        'id': 'plan-21',
+        'nameMr': '२१ महिन्यांची योजना',
+        'nameEn': '21-Month Gold Scheme',
+        'durationMonths': 21,
+        'monthlyAmount': 3000.0,
+        'bonusMonths': 2,
+        'activeSubscribers': 16,
+        'isActive': true,
+      },
+      {
+        'id': 'plan-51',
+        'nameMr': '५१ महिन्यांची योजना',
+        'nameEn': '51-Month Diamond Scheme',
+        'durationMonths': 51,
+        'monthlyAmount': 2000.0,
+        'bonusMonths': 3,
+        'activeSubscribers': 8,
+        'isActive': true,
+      },
+    ],
+    'recentSubscriptions': [
+      {
+        'id': 'sub-001',
+        'customerName': 'रमेश पाटील / Ramesh Patil',
+        'customerId': 'cust-001',
+        'planNameMr': '११ महिन्यांची योजना',
+        'planNameEn': '11-Month Gold Scheme',
+        'monthlyAmount': 5000.0,
+        'paidInstallments': 7,
+        'totalInstallments': 11,
+        'nextDueDate': '01 Jul 2026',
+        'totalPaid': 35000.0,
+        'status': 'active',
+      },
+      {
+        'id': 'sub-002',
+        'customerName': 'सुरेश जाधव / Suresh Jadhav',
+        'customerId': 'cust-002',
+        'planNameMr': '२१ महिन्यांची योजना',
+        'planNameEn': '21-Month Gold Scheme',
+        'monthlyAmount': 3000.0,
+        'paidInstallments': 15,
+        'totalInstallments': 21,
+        'nextDueDate': '05 Jul 2026',
+        'totalPaid': 45000.0,
+        'status': 'active',
+      },
+      {
+        'id': 'sub-003',
+        'customerName': 'प्रिया शर्मा / Priya Sharma',
+        'customerId': 'cust-003',
+        'planNameMr': '११ महिन्यांची योजना',
+        'planNameEn': '11-Month Gold Scheme',
+        'monthlyAmount': 5000.0,
+        'paidInstallments': 11,
+        'totalInstallments': 11,
+        'nextDueDate': '-',
+        'totalPaid': 55000.0,
+        'status': 'completed',
+      },
+      {
+        'id': 'sub-004',
+        'customerName': 'अनिल कुमार / Anil Kumar',
+        'customerId': 'cust-004',
+        'planNameMr': '५१ महिन्यांची योजना',
+        'planNameEn': '51-Month Diamond Scheme',
+        'monthlyAmount': 2000.0,
+        'paidInstallments': 3,
+        'totalInstallments': 51,
+        'nextDueDate': '10 Jul 2026',
+        'totalPaid': 6000.0,
+        'status': 'active',
+      },
+    ],
+  };
+
+  static Map<String, dynamic> _reportsDashboard(String period) {
+    final multiplier = switch (period) {
+      'today' => 0.033,
+      'week' => 0.23,
+      'year' => 12.0,
+      _ => 1.0,
+    };
+    final periodLabel = switch (period) {
+      'today' => 'Today / आज',
+      'week' => 'This Week / या आठवड्यात',
+      'year' => 'This Year / या वर्षात',
+      _ => 'This Month / या महिन्यात',
+    };
+    return {
+      'period': periodLabel,
+      'sales': {
+        'totalRevenue': 485000.0 * multiplier,
+        'totalOrders': (42 * multiplier).round(),
+        'avgOrderValue': 11548.0,
+        'growthPercent': 12.4,
+        'categories': [
+          {
+            'labelMr': 'सोन्याचे दागिने',
+            'labelEn': 'Gold Jewellery',
+            'amount': 290000.0 * multiplier,
+            'percentage': 59.8,
+            'color': 0xFFE7A726,
+          },
+          {
+            'labelMr': 'चांदीचे दागिने',
+            'labelEn': 'Silver Jewellery',
+            'amount': 98000.0 * multiplier,
+            'percentage': 20.2,
+            'color': 0xFF9CA3AF,
+          },
+          {
+            'labelMr': 'हिऱ्याचे दागिने',
+            'labelEn': 'Diamond Jewellery',
+            'amount': 72000.0 * multiplier,
+            'percentage': 14.8,
+            'color': 0xFF6366F1,
+          },
+          {
+            'labelMr': 'इतर',
+            'labelEn': 'Others',
+            'amount': 25000.0 * multiplier,
+            'percentage': 5.2,
+            'color': 0xFF5E6880,
+          },
+        ],
+      },
+      'girvi': {
+        'totalDisbursed': 1240000.0 * multiplier,
+        'totalRepaid': 380000.0 * multiplier,
+        'activeLoans': (124 * (period == 'today' ? 1 : 1)).round(),
+        'overdueLoans': 18,
+        'interestCollected': 96000.0 * multiplier,
+        'avgLoanAmount': 10000.0,
+      },
+      'purchase': {
+        'totalPurchased': 320000.0 * multiplier,
+        'totalWeight': 450.0 * multiplier,
+        'avgRate': 7200.0,
+        'uniqueSuppliers': period == 'today' ? 2 : (period == 'week' ? 5 : 12),
+      },
+    };
+  }
 }

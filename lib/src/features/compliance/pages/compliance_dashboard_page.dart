@@ -1,53 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/compliance_entities.dart';
+import '../presentation/bloc/compliance_dashboard_bloc.dart';
 import '../theme/compliance_colors.dart';
 
 /// SCR-078 Compliance Dashboard
-///
-/// Central compliance monitoring screen showing RBI and Maharashtra
-/// compliance health, violations, and pending actions.
 class ComplianceDashboardPage extends StatelessWidget {
   const ComplianceDashboardPage({super.key});
 
   static const routeName = 'compliance-dashboard';
 
-  final List<Map<String, dynamic>> _metrics = const [
-    {'labelMr': 'सक्रिय गिरवी', 'labelEn': 'Active Girvi', 'value': '124', 'color': 0xFF061C49},
-    {'labelMr': 'LTV उल्लंघने', 'labelEn': 'LTV Violations', 'value': '2', 'color': 0xFFE21B2D},
-    {'labelMr': 'प्रलंबित KFS', 'labelEn': 'Pending KFS', 'value': '5', 'color': 0xFFF59E0B},
-    {'labelMr': 'विमा कालबाह्य', 'labelEn': 'Insurance Expiry', 'value': '1', 'color': 0xFFE21B2D},
-    {'labelMr': 'लिलाव सूचना', 'labelEn': 'Auction Notices', 'value': '3', 'color': 0xFFF59E0B},
-    {'labelMr': 'सोने परत देय', 'labelEn': 'Gold Return Due', 'value': '7', 'color': 0xFF07934A},
-  ];
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<ComplianceDashboardBloc>()
+        ..add(ComplianceDashboardStarted()),
+      child: const _ComplianceDashboardScaffold(),
+    );
+  }
+}
 
-  final List<Map<String, dynamic>> _alerts = const [
-    {
-      'title': 'LTV violation detected',
-      'subtitle': 'GRV-2026-000055 exceeds 85% LTV limit',
-      'severity': 'high',
-      'time': '2h ago',
-    },
-    {
-      'title': 'Insurance expiring soon',
-      'subtitle': 'Vault-B policy expires on 30 Jun 2026',
-      'severity': 'medium',
-      'time': '1d ago',
-    },
-    {
-      'title': 'KFS pending acknowledgement',
-      'subtitle': '3 customers have not acknowledged KFS',
-      'severity': 'medium',
-      'time': '2d ago',
-    },
-    {
-      'title': 'Gold return window closing',
-      'subtitle': 'GRV-2026-000021 return due in 2 days',
-      'severity': 'low',
-      'time': '3d ago',
-    },
-  ];
+class _ComplianceDashboardScaffold extends StatelessWidget {
+  const _ComplianceDashboardScaffold();
 
   @override
   Widget build(BuildContext context) {
@@ -61,90 +39,146 @@ class ComplianceDashboardPage extends StatelessWidget {
               titleEn: 'Compliance Dashboard',
               showBackButton: true,
               backFallbackRoute: 'more',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.refresh, color: ComplianceColors.navy),
+                  onPressed: () => context
+                      .read<ComplianceDashboardBloc>()
+                      .add(ComplianceDashboardRefreshed()),
+                ),
+              ],
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _HealthScoreCard(score: 94),
-              const SizedBox(height: 20),
-              const Text(
-                'मेट्रिक्स / Metrics',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ComplianceColors.ink,
-                ),
+              child: BlocBuilder<ComplianceDashboardBloc,
+                  ComplianceDashboardState>(
+                builder: (context, state) {
+                  if (state is ComplianceDashboardLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                          color: ComplianceColors.navy),
+                    );
+                  }
+                  if (state is ComplianceDashboardError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: ComplianceColors.red, size: 48),
+                          const SizedBox(height: 12),
+                          Text(state.message,
+                              style: const TextStyle(
+                                  color: ComplianceColors.muted)),
+                          const SizedBox(height: 16),
+                          ElevatedButton(
+                            onPressed: () => context
+                                .read<ComplianceDashboardBloc>()
+                                .add(ComplianceDashboardRefreshed()),
+                            style: ElevatedButton.styleFrom(
+                                backgroundColor: ComplianceColors.navy),
+                            child: const Text('पुन्हा प्रयत्न / Retry',
+                                style: TextStyle(color: Colors.white)),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+                  if (state is ComplianceDashboardLoaded) {
+                    return _LoadedView(stats: state.stats);
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
-              const SizedBox(height: 12),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _metrics
-                    .map((m) => _MetricCard(metric: m))
-                    .toList(),
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                'अलर्ट आणि उल्लंघने / Alerts & Violations',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ComplianceColors.ink,
-                ),
-              ),
-              const SizedBox(height: 12),
-              ..._alerts.map((a) => _AlertCard(alert: a)),
-              const SizedBox(height: 24),
-              const Text(
-                'फॉर्म / Forms',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: ComplianceColors.ink,
-                ),
-              ),
-              const SizedBox(height: 12),
-              _FormActionCard(
-                titleMr: 'फॉर्म ६',
-                titleEn: 'Form 6',
-                subtitle: 'Money Lending License',
-                onTap: () => context.goNamed('form6-generator'),
-              ),
-              const SizedBox(height: 10),
-              _FormActionCard(
-                titleMr: 'फॉर्म ९',
-                titleEn: 'Form 9',
-                subtitle: 'Daily Loan Register',
-                onTap: () => context.goNamed('form9-register'),
-              ),
-              const SizedBox(height: 10),
-              _FormActionCard(
-                titleMr: 'फॉर्म ११ आणि १२',
-                titleEn: 'Forms 11 & 12',
-                subtitle: 'Pledged Articles & Loan Register',
-                onTap: () => context.goNamed('forms11-12'),
-              ),
-              const SizedBox(height: 10),
-              _FormActionCard(
-                titleMr: 'फॉर्म १३',
-                titleEn: 'Form 13',
-                subtitle: 'Annual Statutory Return',
-                onTap: () => context.goNamed('form13-generator'),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    ],
-  ),
-),
-);
+    );
+  }
+}
+
+class _LoadedView extends StatelessWidget {
+  const _LoadedView({required this.stats});
+
+  final ComplianceDashboardStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _HealthScoreCard(score: stats.healthScore),
+          const SizedBox(height: 20),
+          const Text(
+            'मेट्रिक्स / Metrics',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ComplianceColors.ink,
+            ),
+          ),
+          const SizedBox(height: 12),
+          GridView.count(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            children: stats.metrics.map((m) => _MetricCard(metric: m)).toList(),
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'अलर्ट आणि उल्लंघने / Alerts & Violations',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ComplianceColors.ink,
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...stats.alerts.map((a) => _AlertCard(alert: a)),
+          const SizedBox(height: 24),
+          const Text(
+            'फॉर्म / Forms',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: ComplianceColors.ink,
+            ),
+          ),
+          const SizedBox(height: 12),
+          _FormActionCard(
+            titleMr: 'फॉर्म ६',
+            titleEn: 'Form 6',
+            subtitle: 'Money Lending License',
+            onTap: () => context.goNamed('form6-generator'),
+          ),
+          const SizedBox(height: 10),
+          _FormActionCard(
+            titleMr: 'फॉर्म ९',
+            titleEn: 'Form 9',
+            subtitle: 'Daily Loan Register',
+            onTap: () => context.goNamed('form9-register'),
+          ),
+          const SizedBox(height: 10),
+          _FormActionCard(
+            titleMr: 'फॉर्म ११ आणि १२',
+            titleEn: 'Forms 11 & 12',
+            subtitle: 'Pledged Articles & Loan Register',
+            onTap: () => context.goNamed('forms11-12'),
+          ),
+          const SizedBox(height: 10),
+          _FormActionCard(
+            titleMr: 'फॉर्म १३',
+            titleEn: 'Form 13',
+            subtitle: 'Annual Statutory Return',
+            onTap: () => context.goNamed('form13-generator'),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -179,10 +213,7 @@ class _HealthScoreCard extends StatelessWidget {
         children: [
           const Text(
             'अनुपालन आरोग्य स्कोर / Compliance Health Score',
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.white70,
-            ),
+            style: TextStyle(fontSize: 13, color: Colors.white70),
           ),
           const SizedBox(height: 12),
           Row(
@@ -222,10 +253,7 @@ class _HealthScoreCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     const Text(
                       'शेवटची स्कॅन: १ तासापूर्वी / Last scan: 1 hour ago',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.white70,
-                      ),
+                      style: TextStyle(fontSize: 12, color: Colors.white70),
                     ),
                   ],
                 ),
@@ -241,11 +269,11 @@ class _HealthScoreCard extends StatelessWidget {
 class _MetricCard extends StatelessWidget {
   const _MetricCard({required this.metric});
 
-  final Map<String, dynamic> metric;
+  final ComplianceMetric metric;
 
   @override
   Widget build(BuildContext context) {
-    final color = Color(metric['color'] as int);
+    final color = Color(metric.colorHex);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -264,7 +292,7 @@ class _MetricCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              metric['value'] as String,
+              metric.value,
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
@@ -276,7 +304,7 @@ class _MetricCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                metric['labelMr'] as String,
+                metric.labelMr,
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
@@ -284,7 +312,7 @@ class _MetricCard extends StatelessWidget {
                 ),
               ),
               Text(
-                metric['labelEn'] as String,
+                metric.labelEn,
                 style: const TextStyle(
                   fontSize: 11,
                   color: ComplianceColors.muted,
@@ -301,15 +329,15 @@ class _MetricCard extends StatelessWidget {
 class _AlertCard extends StatelessWidget {
   const _AlertCard({required this.alert});
 
-  final Map<String, dynamic> alert;
+  final ComplianceAlert alert;
 
   Color get _severityColor {
-    switch (alert['severity'] as String) {
-      case 'high':
+    switch (alert.severity) {
+      case ComplianceSeverity.high:
         return ComplianceColors.red;
-      case 'medium':
+      case ComplianceSeverity.medium:
         return ComplianceColors.orange;
-      default:
+      case ComplianceSeverity.low:
         return ComplianceColors.green;
     }
   }
@@ -342,7 +370,7 @@ class _AlertCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  alert['title'] as String,
+                  alert.title,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -351,7 +379,7 @@ class _AlertCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  alert['subtitle'] as String,
+                  alert.subtitle,
                   style: const TextStyle(
                     fontSize: 12,
                     color: ComplianceColors.muted,
@@ -361,11 +389,8 @@ class _AlertCard extends StatelessWidget {
             ),
           ),
           Text(
-            alert['time'] as String,
-            style: const TextStyle(
-              fontSize: 11,
-              color: ComplianceColors.muted,
-            ),
+            alert.time,
+            style: const TextStyle(fontSize: 11, color: ComplianceColors.muted),
           ),
         ],
       ),
@@ -436,10 +461,7 @@ class _FormActionCard extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: ComplianceColors.muted,
-            ),
+            const Icon(Icons.chevron_right, color: ComplianceColors.muted),
           ],
         ),
       ),

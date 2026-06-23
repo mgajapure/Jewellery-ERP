@@ -66,6 +66,28 @@ import '../../features/inventory/presentation/bloc/inventory_detail_bloc.dart'
     as _i904;
 import '../../features/inventory/presentation/bloc/add_inventory_bloc.dart'
     as _i905;
+import '../../features/compliance/data/repositories/compliance_repository_impl.dart'
+    as _i1001;
+import '../../features/compliance/domain/repositories/compliance_repository.dart'
+    as _i1002;
+import '../../features/compliance/presentation/bloc/compliance_dashboard_bloc.dart'
+    as _i1003;
+import '../../features/compliance/presentation/bloc/form9_bloc.dart'
+    as _i1004;
+import '../../features/compliance/presentation/bloc/generate_form_bloc.dart'
+    as _i1005;
+import '../../features/savings/data/repositories/savings_repository_impl.dart'
+    as _i1101;
+import '../../features/savings/domain/repositories/savings_repository.dart'
+    as _i1102;
+import '../../features/savings/presentation/bloc/savings_dashboard_bloc.dart'
+    as _i1103;
+import '../../features/reports/data/repositories/reports_repository_impl.dart'
+    as _i1201;
+import '../../features/reports/domain/repositories/reports_repository.dart'
+    as _i1202;
+import '../../features/reports/presentation/bloc/reports_dashboard_bloc.dart'
+    as _i1203;
 import '../../features/sales/data/repositories/sales_repository_impl.dart'
     as _i801;
 import '../../features/sales/domain/repositories/sales_repository.dart'
@@ -223,6 +245,37 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i905.AddInventoryBloc>(
     () => _i905.AddInventoryBloc(
         repository: gh<_i902.InventoryRepository>()),
+  );
+  // Compliance
+  gh.lazySingleton<_i1002.ComplianceRepository>(
+    () => _i1001.ComplianceRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1003.ComplianceDashboardBloc>(
+    () => _i1003.ComplianceDashboardBloc(
+        repository: gh<_i1002.ComplianceRepository>()),
+  );
+  gh.factory<_i1004.Form9Bloc>(
+    () => _i1004.Form9Bloc(repository: gh<_i1002.ComplianceRepository>()),
+  );
+  gh.factory<_i1005.GenerateFormBloc>(
+    () =>
+        _i1005.GenerateFormBloc(repository: gh<_i1002.ComplianceRepository>()),
+  );
+  // Savings
+  gh.lazySingleton<_i1102.SavingsRepository>(
+    () => _i1101.SavingsRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1103.SavingsDashboardBloc>(
+    () => _i1103.SavingsDashboardBloc(
+        repository: gh<_i1102.SavingsRepository>()),
+  );
+  // Reports
+  gh.lazySingleton<_i1202.ReportsRepository>(
+    () => _i1201.ReportsRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1203.ReportsDashboardBloc>(
+    () => _i1203.ReportsDashboardBloc(
+        repository: gh<_i1202.ReportsRepository>()),
   );
   // Vault
   gh.lazySingleton<_i602.VaultRepository>(

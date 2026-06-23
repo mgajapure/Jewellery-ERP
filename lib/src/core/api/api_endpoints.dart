@@ -62,4 +62,15 @@ class ApiEndpoints {
   static String inventoryById(String id) => '/inventory/$id';
   static String inventoryItemByBarcode(String barcode) =>
       '/inventory/barcode/$barcode';
+
+  // Compliance
+  static const String complianceDashboard = '/compliance/dashboard';
+  static const String complianceForm9 = '/compliance/form9';
+  static const String complianceGenerate = '/compliance/generate';
+
+  // Savings
+  static const String savingsDashboard = '/savings/dashboard';
+
+  // Reports
+  static const String reportsDashboard = '/reports/dashboard';
 }

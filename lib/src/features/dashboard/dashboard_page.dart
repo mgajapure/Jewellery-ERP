@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../core/di/injection.dart';
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../shared/widgets/app_error_state.dart';
+import '../../shared/widgets/app_loader.dart';
 import '../compliance/compliance.dart';
 import '../customer/customer.dart';
 import '../girvi/girvi.dart';
@@ -10,6 +15,10 @@ import '../more/more.dart';
 import '../purchase/purchase.dart';
 import '../sales/sales.dart';
 import '../vault/vault.dart';
+import 'domain/entities/dashboard_summary.dart';
+import 'presentation/bloc/dashboard_bloc.dart';
+import 'presentation/bloc/dashboard_event.dart';
+import 'presentation/bloc/dashboard_state.dart';
 
 const _navy = Color(0xFF061C49);
 const _gold = Color(0xFFE7A726);
@@ -27,80 +36,125 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: _screenBg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            const _DashboardHeader(),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
-                children: [
-                  const _GoldRateCard(),
-                  const SizedBox(height: 16),
-                  const _SectionHeader(
-                    title: 'मुख्य आकडेवारी / Key Metrics',
-                    trailing: 'आज / Today',
-                  ),
-                  const SizedBox(height: 10),
-                  const _MetricGrid(),
-                  const SizedBox(height: 18),
-                  const _SectionHeader(title: 'जलद कृती / Quick Actions'),
-                  const SizedBox(height: 12),
-                  _QuickActions(
-                    onNewGirviTap: () =>
-                        context.goNamed(CreateGirviWizardPage.routeName),
-                    onSearchCustomerTap: () =>
-                        context.goNamed(CustomerSearchPage.routeName),
-                    onVaultSearchTap: () =>
-                        context.goNamed(VaultSearchPage.routeName),
-                    onInterestCalcTap: () =>
-                        context.goNamed(InterestCalculatorPage.routeName),
-                    onComplianceTap: () =>
-                        context.goNamed(ComplianceDashboardPage.routeName),
-                    onPurchaseTap: () =>
-                        context.goNamed(PurchaseDashboardPage.routeName),
-                    onSalesTap: () =>
-                        context.goNamed(SalesDashboardPage.routeName),
-                  ),
-                  const SizedBox(height: 22),
-                  const _SectionHeader(
-                    title: 'अलीकडील पेमेंट्स / Recent Payments',
-                    trailing: 'सर्व पहा / View All',
-                  ),
-                  const SizedBox(height: 12),
-                  const _RecentPaymentsList(),
-                ],
-              ),
-            ),
-            AppBottomNav(
-              currentIndex: 0,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    break;
-                  case 1:
-                    context.goNamed(GirviListPage.routeName);
-                    break;
-                  case 2:
-                    context.goNamed(CustomerListPage.routeName);
-                    break;
-                  case 3:
-                    context.goNamed(MorePage.routeName);
-                    break;
-                }
-              },
-            ),
-          ],
-        ),
-      ),
+    return BlocProvider(
+      create: (_) =>
+          getIt<DashboardBloc>()..add(const LoadDashboard()),
+      child: const _DashboardView(),
     );
   }
 }
 
+class _DashboardView extends StatelessWidget {
+  const _DashboardView();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<DashboardBloc, DashboardState>(
+      builder: (context, state) {
+        final alertCount = state is DashboardLoaded
+            ? state.summary.alertCount
+            : 0;
+
+        return Scaffold(
+          backgroundColor: _screenBg,
+          body: SafeArea(
+            child: Column(
+              children: [
+                _DashboardHeader(alertCount: alertCount),
+                Expanded(child: _buildBody(context, state)),
+                AppBottomNav(
+                  currentIndex: 0,
+                  onTap: (index) {
+                    switch (index) {
+                      case 0:
+                        break;
+                      case 1:
+                        context.goNamed(GirviListPage.routeName);
+                        break;
+                      case 2:
+                        context.goNamed(CustomerListPage.routeName);
+                        break;
+                      case 3:
+                        context.goNamed(MorePage.routeName);
+                        break;
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBody(BuildContext context, DashboardState state) {
+    if (state is DashboardInitial || state is DashboardLoading) {
+      return const AppLoader(message: 'डॅशबोर्ड लोड होत आहे...');
+    }
+    if (state is DashboardError) {
+      return AppErrorState(
+        message: state.message,
+        onRetry: () =>
+            context.read<DashboardBloc>().add(const LoadDashboard()),
+      );
+    }
+    if (state is DashboardLoaded) {
+      return RefreshIndicator(
+        color: _navy,
+        onRefresh: () async =>
+            context.read<DashboardBloc>().add(const RefreshDashboard()),
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+          children: [
+            _GoldRateCard(summary: state.summary),
+            const SizedBox(height: 16),
+            const _SectionHeader(
+              title: 'मुख्य आकडेवारी / Key Metrics',
+              trailing: 'आज / Today',
+            ),
+            const SizedBox(height: 10),
+            _MetricGrid(summary: state.summary),
+            const SizedBox(height: 18),
+            const _SectionHeader(title: 'जलद कृती / Quick Actions'),
+            const SizedBox(height: 12),
+            _QuickActions(
+              onNewGirviTap: () =>
+                  context.goNamed(CreateGirviWizardPage.routeName),
+              onSearchCustomerTap: () =>
+                  context.goNamed(CustomerSearchPage.routeName),
+              onVaultSearchTap: () =>
+                  context.goNamed(VaultSearchPage.routeName),
+              onInterestCalcTap: () =>
+                  context.goNamed(InterestCalculatorPage.routeName),
+              onComplianceTap: () =>
+                  context.goNamed(ComplianceDashboardPage.routeName),
+              onPurchaseTap: () =>
+                  context.goNamed(PurchaseDashboardPage.routeName),
+              onSalesTap: () =>
+                  context.goNamed(SalesDashboardPage.routeName),
+            ),
+            const SizedBox(height: 22),
+            const _SectionHeader(
+              title: 'अलीकडील व्यवहार / Recent Transactions',
+              trailing: 'सर्व पहा / View All',
+            ),
+            const SizedBox(height: 12),
+            _RecentPaymentsList(payments: state.summary.recentPayments),
+          ],
+        ),
+      );
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+// ─── Header ───────────────────────────────────────────────────────────────────
+
 class _DashboardHeader extends StatelessWidget {
-  const _DashboardHeader();
+  const _DashboardHeader({required this.alertCount});
+
+  final int alertCount;
 
   @override
   Widget build(BuildContext context) {
@@ -131,27 +185,28 @@ class _DashboardHeader extends StatelessWidget {
                 icon: const Icon(Icons.notifications_none, color: _ink),
                 tooltip: 'Notifications',
               ),
-              Positioned(
-                right: 7,
-                top: 6,
-                child: Container(
-                  width: 16,
-                  height: 16,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                    color: _red,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Text(
-                    '3',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
+              if (alertCount > 0)
+                Positioned(
+                  right: 7,
+                  top: 6,
+                  child: Container(
+                    width: 16,
+                    height: 16,
+                    alignment: Alignment.center,
+                    decoration: const BoxDecoration(
+                      color: _red,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      alertCount > 99 ? '99+' : alertCount.toString(),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w800,
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
         ],
@@ -160,11 +215,31 @@ class _DashboardHeader extends StatelessWidget {
   }
 }
 
+// ─── Gold Rate Card ────────────────────────────────────────────────────────────
+
 class _GoldRateCard extends StatelessWidget {
-  const _GoldRateCard();
+  const _GoldRateCard({required this.summary});
+
+  final DashboardSummary summary;
+
+  String _formatRate(double perGram) {
+    final per10g = (perGram * 10).toInt();
+    return '₹${NumberFormat('#,##,###', 'en_IN').format(per10g)}';
+  }
+
+  String _formatChange(double change) {
+    final per10g = (change * 10).toInt();
+    final sign = per10g >= 0 ? '+ ' : '− ';
+    final arrow = per10g >= 0 ? '↑' : '↓';
+    return '$sign₹${per10g.abs()} (${summary.goldRateChangePct.toStringAsFixed(2)}%) $arrow';
+  }
+
+  String _formatTime(DateTime dt) =>
+      DateFormat('dd MMM yyyy, hh:mm a').format(dt.toLocal());
 
   @override
   Widget build(BuildContext context) {
+    final isUp = summary.goldRateChange >= 0;
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
@@ -182,8 +257,8 @@ class _GoldRateCard extends StatelessWidget {
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Expanded(
+            children: [
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -212,18 +287,20 @@ class _GoldRateCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    '₹71,850',
-                    style: TextStyle(
+                    _formatRate(summary.goldRatePerGram),
+                    style: const TextStyle(
                       color: _gold,
                       fontSize: 25,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
-                    '+ ₹320 (0.45%) ↑',
+                    _formatChange(summary.goldRateChange),
                     style: TextStyle(
-                      color: Color(0xFF34D06D),
+                      color: isUp
+                          ? const Color(0xFF34D06D)
+                          : const Color(0xFFFF6B6B),
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
                     ),
@@ -234,18 +311,18 @@ class _GoldRateCard extends StatelessWidget {
           ),
           const SizedBox(height: 22),
           Row(
-            children: const [
+            children: [
               Text(
-                '06 Jun 2026, 09:30 AM',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                _formatTime(summary.goldRateUpdatedAt),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
-              Spacer(),
+              const Spacer(),
               Text(
-                'स्रोत: MCX',
-                style: TextStyle(color: Colors.white70, fontSize: 12),
+                'स्रोत: ${summary.goldRateSource}',
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
-              SizedBox(width: 6),
-              Icon(Icons.refresh, color: Colors.white70, size: 16),
+              const SizedBox(width: 6),
+              const Icon(Icons.refresh, color: Colors.white70, size: 16),
             ],
           ),
         ],
@@ -253,6 +330,8 @@ class _GoldRateCard extends StatelessWidget {
     );
   }
 }
+
+// ─── Section Header ────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
   const _SectionHeader({required this.title, this.trailing});
@@ -292,8 +371,25 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
+// ─── Metric Grid ──────────────────────────────────────────────────────────────
+
 class _MetricGrid extends StatelessWidget {
-  const _MetricGrid();
+  const _MetricGrid({required this.summary});
+
+  final DashboardSummary summary;
+
+  String _formatAmount(double amount) {
+    if (amount >= 10000000) {
+      return '₹${(amount / 10000000).toStringAsFixed(2)} Cr';
+    }
+    if (amount >= 100000) {
+      return '₹${(amount / 100000).toStringAsFixed(2)} L';
+    }
+    if (amount >= 1000) {
+      return '₹${NumberFormat('#,##,###', 'en_IN').format(amount.toInt())}';
+    }
+    return '₹${amount.toInt()}';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -304,31 +400,41 @@ class _MetricGrid extends StatelessWidget {
       mainAxisSpacing: 12,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      children: const [
+      children: [
         _MetricTile(
           titleMr: 'एकूण सक्रिय गिरवी',
           titleEn: 'Active Girvi',
-          value: '128',
-          delta: '+12 आज / today',
+          value: summary.activeGirvi.toString(),
+          delta: summary.newGirviToday > 0
+              ? '+${summary.newGirviToday} आज / today'
+              : 'कोणतेही नाहीत',
+          deltaColor: _green,
         ),
         _MetricTile(
-          titleMr: 'एकूण डिस्बर्समेंट',
-          titleEn: 'Total Disbursed',
-          value: '₹2.45 Cr',
-          delta: '+₹18.6L आज / today',
+          titleMr: 'एकूण कर्ज एक्स्पोजर',
+          titleEn: 'Loan Exposure',
+          value: _formatAmount(summary.loanExposure),
+          delta: summary.disbursedToday > 0
+              ? '+${_formatAmount(summary.disbursedToday)} आज'
+              : 'आज नाही',
+          deltaColor: _green,
         ),
         _MetricTile(
-          titleMr: 'आजचे व्याज',
-          titleEn: 'Interest Due Today',
-          value: '₹48,760',
-          delta: '+₹3,250 आज / today',
+          titleMr: 'आजचे संकलन',
+          titleEn: 'Collections Today',
+          value: _formatAmount(summary.collectionsToday),
+          delta: '${summary.dueToday} खाती येणे / due',
+          deltaColor: _muted,
         ),
         _MetricTile(
           titleMr: 'ओव्हरड्यू खाती',
           titleEn: 'Overdue Accounts',
-          value: '21',
+          value: summary.overdue.toString(),
           valueColor: _red,
-          delta: '+2 आज / today',
+          delta: summary.overdue > 0
+              ? 'तात्काळ कारवाई आवश्यक'
+              : 'सर्व खाती ठीक आहेत',
+          deltaColor: summary.overdue > 0 ? _red : _green,
         ),
       ],
     );
@@ -342,6 +448,7 @@ class _MetricTile extends StatelessWidget {
     required this.value,
     required this.delta,
     this.valueColor = _ink,
+    this.deltaColor = _green,
   });
 
   final String titleMr;
@@ -349,6 +456,7 @@ class _MetricTile extends StatelessWidget {
   final String value;
   final String delta;
   final Color valueColor;
+  final Color deltaColor;
 
   @override
   Widget build(BuildContext context) {
@@ -385,8 +493,8 @@ class _MetricTile extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: const TextStyle(
-              color: _ink,
-              fontSize: 12,
+              color: _muted,
+              fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -397,7 +505,7 @@ class _MetricTile extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               color: valueColor,
-              fontSize: 23,
+              fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -406,10 +514,10 @@ class _MetricTile extends StatelessWidget {
             delta,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: _green,
+            style: TextStyle(
+              color: deltaColor,
               fontSize: 11,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ],
@@ -417,6 +525,8 @@ class _MetricTile extends StatelessWidget {
     );
   }
 }
+
+// ─── Quick Actions ────────────────────────────────────────────────────────────
 
 class _QuickActions extends StatelessWidget {
   const _QuickActions({
@@ -577,7 +687,7 @@ class _QuickAction extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
             style: const TextStyle(
-              color: _ink,
+              color: _muted,
               fontSize: 10,
               fontWeight: FontWeight.w500,
               height: 1.1,
@@ -589,11 +699,33 @@ class _QuickAction extends StatelessWidget {
   }
 }
 
+// ─── Recent Payments ──────────────────────────────────────────────────────────
+
 class _RecentPaymentsList extends StatelessWidget {
-  const _RecentPaymentsList();
+  const _RecentPaymentsList({required this.payments});
+
+  final List<RecentPayment> payments;
 
   @override
   Widget build(BuildContext context) {
+    if (payments.isEmpty) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: _line),
+        ),
+        child: const Center(
+          child: Text(
+            'आज कोणतेही व्यवहार नाहीत\nNo transactions today',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: _muted, fontSize: 13),
+          ),
+        ),
+      );
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -607,37 +739,12 @@ class _RecentPaymentsList extends StatelessWidget {
           ),
         ],
       ),
-      child: const Column(
+      child: Column(
         children: [
-          _PaymentTransactionTile(
-            customerName: 'सुरेश पाटील',
-            customerSubtitle: 'Suresh Patil',
-            paymentType: 'व्याज पेमेंट / Interest Payment',
-            amount: '₹12,500',
-            time: '10:45 AM',
-            status: 'पूर्ण / Paid',
-            icon: Icons.south_west,
-          ),
-          _ListDivider(),
-          _PaymentTransactionTile(
-            customerName: 'मीना जाधव',
-            customerSubtitle: 'Meena Jadhav',
-            paymentType: 'मुद्दल पेमेंट / Principal Payment',
-            amount: '₹35,000',
-            time: '09:20 AM',
-            status: 'पूर्ण / Paid',
-            icon: Icons.south_west,
-          ),
-          _ListDivider(),
-          _PaymentTransactionTile(
-            customerName: 'अमोल देशमुख',
-            customerSubtitle: 'Amol Deshmukh',
-            paymentType: 'आंशिक पेमेंट / Partial Payment',
-            amount: '₹8,760',
-            time: 'काल / Yesterday',
-            status: 'पूर्ण / Paid',
-            icon: Icons.south_west,
-          ),
+          for (int i = 0; i < payments.length; i++) ...[
+            _PaymentTransactionTile(payment: payments[i]),
+            if (i < payments.length - 1) const _ListDivider(),
+          ],
         ],
       ),
     );
@@ -645,23 +752,36 @@ class _RecentPaymentsList extends StatelessWidget {
 }
 
 class _PaymentTransactionTile extends StatelessWidget {
-  const _PaymentTransactionTile({
-    required this.customerName,
-    required this.customerSubtitle,
-    required this.paymentType,
-    required this.amount,
-    required this.time,
-    required this.status,
-    required this.icon,
-  });
+  const _PaymentTransactionTile({required this.payment});
 
-  final String customerName;
-  final String customerSubtitle;
-  final String paymentType;
-  final String amount;
-  final String time;
-  final String status;
-  final IconData icon;
+  final RecentPayment payment;
+
+  static const _typeLabels = {
+    RecentPaymentType.interest: 'व्याज पेमेंट / Interest',
+    RecentPaymentType.principal: 'मुद्दल पेमेंट / Principal',
+    RecentPaymentType.partial: 'आंशिक पेमेंट / Partial',
+    RecentPaymentType.renewal: 'नूतनीकरण / Renewal',
+    RecentPaymentType.redemption: 'सोडवणूक / Redemption',
+  };
+
+  String _formatAmount(double amount) {
+    return '₹${NumberFormat('#,##,###', 'en_IN').format(amount.toInt())}';
+  }
+
+  String _formatTime(DateTime dt) {
+    final now = DateTime.now();
+    final local = dt.toLocal();
+    final today = DateTime(now.year, now.month, now.day);
+    final paidDay = DateTime(local.year, local.month, local.day);
+
+    if (paidDay == today) {
+      return DateFormat('hh:mm a').format(local);
+    }
+    if (paidDay == today.subtract(const Duration(days: 1))) {
+      return 'काल / Yesterday';
+    }
+    return DateFormat('dd MMM').format(local);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -672,11 +792,11 @@ class _PaymentTransactionTile extends StatelessWidget {
           Container(
             width: 42,
             height: 42,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEFF8F3),
-              borderRadius: BorderRadius.circular(21),
+            decoration: const BoxDecoration(
+              color: Color(0xFFEFF8F3),
+              shape: BoxShape.circle,
             ),
-            child: Icon(icon, color: _green, size: 22),
+            child: const Icon(Icons.south_west, color: _green, size: 22),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -684,7 +804,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  customerName,
+                  payment.customerName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -695,7 +815,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  customerSubtitle,
+                  payment.customerNameEn,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -704,9 +824,9 @@ class _PaymentTransactionTile extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: 4),
                 Text(
-                  paymentType,
+                  _typeLabels[payment.paymentType] ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -723,7 +843,7 @@ class _PaymentTransactionTile extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                amount,
+                _formatAmount(payment.amount),
                 style: const TextStyle(
                   color: _ink,
                   fontSize: 15,
@@ -732,7 +852,7 @@ class _PaymentTransactionTile extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                time,
+                _formatTime(payment.paidAt),
                 style: const TextStyle(
                   color: _muted,
                   fontSize: 10,
@@ -740,9 +860,9 @@ class _PaymentTransactionTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5),
-              Text(
-                status,
-                style: const TextStyle(
+              const Text(
+                'पूर्ण / Paid',
+                style: TextStyle(
                   color: _green,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,
@@ -760,8 +880,6 @@ class _ListDivider extends StatelessWidget {
   const _ListDivider();
 
   @override
-  Widget build(BuildContext context) {
-    return const Divider(height: 1, color: _line, indent: 68);
-  }
+  Widget build(BuildContext context) =>
+      const Divider(height: 1, color: _line, indent: 68);
 }
-

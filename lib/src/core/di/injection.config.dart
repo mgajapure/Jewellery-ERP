@@ -22,6 +22,12 @@ import '../../features/customer/presentation/bloc/customer_detail_bloc.dart'
     as _i103;
 import '../../features/customer/presentation/bloc/customer_list_bloc.dart'
     as _i104;
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i201;
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i202;
+import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart'
+    as _i203;
 import '../../features/girvi/data/repositories/girvi_repository_impl.dart'
     as _i731;
 import '../../features/girvi/domain/repositories/girvi_repository.dart'
@@ -76,6 +82,13 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i103.CustomerDetailBloc>(
     () =>
         _i103.CustomerDetailBloc(repository: gh<_i102.CustomerRepository>()),
+  );
+  // Dashboard
+  gh.lazySingleton<_i202.DashboardRepository>(
+    () => _i201.DashboardRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i203.DashboardBloc>(
+    () => _i203.DashboardBloc(repository: gh<_i202.DashboardRepository>()),
   );
   return getIt;
 }

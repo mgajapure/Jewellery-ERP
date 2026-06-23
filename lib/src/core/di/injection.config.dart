@@ -56,6 +56,12 @@ import '../../features/purchase/presentation/bloc/new_purchase_bloc.dart'
     as _i705;
 import '../../features/purchase/presentation/bloc/supplier_bloc.dart'
     as _i706;
+import '../../features/inventory/data/repositories/inventory_repository_impl.dart'
+    as _i901;
+import '../../features/inventory/domain/repositories/inventory_repository.dart'
+    as _i902;
+import '../../features/inventory/presentation/bloc/inventory_list_bloc.dart'
+    as _i903;
 import '../../features/sales/data/repositories/sales_repository_impl.dart'
     as _i801;
 import '../../features/sales/domain/repositories/sales_repository.dart'
@@ -197,6 +203,14 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.factory<_i807.BarcodeSaleBloc>(
     () => _i807.BarcodeSaleBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  // Inventory
+  gh.lazySingleton<_i902.InventoryRepository>(
+    () => _i901.InventoryRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i903.InventoryListBloc>(
+    () => _i903.InventoryListBloc(
+        repository: gh<_i902.InventoryRepository>()),
   );
   // Vault
   gh.lazySingleton<_i602.VaultRepository>(

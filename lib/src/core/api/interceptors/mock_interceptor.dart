@@ -252,6 +252,24 @@ class MockInterceptor extends Interceptor {
         }).toList();
         return {'success': true, 'data': filtered};
 
+      case ApiEndpoints.inventory:
+        final invFilter = (query['filter'] as String? ?? '').toUpperCase();
+        final invQ = (query['q'] as String? ?? '').toLowerCase();
+        var inventoryList = _inventoryItems.toList();
+        if (invFilter.isNotEmpty) {
+          inventoryList = inventoryList
+              .where((i) => i['status'] == invFilter)
+              .toList();
+        }
+        if (invQ.isNotEmpty) {
+          inventoryList = inventoryList.where((i) {
+            return (i['name'] as String).toLowerCase().contains(invQ) ||
+                (i['barcode'] as String).toLowerCase().contains(invQ) ||
+                (i['category'] as String).toLowerCase().contains(invQ);
+          }).toList();
+        }
+        return {'success': true, 'data': inventoryList};
+
       case ApiEndpoints.salesDashboard:
         return {'success': true, 'data': _salesDashboardStats};
 
@@ -455,6 +473,20 @@ class MockInterceptor extends Interceptor {
             orElse: () => _salesLedger.first,
           );
           return {'success': true, 'data': order};
+        }
+
+        if (path.startsWith('/inventory/') &&
+            !path.contains('/barcode/') &&
+            path.split('/').length == 3) {
+          final id = path.split('/')[2];
+          final item = _inventoryItems.firstWhere(
+            (i) => i['id'] == id,
+            orElse: () => <String, dynamic>{},
+          );
+          if (item.isNotEmpty) {
+            return {'success': true, 'data': item};
+          }
+          return {'success': false, 'message': 'Item not found.'};
         }
 
         if (path.startsWith('/inventory/barcode/')) {
@@ -812,58 +844,157 @@ class MockInterceptor extends Interceptor {
   static final List<Map<String, dynamic>> _inventoryItems = [
     {
       'id': 'inv-1001',
-      'name': 'Gold Chain 22K',
       'barcode': 'ITM-1001',
+      'name': 'Gold Chain 22K',
+      'category': 'Gold Jewellery',
+      'description': 'Traditional 22K gold chain with intricate design. Hallmarked and certified.',
+      'metalType': 'Gold',
       'grossWeight': 24.50,
       'netWeight': 24.20,
-      'purity': 91.6,
+      'purity': '22K',
+      'makingCharges': 12500.0,
+      'costPrice': 100000.0,
+      'sellingPrice': 125000.0,
       'taxableAmount': 125000.0,
       'gst': 3750.0,
       'totalAmount': 128750.0,
+      'status': 'AVAILABLE',
+      'movements': [
+        {'date': '15 Jan 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250622-001'},
+        {'date': '20 Jan 2026', 'action': 'Available', 'user': 'System', 'reference': '-'},
+      ],
     },
     {
       'id': 'inv-1002',
-      'name': 'Gold Ring 22K',
       'barcode': 'ITM-1002',
+      'name': 'Gold Ring 22K',
+      'category': 'Gold Jewellery',
+      'description': 'Classic 22K gold ring with smooth finish. BIS hallmarked.',
+      'metalType': 'Gold',
       'grossWeight': 8.20,
       'netWeight': 8.00,
-      'purity': 91.6,
+      'purity': '22K',
+      'makingCharges': 3500.0,
+      'costPrice': 35000.0,
+      'sellingPrice': 42000.0,
       'taxableAmount': 42000.0,
       'gst': 1260.0,
       'totalAmount': 43260.0,
+      'status': 'AVAILABLE',
+      'movements': [
+        {'date': '15 Jan 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250622-001'},
+        {'date': '18 Jan 2026', 'action': 'Available', 'user': 'System', 'reference': '-'},
+      ],
     },
     {
       'id': 'inv-1003',
-      'name': 'Gold Earrings 22K',
       'barcode': 'ITM-1003',
+      'name': 'Gold Earrings 22K',
+      'category': 'Gold Jewellery',
+      'description': 'Elegant 22K gold earrings with floral design. Suitable for daily wear.',
+      'metalType': 'Gold',
       'grossWeight': 6.50,
       'netWeight': 6.20,
-      'purity': 91.6,
+      'purity': '22K',
+      'makingCharges': 3000.0,
+      'costPrice': 32000.0,
+      'sellingPrice': 40000.0,
       'taxableAmount': 40000.0,
       'gst': 1200.0,
       'totalAmount': 41200.0,
+      'status': 'RESERVED',
+      'movements': [
+        {'date': '16 Jan 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250621-002'},
+        {'date': '22 Jan 2026', 'action': 'Reserved', 'user': 'Staff', 'reference': '-'},
+      ],
     },
     {
       'id': 'inv-1004',
-      'name': 'Gold Necklace 22K',
       'barcode': 'ITM-1004',
+      'name': 'Gold Necklace 22K',
+      'category': 'Gold Jewellery',
+      'description': 'Heavy 22K gold necklace with traditional design. Premium craftsmanship.',
+      'metalType': 'Gold',
       'grossWeight': 45.00,
       'netWeight': 44.50,
-      'purity': 91.6,
+      'purity': '22K',
+      'makingCharges': 25000.0,
+      'costPrice': 235000.0,
+      'sellingPrice': 275000.0,
       'taxableAmount': 275000.0,
       'gst': 8250.0,
       'totalAmount': 283250.0,
+      'status': 'SOLD',
+      'movements': [
+        {'date': '10 Jan 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250620-003'},
+        {'date': '20 Jun 2026', 'action': 'Sold', 'user': 'Staff', 'reference': 'INV-2026-000100'},
+      ],
     },
     {
       'id': 'inv-1005',
-      'name': 'Gold Bangle 22K',
       'barcode': 'ITM-1005',
+      'name': 'Gold Bangle 22K',
+      'category': 'Gold Jewellery',
+      'description': '22K gold bangle set with broad design and fine polish.',
+      'metalType': 'Gold',
       'grossWeight': 20.00,
       'netWeight': 19.80,
-      'purity': 91.6,
+      'purity': '22K',
+      'makingCharges': 10000.0,
+      'costPrice': 105000.0,
+      'sellingPrice': 125000.0,
       'taxableAmount': 125000.0,
       'gst': 3750.0,
       'totalAmount': 128750.0,
+      'status': 'LOW_STOCK',
+      'movements': [
+        {'date': '12 Jan 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250619-004'},
+        {'date': '19 Jan 2026', 'action': 'Available', 'user': 'System', 'reference': '-'},
+      ],
+    },
+    {
+      'id': 'inv-1006',
+      'barcode': 'ITM-1006',
+      'name': 'Diamond Ring 18K',
+      'category': 'Diamond Jewellery',
+      'description': '18K white gold diamond solitaire ring. Certified 0.5 ct VS1 clarity.',
+      'metalType': 'Gold',
+      'grossWeight': 4.20,
+      'netWeight': 3.80,
+      'purity': '18K',
+      'makingCharges': 8000.0,
+      'costPrice': 55000.0,
+      'sellingPrice': 68000.0,
+      'taxableAmount': 68000.0,
+      'gst': 2040.0,
+      'totalAmount': 70040.0,
+      'status': 'AVAILABLE',
+      'movements': [
+        {'date': '02 Feb 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250619-004'},
+        {'date': '05 Feb 2026', 'action': 'Available', 'user': 'System', 'reference': '-'},
+      ],
+    },
+    {
+      'id': 'inv-1007',
+      'barcode': 'ITM-1007',
+      'name': 'Silver Payal',
+      'category': 'Silver Jewellery',
+      'description': 'Sterling silver payal set with traditional ghungroo design.',
+      'metalType': 'Silver',
+      'grossWeight': 25.00,
+      'netWeight': 24.50,
+      'purity': '925',
+      'makingCharges': 1200.0,
+      'costPrice': 9500.0,
+      'sellingPrice': 12000.0,
+      'taxableAmount': 12000.0,
+      'gst': 360.0,
+      'totalAmount': 12360.0,
+      'status': 'AVAILABLE',
+      'movements': [
+        {'date': '20 Mar 2026', 'action': 'Created', 'user': 'Admin', 'reference': 'PUR-20250619-004'},
+        {'date': '22 Mar 2026', 'action': 'Available', 'user': 'System', 'reference': '-'},
+      ],
     },
   ];
 

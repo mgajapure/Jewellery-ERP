@@ -54,7 +54,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/inventory/:id',
       name: InventoryDetailsPage.routeName,
-      builder: (context, state) => const InventoryDetailsPage(),
+      builder: (context, state) => InventoryDetailsPage(
+        item: state.extra! as InventoryItem,
+      ),
     ),
     GoRoute(
       path: '/customers',

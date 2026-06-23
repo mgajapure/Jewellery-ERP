@@ -88,6 +88,15 @@ class InventoryItem extends Equatable {
   double get marginPercent =>
       costPrice > 0 ? (margin / costPrice) * 100 : 0;
 
+  double get purityPercent {
+    if (purity.toUpperCase().endsWith('K')) {
+      final karat =
+          double.tryParse(purity.substring(0, purity.length - 1)) ?? 0;
+      return (karat / 24) * 100;
+    }
+    return double.tryParse(purity) ?? 0.0;
+  }
+
   @override
   List<Object?> get props => [id, barcode, name, status];
 }

@@ -19,7 +19,7 @@ class SaleItemModel extends SaleItem {
         barcode: json['barcode'] as String,
         grossWeight: (json['grossWeight'] as num).toDouble(),
         netWeight: (json['netWeight'] as num).toDouble(),
-        purity: (json['purity'] as num).toDouble(),
+        purity: (json['purityValue'] as num? ?? json['purity'] as num).toDouble(),
         taxableAmount: (json['taxableAmount'] as num).toDouble(),
         gst: (json['gst'] as num).toDouble(),
         totalAmount: (json['totalAmount'] as num).toDouble(),

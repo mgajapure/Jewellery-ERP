@@ -6,6 +6,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../../inventory/domain/entities/inventory_item.dart';
+import '../../inventory/presentation/bloc/inventory_list_bloc.dart';
 import '../domain/entities/sale_order.dart';
 import '../presentation/bloc/new_sale_bloc.dart';
 import '../theme/sales_colors.dart';
@@ -148,7 +150,8 @@ class _NewSaleScaffoldState extends State<_NewSaleScaffold> {
                         ),
                         const SizedBox(height: 10),
                         OutlinedButton.icon(
-                          onPressed: () {},
+                          onPressed: () =>
+                              _showInventoryPicker(context),
                           icon: const Icon(Icons.add,
                               color: SalesColors.navy),
                           label: const Text(
@@ -220,6 +223,32 @@ class _NewSaleScaffoldState extends State<_NewSaleScaffold> {
         ),
       ),
     );
+  }
+
+  Future<void> _showInventoryPicker(BuildContext pageContext) async {
+    final item = await showModalBottomSheet<InventoryItem>(
+      context: pageContext,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _InventoryPickerSheet(),
+    );
+    if (item != null && pageContext.mounted) {
+      pageContext.read<NewSaleBloc>().add(
+            NewSaleItemAdded(
+              item: SaleItem(
+                id: item.id,
+                name: item.name,
+                barcode: item.barcode,
+                grossWeight: item.grossWeight,
+                netWeight: item.netWeight,
+                purity: item.purityPercent,
+                taxableAmount: item.taxableAmount,
+                gst: item.gst,
+                totalAmount: item.totalAmount,
+              ),
+            ),
+          );
+    }
   }
 
   InputDecoration _inputDecoration(String label) {
@@ -508,6 +537,250 @@ class _TotalRow extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Inventory picker bottom sheet (Gap fix: Add Item)
+// ---------------------------------------------------------------------------
+
+class _InventoryPickerSheet extends StatefulWidget {
+  const _InventoryPickerSheet();
+
+  @override
+  State<_InventoryPickerSheet> createState() =>
+      _InventoryPickerSheetState();
+}
+
+class _InventoryPickerSheetState extends State<_InventoryPickerSheet> {
+  final _searchCtrl = TextEditingController();
+  late final InventoryListBloc _bloc;
+
+  @override
+  void initState() {
+    super.initState();
+    _bloc = GetIt.instance<InventoryListBloc>()
+      ..add(InventoryListStarted());
+  }
+
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    _bloc.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final mq = MediaQuery.of(context);
+    return BlocProvider.value(
+      value: _bloc,
+      child: Container(
+        height: mq.size.height * 0.75,
+        decoration: const BoxDecoration(
+          color: SalesColors.screenBg,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          children: [
+            // Handle bar
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: SalesColors.line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+              child: Row(
+                children: [
+                  const Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'वस्तू निवडा',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: SalesColors.ink,
+                          ),
+                        ),
+                        Text(
+                          'Select Item',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: SalesColors.muted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close, color: SalesColors.muted),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: TextField(
+                controller: _searchCtrl,
+                decoration: InputDecoration(
+                  hintText: 'नाव / बारकोड शोधा  |  Search name / barcode',
+                  hintStyle:
+                      const TextStyle(fontSize: 13, color: SalesColors.muted),
+                  prefixIcon: const Icon(Icons.search,
+                      color: SalesColors.muted, size: 20),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: SalesColors.line),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide:
+                        const BorderSide(color: SalesColors.line),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                        color: SalesColors.navy, width: 1.5),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 14, vertical: 12),
+                ),
+                onChanged: (v) => setState(() {}),
+              ),
+            ),
+            const Divider(height: 1, color: SalesColors.line),
+            Expanded(
+              child: BlocBuilder<InventoryListBloc, InventoryListState>(
+                builder: (context, state) {
+                  if (state is InventoryListLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                          color: SalesColors.navy),
+                    );
+                  }
+                  if (state is InventoryListError) {
+                    return Center(
+                      child: Text(state.message,
+                          style:
+                              const TextStyle(color: SalesColors.muted)),
+                    );
+                  }
+                  if (state is InventoryListLoaded) {
+                    final query = _searchCtrl.text.toLowerCase();
+                    final available = state.items
+                        .where((i) =>
+                            i.status == InventoryStatus.available &&
+                            (query.isEmpty ||
+                                i.name.toLowerCase().contains(query) ||
+                                i.barcode.toLowerCase().contains(query)))
+                        .toList();
+                    if (available.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'उपलब्ध वस्तू नाहीत\nNo items available',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: SalesColors.muted),
+                        ),
+                      );
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
+                      itemCount: available.length,
+                      separatorBuilder: (_, _) =>
+                          const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final item = available[index];
+                        final amtFmt =
+                            NumberFormat('#,##,##0.00', 'en_IN');
+                        return InkWell(
+                          onTap: () => Navigator.pop(context, item),
+                          borderRadius: BorderRadius.circular(12),
+                          child: Container(
+                            padding: const EdgeInsets.all(14),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                  color: SalesColors.line),
+                            ),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 40,
+                                  height: 40,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFFFF7E9),
+                                    borderRadius:
+                                        BorderRadius.circular(8),
+                                  ),
+                                  child: const Icon(
+                                    Icons.diamond_outlined,
+                                    color: SalesColors.gold,
+                                    size: 20,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item.name,
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w600,
+                                          color: SalesColors.ink,
+                                        ),
+                                      ),
+                                      const SizedBox(height: 2),
+                                      Text(
+                                        '${item.barcode} • ${item.purity} • ${item.grossWeight.toStringAsFixed(2)}g',
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          color: SalesColors.muted,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Text(
+                                  '₹${amtFmt.format(item.sellingPrice)}',
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w700,
+                                    color: SalesColors.navy,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

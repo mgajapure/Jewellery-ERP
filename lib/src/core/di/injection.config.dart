@@ -62,6 +62,10 @@ import '../../features/inventory/domain/repositories/inventory_repository.dart'
     as _i902;
 import '../../features/inventory/presentation/bloc/inventory_list_bloc.dart'
     as _i903;
+import '../../features/inventory/presentation/bloc/inventory_detail_bloc.dart'
+    as _i904;
+import '../../features/inventory/presentation/bloc/add_inventory_bloc.dart'
+    as _i905;
 import '../../features/sales/data/repositories/sales_repository_impl.dart'
     as _i801;
 import '../../features/sales/domain/repositories/sales_repository.dart'
@@ -210,6 +214,14 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.factory<_i903.InventoryListBloc>(
     () => _i903.InventoryListBloc(
+        repository: gh<_i902.InventoryRepository>()),
+  );
+  gh.factory<_i904.InventoryDetailBloc>(
+    () => _i904.InventoryDetailBloc(
+        repository: gh<_i902.InventoryRepository>()),
+  );
+  gh.factory<_i905.AddInventoryBloc>(
+    () => _i905.AddInventoryBloc(
         repository: gh<_i902.InventoryRepository>()),
   );
   // Vault

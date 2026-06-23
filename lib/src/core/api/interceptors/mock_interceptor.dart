@@ -214,6 +214,42 @@ class MockInterceptor extends Interceptor {
         };
       }
 
+      // Inventory — create new item
+      if (path == ApiEndpoints.inventory) {
+        final body = _extractBody(options) ?? {};
+        final now = DateTime.now();
+        final newItem = <String, dynamic>{
+          'id': 'inv-${now.millisecondsSinceEpoch}',
+          'barcode': 'ITM-${(1000 + _inventoryItems.length + 1).toString()}',
+          'name': body['name'] ?? 'New Item',
+          'category': body['category'] ?? 'Gold Jewellery',
+          'description': body['description'] ?? '',
+          'metalType': body['metalType'] ?? 'Gold',
+          'grossWeight': (body['grossWeight'] as num?)?.toDouble() ?? 0.0,
+          'netWeight': (body['netWeight'] as num?)?.toDouble() ?? 0.0,
+          'purity': body['purity'] ?? '22K',
+          'purityValue': (body['purityValue'] as num?)?.toDouble() ?? 91.67,
+          'makingCharges': (body['makingCharges'] as num?)?.toDouble() ?? 0.0,
+          'costPrice': (body['costPrice'] as num?)?.toDouble() ?? 0.0,
+          'sellingPrice': (body['sellingPrice'] as num?)?.toDouble() ?? 0.0,
+          'taxableAmount': (body['sellingPrice'] as num?)?.toDouble() ?? 0.0,
+          'gst': ((body['sellingPrice'] as num?)?.toDouble() ?? 0.0) * 0.03,
+          'totalAmount':
+              ((body['sellingPrice'] as num?)?.toDouble() ?? 0.0) * 1.03,
+          'status': 'AVAILABLE',
+          'movements': [
+            {
+              'date': '${now.day} ${_monthName(now.month)} ${now.year}',
+              'action': 'Created',
+              'user': 'Staff',
+              'reference': '-',
+            },
+          ],
+        };
+        _inventoryItems.add(newItem);
+        return {'success': true, 'data': newItem};
+      }
+
       final postPaths = [
         RegExp(r'^/girvi/[^/]+/payment$'),
         RegExp(r'^/girvi/[^/]+/redemption$'),
@@ -232,6 +268,22 @@ class MockInterceptor extends Interceptor {
           orElse: () => _girviList.first,
         );
         return {'success': true, 'data': girvi};
+      }
+    }
+
+    if (method == 'PUT') {
+      // Inventory — update status
+      if (path.startsWith('/inventory/') && path.split('/').length == 3) {
+        final id = path.split('/')[2];
+        final body = _extractBody(options) ?? {};
+        final newStatus = body['status'] as String? ?? 'AVAILABLE';
+        final idx = _inventoryItems.indexWhere((i) => i['id'] == id);
+        if (idx != -1) {
+          _inventoryItems[idx] = Map<String, dynamic>.from(_inventoryItems[idx])
+            ..['status'] = newStatus;
+          return {'success': true, 'data': _inventoryItems[idx]};
+        }
+        return {'success': false, 'message': 'Item not found.'};
       }
     }
 
@@ -841,6 +893,22 @@ class MockInterceptor extends Interceptor {
     },
   ];
 
+  static String _monthName(int m) => const [
+        '',
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec'
+      ][m];
+
   static final List<Map<String, dynamic>> _inventoryItems = [
     {
       'id': 'inv-1001',
@@ -852,6 +920,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 24.50,
       'netWeight': 24.20,
       'purity': '22K',
+      'purityValue': 91.67,
       'makingCharges': 12500.0,
       'costPrice': 100000.0,
       'sellingPrice': 125000.0,
@@ -874,6 +943,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 8.20,
       'netWeight': 8.00,
       'purity': '22K',
+      'purityValue': 91.67,
       'makingCharges': 3500.0,
       'costPrice': 35000.0,
       'sellingPrice': 42000.0,
@@ -896,6 +966,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 6.50,
       'netWeight': 6.20,
       'purity': '22K',
+      'purityValue': 91.67,
       'makingCharges': 3000.0,
       'costPrice': 32000.0,
       'sellingPrice': 40000.0,
@@ -918,6 +989,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 45.00,
       'netWeight': 44.50,
       'purity': '22K',
+      'purityValue': 91.67,
       'makingCharges': 25000.0,
       'costPrice': 235000.0,
       'sellingPrice': 275000.0,
@@ -940,6 +1012,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 20.00,
       'netWeight': 19.80,
       'purity': '22K',
+      'purityValue': 91.67,
       'makingCharges': 10000.0,
       'costPrice': 105000.0,
       'sellingPrice': 125000.0,
@@ -962,6 +1035,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 4.20,
       'netWeight': 3.80,
       'purity': '18K',
+      'purityValue': 75.0,
       'makingCharges': 8000.0,
       'costPrice': 55000.0,
       'sellingPrice': 68000.0,
@@ -984,6 +1058,7 @@ class MockInterceptor extends Interceptor {
       'grossWeight': 25.00,
       'netWeight': 24.50,
       'purity': '925',
+      'purityValue': 92.5,
       'makingCharges': 1200.0,
       'costPrice': 9500.0,
       'sellingPrice': 12000.0,

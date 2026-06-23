@@ -61,6 +61,36 @@ class InventoryRepositoryImpl implements InventoryRepository {
     }
   }
 
+  @override
+  Future<Result<InventoryItem>> updateStatus(
+      String id, InventoryStatus status) async {
+    try {
+      final response = await apiClient.put(
+        ApiEndpoints.inventoryById(id),
+        data: {'status': status.name.toUpperCase()},
+      );
+      final data = _dataMap(response.data);
+      return Result.success(InventoryItemModel.fromJson(data));
+    } on DioException catch (e) {
+      return Result.failure(_mapDio(e));
+    }
+  }
+
+  @override
+  Future<Result<InventoryItem>> createItem(
+      Map<String, dynamic> payload) async {
+    try {
+      final response = await apiClient.post(
+        ApiEndpoints.inventory,
+        data: payload,
+      );
+      final data = _dataMap(response.data);
+      return Result.success(InventoryItemModel.fromJson(data));
+    } on DioException catch (e) {
+      return Result.failure(_mapDio(e));
+    }
+  }
+
   List<Map<String, dynamic>> _dataList(dynamic body) =>
       ((body as Map<String, dynamic>)['data'] as List)
           .cast<Map<String, dynamic>>();

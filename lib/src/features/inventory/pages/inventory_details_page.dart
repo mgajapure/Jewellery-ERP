@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../domain/entities/inventory_item.dart';
+import '../presentation/bloc/inventory_detail_bloc.dart';
 import '../theme/inventory_colors.dart';
 import 'inventory_list_page.dart';
 
@@ -14,8 +17,37 @@ class InventoryDetailsPage extends StatelessWidget {
 
   final InventoryItem item;
 
-  Color get _statusColor {
-    switch (item.status) {
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<InventoryDetailBloc>(),
+      child: _InventoryDetailsScaffold(item: item),
+    );
+  }
+}
+
+class _InventoryDetailsScaffold extends StatefulWidget {
+  const _InventoryDetailsScaffold({required this.item});
+
+  final InventoryItem item;
+
+  @override
+  State<_InventoryDetailsScaffold> createState() =>
+      _InventoryDetailsScaffoldState();
+}
+
+class _InventoryDetailsScaffoldState
+    extends State<_InventoryDetailsScaffold> {
+  late InventoryItem _item;
+
+  @override
+  void initState() {
+    super.initState();
+    _item = widget.item;
+  }
+
+  Color _statusColor(InventoryStatus status) {
+    switch (status) {
       case InventoryStatus.available:
         return InventoryColors.green;
       case InventoryStatus.reserved:
@@ -32,172 +64,226 @@ class InventoryDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
-    return Scaffold(
-      backgroundColor: InventoryColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: InventoryColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            InventoryListPage.routeName,
+    return BlocListener<InventoryDetailBloc, InventoryDetailState>(
+      listener: (context, state) {
+        if (state is InventoryDetailUpdateSuccess) {
+          setState(() => _item = state.item);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('स्थिती अद्यतनित! / Status updated!'),
+              backgroundColor: InventoryColors.green,
+            ),
+          );
+        }
+        if (state is InventoryDetailError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: InventoryColors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: InventoryColors.screenBg,
+        appBar: AppBar(
+          backgroundColor: InventoryColors.navy,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => AppNavigation.popOrGoNamed(
+              context,
+              InventoryListPage.routeName,
+            ),
+          ),
+          title: const Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'इन्व्हेंटरी तपशील',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+              Text(
+                'Inventory Details',
+                style: TextStyle(fontSize: 12, color: Colors.white70),
+              ),
+            ],
+          ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.print_outlined),
+              onPressed: () => _showPrintDialog(context),
+            ),
+          ],
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HeaderCard(
+                  item: _item,
+                  statusColor: _statusColor(_item.status),
+                  amtFmt: amtFmt,
+                ),
+                const SizedBox(height: 14),
+                _SectionCard(
+                  titleMr: 'मूळ तपशील',
+                  titleEn: 'Basic Details',
+                  rows: [
+                    _DetailRow(label: 'Barcode', value: _item.barcode),
+                    _DetailRow(label: 'Item Name', value: _item.name),
+                    _DetailRow(label: 'Category', value: _item.category),
+                    if (_item.description.isNotEmpty)
+                      _DetailRow(
+                          label: 'Description', value: _item.description),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SectionCard(
+                  titleMr: 'दागिने तपशील',
+                  titleEn: 'Jewellery Details',
+                  rows: [
+                    _DetailRow(label: 'Metal Type', value: _item.metalType),
+                    _DetailRow(
+                      label: 'Gross Weight',
+                      value: '${_item.grossWeight.toStringAsFixed(2)} g',
+                    ),
+                    _DetailRow(
+                      label: 'Net Weight',
+                      value: '${_item.netWeight.toStringAsFixed(2)} g',
+                    ),
+                    _DetailRow(label: 'Purity', value: _item.purity),
+                    _DetailRow(
+                      label: 'Making Charges',
+                      value: '₹ ${amtFmt.format(_item.makingCharges)}',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SectionCard(
+                  titleMr: 'किंमत',
+                  titleEn: 'Pricing',
+                  rows: [
+                    _DetailRow(
+                      label: 'Cost Price',
+                      value: '₹ ${amtFmt.format(_item.costPrice)}',
+                    ),
+                    _DetailRow(
+                      label: 'Selling Price',
+                      value: '₹ ${amtFmt.format(_item.sellingPrice)}',
+                      valueColor: InventoryColors.green,
+                    ),
+                    _DetailRow(
+                      label: 'GST',
+                      value: '₹ ${amtFmt.format(_item.gst)}',
+                    ),
+                    _DetailRow(
+                      label: 'Total Amount',
+                      value: '₹ ${amtFmt.format(_item.totalAmount)}',
+                      valueColor: InventoryColors.navy,
+                    ),
+                    _DetailRow(
+                      label: 'Profit Margin',
+                      value: '${_item.marginPercent.toStringAsFixed(2)}%',
+                      valueColor: InventoryColors.gold,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _ImageGallery(),
+                const SizedBox(height: 12),
+                if (_item.movements.isNotEmpty)
+                  _MovementHistory(movements: _item.movements),
+              ],
+            ),
           ),
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        bottomSheet: _BottomActions(
+          item: _item,
+          onReserve: () => context.read<InventoryDetailBloc>().add(
+                InventoryDetailUpdateStatus(
+                  id: _item.id,
+                  status: InventoryStatus.reserved,
+                ),
+              ),
+          onMarkSold: () => context.read<InventoryDetailBloc>().add(
+                InventoryDetailUpdateStatus(
+                  id: _item.id,
+                  status: InventoryStatus.sold,
+                ),
+              ),
+        ),
+      ),
+    );
+  }
+
+  void _showPrintDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'बारकोड प्रिंट / Print Barcode',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'इन्व्हेंटरी तपशील',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 120,
+              height: 60,
+              decoration: BoxDecoration(
                 color: Colors.white,
+                border: Border.all(color: InventoryColors.line),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Icon(Icons.barcode_reader,
+                    size: 40, color: InventoryColors.navy),
               ),
             ),
+            const SizedBox(height: 12),
             Text(
-              'Inventory Details',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+              _item.barcode,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
+                color: InventoryColors.ink,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _item.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: InventoryColors.muted),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.print_outlined),
-            onPressed: () {},
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('बंद / Close'),
+          ),
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.print, size: 16),
+            label: const Text('प्रिंट / Print'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: InventoryColors.navy,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _HeaderCard(
-                item: item,
-                statusColor: _statusColor,
-                amtFmt: amtFmt,
-              ),
-              const SizedBox(height: 14),
-              _SectionCard(
-                titleMr: 'मूळ तपशील',
-                titleEn: 'Basic Details',
-                rows: [
-                  _DetailRow(label: 'Barcode', value: item.barcode),
-                  _DetailRow(label: 'Item Name', value: item.name),
-                  _DetailRow(label: 'Category', value: item.category),
-                  if (item.description.isNotEmpty)
-                    _DetailRow(
-                        label: 'Description', value: item.description),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                titleMr: 'दागिने तपशील',
-                titleEn: 'Jewellery Details',
-                rows: [
-                  _DetailRow(label: 'Metal Type', value: item.metalType),
-                  _DetailRow(
-                    label: 'Gross Weight',
-                    value: '${item.grossWeight.toStringAsFixed(2)} g',
-                  ),
-                  _DetailRow(
-                    label: 'Net Weight',
-                    value: '${item.netWeight.toStringAsFixed(2)} g',
-                  ),
-                  _DetailRow(label: 'Purity', value: item.purity),
-                  _DetailRow(
-                    label: 'Making Charges',
-                    value: '₹ ${amtFmt.format(item.makingCharges)}',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                titleMr: 'किंमत',
-                titleEn: 'Pricing',
-                rows: [
-                  _DetailRow(
-                    label: 'Cost Price',
-                    value: '₹ ${amtFmt.format(item.costPrice)}',
-                  ),
-                  _DetailRow(
-                    label: 'Selling Price',
-                    value: '₹ ${amtFmt.format(item.sellingPrice)}',
-                    valueColor: InventoryColors.green,
-                  ),
-                  _DetailRow(
-                    label: 'GST',
-                    value: '₹ ${amtFmt.format(item.gst)}',
-                  ),
-                  _DetailRow(
-                    label: 'Total Amount',
-                    value: '₹ ${amtFmt.format(item.totalAmount)}',
-                    valueColor: InventoryColors.navy,
-                  ),
-                  _DetailRow(
-                    label: 'Profit Margin',
-                    value: '${item.marginPercent.toStringAsFixed(2)}%',
-                    valueColor: InventoryColors.gold,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _ImageGallery(),
-              const SizedBox(height: 12),
-              if (item.movements.isNotEmpty)
-                _MovementHistory(movements: item.movements),
-            ],
-          ),
-        ),
-      ),
-      bottomSheet: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: InventoryColors.line)),
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: item.status == InventoryStatus.available
-                      ? () {}
-                      : null,
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: InventoryColors.orange,
-                    side: const BorderSide(color: InventoryColors.orange),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('राखीव / Reserve'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: item.status == InventoryStatus.available
-                      ? () {}
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: InventoryColors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('विकले / Mark Sold'),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
@@ -475,6 +561,81 @@ class _MovementHistory extends StatelessWidget {
           ...movements.map((m) => _MovementRow(movement: m)),
         ],
       ),
+    );
+  }
+}
+
+class _BottomActions extends StatelessWidget {
+  const _BottomActions({
+    required this.item,
+    required this.onReserve,
+    required this.onMarkSold,
+  });
+
+  final InventoryItem item;
+  final VoidCallback onReserve;
+  final VoidCallback onMarkSold;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<InventoryDetailBloc, InventoryDetailState>(
+      builder: (context, state) {
+        final isLoading = state is InventoryDetailLoading;
+        final canAct = item.status == InventoryStatus.available && !isLoading;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: InventoryColors.line)),
+          ),
+          child: SafeArea(
+            child: isLoading
+                ? const Center(
+                    child: SizedBox(
+                      height: 40,
+                      child: CircularProgressIndicator(
+                          color: InventoryColors.navy),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: canAct ? onReserve : null,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: InventoryColors.orange,
+                            side: const BorderSide(
+                                color: InventoryColors.orange),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('राखीव / Reserve'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: canAct ? onMarkSold : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: InventoryColors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('विकले / Mark Sold'),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
     );
   }
 }

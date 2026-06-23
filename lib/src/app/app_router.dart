@@ -52,6 +52,11 @@ final appRouter = GoRouter(
       builder: (context, state) => const InventoryListPage(),
     ),
     GoRoute(
+      path: '/inventory/create',
+      name: AddInventoryItemPage.routeName,
+      builder: (context, state) => const AddInventoryItemPage(),
+    ),
+    GoRoute(
       path: '/inventory/:id',
       name: InventoryDetailsPage.routeName,
       builder: (context, state) => InventoryDetailsPage(

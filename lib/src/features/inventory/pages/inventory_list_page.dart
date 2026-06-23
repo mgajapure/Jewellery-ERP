@@ -8,6 +8,7 @@ import '../../../core/widgets/app_header.dart';
 import '../domain/entities/inventory_item.dart';
 import '../presentation/bloc/inventory_list_bloc.dart';
 import '../theme/inventory_colors.dart';
+import 'add_inventory_item_page.dart';
 import 'inventory_details_page.dart';
 
 /// SCR-048 Inventory List
@@ -68,7 +69,8 @@ class _InventoryListScaffoldState extends State<_InventoryListScaffold> {
                   icon: const Icon(Icons.add_circle,
                       color: InventoryColors.navy),
                   tooltip: 'नवीन वस्तू / New Item',
-                  onPressed: () {},
+                  onPressed: () =>
+                      context.goNamed(AddInventoryItemPage.routeName),
                 ),
               ],
             ),

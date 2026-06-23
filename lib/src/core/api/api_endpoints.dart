@@ -31,7 +31,14 @@ class ApiEndpoints {
 
   // Vault
   static const String vaults = '/vaults';
+  static const String vaultList = '/vaults/list';
   static const String vaultAssign = '/vaults/assign';
+  static const String vaultSearch = '/vaults/search';
+  static String vaultSafes(String vault) => '/vaults/$vault/safes';
+  static String vaultTrays(String vault, String safe) =>
+      '/vaults/$vault/safes/$safe/trays';
+  static String vaultSlots(String vault, String safe, String tray) =>
+      '/vaults/$vault/safes/$safe/trays/$tray/slots';
 
   // Interest
   static String interestLedger(String girviId) => '/interest/ledger/$girviId';

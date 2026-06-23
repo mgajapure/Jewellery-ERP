@@ -99,6 +99,16 @@ class MockInterceptor extends Interceptor {
         return {'success': true};
       }
 
+      // Vault — assign slot
+      if (path == ApiEndpoints.vaultAssign) {
+        final coordinate =
+            (_extractBody(options)?['coordinate'] as String?) ?? '';
+        return {
+          'success': true,
+          'data': {'coordinate': coordinate},
+        };
+      }
+
       // Customer creation — simulate a new customer record
       if (path == ApiEndpoints.customers) {
         final now = DateTime.now().toIso8601String();
@@ -153,6 +163,22 @@ class MockInterceptor extends Interceptor {
     }
 
     switch (path) {
+      case ApiEndpoints.vaults:
+        return {'success': true, 'data': _vaultOccupancy};
+
+      case ApiEndpoints.vaultList:
+        return {'success': true, 'data': ['Vault-A', 'Vault-B', 'Vault-C']};
+
+      case ApiEndpoints.vaultSearch:
+        final q = (query['q'] as String? ?? '').toLowerCase();
+        final filtered = _vaultSearchResults.where((r) {
+          return (r['customerName'] as String).toLowerCase().contains(q) ||
+              (r['girviId'] as String).toLowerCase().contains(q) ||
+              (r['mobile'] as String).contains(q) ||
+              (r['serialId'] as String).toLowerCase().contains(q);
+        }).toList();
+        return {'success': true, 'data': filtered};
+
       case ApiEndpoints.dashboardSummary:
         return {
           'success': true,
@@ -288,9 +314,120 @@ class MockInterceptor extends Interceptor {
           return {'success': true, 'data': _interestLedger};
         }
 
+        // Vault structure: /vaults/{vault}/safes/{safe}/trays/{tray}/slots
+        final vaultSlotRe =
+            RegExp(r'^/vaults/([^/]+)/safes/([^/]+)/trays/([^/]+)/slots$');
+        final vaultSlotMatch = vaultSlotRe.firstMatch(path);
+        if (vaultSlotMatch != null) {
+          final vault = vaultSlotMatch.group(1)!;
+          final safe = vaultSlotMatch.group(2)!;
+          final tray = vaultSlotMatch.group(3)!;
+          return {
+            'success': true,
+            'data': _buildSlots(vault, safe, tray),
+          };
+        }
+
+        // Vault structure: /vaults/{vault}/safes/{safe}/trays
+        final vaultTrayRe = RegExp(r'^/vaults/([^/]+)/safes/([^/]+)/trays$');
+        if (vaultTrayRe.hasMatch(path)) {
+          return {
+            'success': true,
+            'data': ['Tray-01', 'Tray-05', 'Tray-12'],
+          };
+        }
+
+        // Vault structure: /vaults/{vault}/safes
+        final vaultSafeRe = RegExp(r'^/vaults/([^/]+)/safes$');
+        if (vaultSafeRe.hasMatch(path)) {
+          return {
+            'success': true,
+            'data': ['Safe-01', 'Safe-02', 'Safe-03'],
+          };
+        }
+
         return null;
     }
   }
+
+  static List<Map<String, dynamic>> _buildSlots(
+    String vault,
+    String safe,
+    String tray,
+  ) {
+    final vaultCode = vault.replaceAll('Vault-', 'VA-');
+    final safeCode = safe.replaceAll('Safe-', 'SF-');
+    final trayCode = tray.replaceAll('Tray-', 'TR-');
+    final occupied = {'SL-02', 'SL-05', 'SL-09', 'SL-14', 'SL-18'};
+    final reserved = {'SL-20'};
+    return List.generate(20, (i) {
+      final n = (i + 1).toString().padLeft(2, '0');
+      final slotCode = 'SL-$n';
+      final coord = '$vaultCode/$safeCode/$trayCode/$slotCode';
+      final status = occupied.contains(slotCode)
+          ? 'occupied'
+          : reserved.contains(slotCode)
+              ? 'reserved'
+              : 'available';
+      final girviId = occupied.contains(slotCode) ? 'GRV-2026-0005$n' : null;
+      return {
+        'id': 'slot-${coord.replaceAll('/', '-').toLowerCase()}',
+        'slotName': 'Slot-$n',
+        'coordinate': coord,
+        'status': status,
+        'girviId': girviId,
+      };
+    });
+  }
+
+  static final List<Map<String, dynamic>> _vaultOccupancy = [
+    {'vaultName': 'Vault-A', 'occupied': 42, 'total': 80},
+    {'vaultName': 'Vault-B', 'occupied': 64, 'total': 80},
+    {'vaultName': 'Vault-C', 'occupied': 18, 'total': 60},
+  ];
+
+  static final List<Map<String, dynamic>> _vaultSearchResults = [
+    {
+      'customerName': 'Ramesh Patil',
+      'girviId': 'GRV-2026-000042',
+      'serialId': 'SA-2026-000042',
+      'status': 'Active',
+      'coordinate': 'VA-A/SF-02/TR-05/SL-18',
+      'mobile': '9876543210',
+    },
+    {
+      'customerName': 'Suresh Jadhav',
+      'girviId': 'GRV-2026-000038',
+      'serialId': 'SA-2026-000038',
+      'status': 'Partial Paid',
+      'coordinate': 'VA-A/SF-01/TR-03/SL-07',
+      'mobile': '9123456780',
+    },
+    {
+      'customerName': 'Asha Desai',
+      'girviId': 'GRV-2026-000021',
+      'serialId': 'SA-2026-000021',
+      'status': 'Renewed',
+      'coordinate': 'VA-B/SF-03/TR-08/SL-02',
+      'mobile': '9988776655',
+    },
+    {
+      'customerName': 'Meena Jadhav',
+      'girviId': 'GRV-2026-000520',
+      'serialId': 'SA-2026-000520',
+      'status': 'Active',
+      'coordinate': 'VA-A/SF-01/TR-03/SL-07',
+      'mobile': '8765432109',
+    },
+    {
+      'customerName': 'Amol Deshmukh',
+      'girviId': 'GRV-2026-000519',
+      'serialId': 'SA-2026-000519',
+      'status': 'Overdue',
+      'coordinate': 'VA-B/SF-03/TR-01/SL-12',
+      'mobile': '7654321098',
+    },
+  ];
 
   static final Map<String, dynamic> _interestLedger = {
     'girviId': 'GRV-2026-000042',

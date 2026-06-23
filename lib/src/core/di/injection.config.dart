@@ -44,6 +44,14 @@ import '../../features/girvi/presentation/bloc/girvi_detail_bloc.dart'
 import '../../features/girvi/presentation/bloc/girvi_list_bloc.dart' as _i876;
 import '../../features/interest/data/repositories/interest_repository_impl.dart'
     as _i501;
+import '../../features/vault/data/repositories/vault_repository_impl.dart'
+    as _i601;
+import '../../features/vault/domain/repositories/vault_repository.dart'
+    as _i602;
+import '../../features/vault/presentation/bloc/vault_assignment_bloc.dart'
+    as _i603;
+import '../../features/vault/presentation/bloc/vault_search_bloc.dart'
+    as _i604;
 import '../../features/interest/domain/repositories/interest_repository.dart'
     as _i502;
 import '../../features/interest/presentation/bloc/calculator_bloc.dart'
@@ -127,6 +135,16 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i503.CalculatorBloc>(() => _i503.CalculatorBloc());
   gh.factory<_i504.LedgerBloc>(
     () => _i504.LedgerBloc(repository: gh<_i502.InterestRepository>()),
+  );
+  // Vault
+  gh.lazySingleton<_i602.VaultRepository>(
+    () => _i601.VaultRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i604.VaultSearchBloc>(
+    () => _i604.VaultSearchBloc(repository: gh<_i602.VaultRepository>()),
+  );
+  gh.factory<_i603.VaultAssignmentBloc>(
+    () => _i603.VaultAssignmentBloc(repository: gh<_i602.VaultRepository>()),
   );
   return getIt;
 }

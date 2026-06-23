@@ -10,11 +10,7 @@ import '../api_endpoints.dart';
 class MockInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final mock = _mockResponseFor(
-      options.path,
-      options.method,
-      options.queryParameters,
-    );
+    final mock = _mockResponseFor(options);
     if (mock != null) {
       handler.resolve(
         Response(
@@ -29,13 +25,80 @@ class MockInterceptor extends Interceptor {
     handler.next(options);
   }
 
-  dynamic _mockResponseFor(
-    String path,
-    String method,
-    Map<String, dynamic> query,
-  ) {
+  static Map<String, dynamic>? _extractBody(RequestOptions options) {
+    final data = options.data;
+    if (data is Map<String, dynamic>) return data;
+    return null;
+  }
+
+  dynamic _mockResponseFor(RequestOptions options) {
+    final path = options.path;
+    final method = options.method;
+    final query = options.queryParameters;
     // POST endpoints — return success acknowledgement
     if (method == 'POST') {
+      // Auth — request OTP
+      if (path == ApiEndpoints.requestOtp) {
+        return {
+          'success': true,
+          'data': {
+            'requestId': 'otp-req-${DateTime.now().millisecondsSinceEpoch}',
+          },
+        };
+      }
+
+      // Auth — verify OTP
+      // Rules: '000000' → registration pending; any other 6-digit OTP → success.
+      if (path == ApiEndpoints.verifyOtp) {
+        final otp = (_extractBody(options)?['otp'] as String?) ?? '';
+        if (otp == '000000') {
+          return {
+            'success': false,
+            'pending': true,
+            'message': 'Device registration is pending admin approval.',
+          };
+        }
+        return {
+          'success': true,
+          'data': {
+            'accessToken':
+                'mock-access-${DateTime.now().millisecondsSinceEpoch}',
+            'refreshToken': 'mock-refresh-token',
+            'staffId': 'staff-001',
+            'tenantId': 'tenant-001',
+            'staffName': 'रमेश पाटील / Ramesh Patil',
+            'role': 'STAFF',
+            'expiresAt': DateTime.now()
+                .add(const Duration(hours: 8))
+                .toIso8601String(),
+          },
+        };
+      }
+
+      // Auth — refresh token → return a refreshed session
+      if (path == ApiEndpoints.refreshToken) {
+        return {
+          'success': true,
+          'data': {
+            'accessToken':
+                'mock-access-refreshed-${DateTime.now().millisecondsSinceEpoch}',
+            'refreshToken': 'mock-refresh-token-2',
+            'staffId': 'staff-001',
+            'tenantId': 'tenant-001',
+            'staffName': 'रमेश पाटील / Ramesh Patil',
+            'role': 'STAFF',
+            'expiresAt': DateTime.now()
+                .add(const Duration(hours: 8))
+                .toIso8601String(),
+          },
+        };
+      }
+
+      // Auth — logout → always success
+      if (path == ApiEndpoints.logout) {
+        return {'success': true};
+      }
+
       // Customer creation — simulate a new customer record
       if (path == ApiEndpoints.customers) {
         final now = DateTime.now().toIso8601String();

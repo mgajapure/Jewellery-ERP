@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth.dart';
+import '../features/auth/domain/entities/auth_session.dart';
 import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/girvi/girvi.dart';
@@ -32,7 +33,8 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/otp',
       name: OtpVerificationPage.routeName,
-      builder: (context, state) => const OtpVerificationPage(),
+      builder: (context, state) =>
+          OtpVerificationPage(args: state.extra! as OtpArgs),
     ),
     GoRoute(
       path: '/registration-pending',

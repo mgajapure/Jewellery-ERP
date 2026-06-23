@@ -14,6 +14,13 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
+import '../../features/auth/data/repositories/auth_repository_impl.dart'
+    as _i301;
+import '../../features/auth/domain/repositories/auth_repository.dart'
+    as _i302;
+import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i303;
+import '../../features/auth/presentation/bloc/mobile_bloc.dart' as _i304;
+import '../../features/auth/presentation/bloc/otp_bloc.dart' as _i305;
 import '../../features/customer/data/repositories/customer_repository_impl.dart'
     as _i101;
 import '../../features/customer/domain/repositories/customer_repository.dart'
@@ -61,6 +68,22 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.lazySingleton<_i277.ApiClient>(
     () => _i277.ApiClient(secureStorage: gh<_i619.SecureStorage>()),
+  );
+  // Auth
+  gh.lazySingleton<_i302.AuthRepository>(
+    () => _i301.AuthRepositoryImpl(
+      apiClient: gh<_i277.ApiClient>(),
+      secureStorage: gh<_i619.SecureStorage>(),
+    ),
+  );
+  gh.lazySingleton<_i303.AuthBloc>(
+    () => _i303.AuthBloc(repository: gh<_i302.AuthRepository>()),
+  );
+  gh.factory<_i304.MobileBloc>(
+    () => _i304.MobileBloc(repository: gh<_i302.AuthRepository>()),
+  );
+  gh.factory<_i305.OtpBloc>(
+    () => _i305.OtpBloc(repository: gh<_i302.AuthRepository>()),
   );
   // Girvi
   gh.lazySingleton<_i812.GirviRepository>(

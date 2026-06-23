@@ -184,7 +184,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/purchase/:id',
       name: PurchaseDetailsPage.routeName,
-      builder: (context, state) => const PurchaseDetailsPage(),
+      builder: (context, state) => PurchaseDetailsPage(
+        entry: state.extra! as PurchaseEntry,
+      ),
     ),
     GoRoute(
       path: '/sales',

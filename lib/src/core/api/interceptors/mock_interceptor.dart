@@ -99,6 +99,34 @@ class MockInterceptor extends Interceptor {
         return {'success': true};
       }
 
+      // Purchase — create new purchase entry
+      if (path == ApiEndpoints.purchases) {
+        final body = _extractBody(options) ?? {};
+        final now = DateTime.now();
+        final id =
+            'PUR-${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-${(1000 + _purchaseLedger.length).toString()}';
+        final entry = {
+          'id': id,
+          'date': now.toIso8601String(),
+          'supplierName': body['supplierName'] ?? 'Unknown',
+          'supplierMobile': body['supplierMobile'] ?? '',
+          'billNo': body['billNo'] ?? '',
+          'purchaseType': body['purchaseType'] ?? 'NEWINVENTORY',
+          'metalType': body['metalType'] ?? 'GOLD22K',
+          'itemName': body['itemName'] ?? '',
+          'grossWeight': body['grossWeight'] ?? 0.0,
+          'netWeight': body['netWeight'] ?? 0.0,
+          'purity': body['purity'] ?? 0.0,
+          'rate': body['rate'] ?? 0.0,
+          'amount': body['amount'] ?? 0.0,
+          'gst': 0.0,
+          'totalAmount': body['amount'] ?? 0.0,
+          'paymentMode': body['paymentMode'] ?? 'CASH',
+          'status': 'PENDING',
+        };
+        return {'success': true, 'data': entry};
+      }
+
       // Vault — assign slot
       if (path == ApiEndpoints.vaultAssign) {
         final coordinate =
@@ -178,6 +206,48 @@ class MockInterceptor extends Interceptor {
               (r['serialId'] as String).toLowerCase().contains(q);
         }).toList();
         return {'success': true, 'data': filtered};
+
+      case ApiEndpoints.purchaseDashboard:
+        return {'success': true, 'data': _purchaseDashboardStats};
+
+      case ApiEndpoints.purchaseLedger:
+        final payFilter = (query['filter'] as String? ?? '').toUpperCase();
+        final searchQ = (query['q'] as String? ?? '').toLowerCase();
+        var ledger = _purchaseLedger.toList();
+        if (payFilter.isNotEmpty) {
+          ledger = ledger.where((e) {
+            if (payFilter == 'CASH') return e['paymentMode'] == 'CASH';
+            if (payFilter == 'BANK') return e['paymentMode'] == 'BANK_TRANSFER';
+            if (payFilter == 'CREDIT') return e['paymentMode'] == 'CREDIT';
+            return true;
+          }).toList();
+        }
+        if (searchQ.isNotEmpty) {
+          ledger = ledger.where((e) {
+            return (e['supplierName'] as String)
+                    .toLowerCase()
+                    .contains(searchQ) ||
+                (e['id'] as String).toLowerCase().contains(searchQ);
+          }).toList();
+        }
+        return {'success': true, 'data': ledger};
+
+      case ApiEndpoints.suppliers:
+        final suppFilter = (query['filter'] as String? ?? '').toUpperCase();
+        final suppQ = (query['q'] as String? ?? '').toLowerCase();
+        var suppList = _suppliers.toList();
+        if (suppFilter.isNotEmpty) {
+          suppList = suppList
+              .where((s) => s['status'] == suppFilter)
+              .toList();
+        }
+        if (suppQ.isNotEmpty) {
+          suppList = suppList.where((s) {
+            return (s['name'] as String).toLowerCase().contains(suppQ) ||
+                (s['mobile'] as String).contains(suppQ);
+          }).toList();
+        }
+        return {'success': true, 'data': suppList};
 
       case ApiEndpoints.dashboardSummary:
         return {
@@ -310,6 +380,18 @@ class MockInterceptor extends Interceptor {
           }
         }
 
+        if (path.startsWith('/purchases/')) {
+          final segments = path.split('/');
+          if (segments.length == 3) {
+            final id = segments[2];
+            final entry = _purchaseLedger.firstWhere(
+              (e) => e['id'] == id,
+              orElse: () => _purchaseLedger.first,
+            );
+            return {'success': true, 'data': entry};
+          }
+        }
+
         if (path.startsWith('/interest/ledger/')) {
           return {'success': true, 'data': _interestLedger};
         }
@@ -379,6 +461,129 @@ class MockInterceptor extends Interceptor {
       };
     });
   }
+
+  static final Map<String, dynamic> _purchaseDashboardStats = {
+    'todayPurchases': 8,
+    'todayValue': 420000.0,
+    'pendingApprovals': 3,
+    'totalSuppliers': 24,
+    'scrapPurchases': 5,
+    'inventoryAdded': 12,
+  };
+
+  static final List<Map<String, dynamic>> _purchaseLedger = [
+    {
+      'id': 'PUR-20250622-001',
+      'date': '2025-06-22T00:00:00Z',
+      'supplierName': 'Ramesh Jewellers',
+      'supplierMobile': '+91 98765 43210',
+      'billNo': 'BJ/2025/045',
+      'purchaseType': 'NEWINVENTORY',
+      'metalType': 'GOLD22K',
+      'itemName': 'Gold Chain',
+      'grossWeight': 26.10,
+      'netWeight': 24.50,
+      'purity': 91.6,
+      'rate': 5102.0,
+      'amount': 124999.0,
+      'gst': 1.0,
+      'totalAmount': 125000.0,
+      'paymentMode': 'BANK_TRANSFER',
+      'status': 'APPROVED',
+    },
+    {
+      'id': 'PUR-20250621-002',
+      'date': '2025-06-21T00:00:00Z',
+      'supplierName': 'Shree Gold House',
+      'supplierMobile': '+91 91234 56789',
+      'billNo': 'SGH/2025/012',
+      'purchaseType': 'SCRAP',
+      'metalType': 'GOLD22K',
+      'itemName': 'Gold Scrap',
+      'grossWeight': 8.50,
+      'netWeight': 8.20,
+      'purity': 91.6,
+      'rate': 5122.0,
+      'amount': 42000.0,
+      'gst': 0.0,
+      'totalAmount': 42000.0,
+      'paymentMode': 'CASH',
+      'status': 'APPROVED',
+    },
+    {
+      'id': 'PUR-20250620-003',
+      'date': '2025-06-20T00:00:00Z',
+      'supplierName': 'Mumbai Bullion Traders',
+      'supplierMobile': '+91 99887 77665',
+      'billNo': 'MBT/2025/089',
+      'purchaseType': 'BULLION',
+      'metalType': 'GOLD24K',
+      'itemName': 'Gold Bar 50g',
+      'grossWeight': 50.10,
+      'netWeight': 50.00,
+      'purity': 99.9,
+      'rate': 6100.0,
+      'amount': 305000.0,
+      'gst': 0.0,
+      'totalAmount': 305000.0,
+      'paymentMode': 'CREDIT',
+      'status': 'APPROVED',
+    },
+    {
+      'id': 'PUR-20250619-004',
+      'date': '2025-06-19T00:00:00Z',
+      'supplierName': 'Ramesh Jewellers',
+      'supplierMobile': '+91 98765 43210',
+      'billNo': 'BJ/2025/041',
+      'purchaseType': 'NEWINVENTORY',
+      'metalType': 'SILVER',
+      'itemName': 'Silver Bar 100g',
+      'grossWeight': 100.50,
+      'netWeight': 100.00,
+      'purity': 99.0,
+      'rate': 75.0,
+      'amount': 7500.0,
+      'gst': 0.0,
+      'totalAmount': 7500.0,
+      'paymentMode': 'CASH',
+      'status': 'APPROVED',
+    },
+  ];
+
+  static final List<Map<String, dynamic>> _suppliers = [
+    {
+      'id': 'supp-001',
+      'name': 'Ramesh Jewellers',
+      'mobile': '+91 98765 43210',
+      'gstNo': '27ABCDE1234F1Z5',
+      'balanceDue': 125000.0,
+      'status': 'ACTIVE',
+    },
+    {
+      'id': 'supp-002',
+      'name': 'Shree Gold House',
+      'mobile': '+91 91234 56789',
+      'gstNo': '27FGHIJ5678K2L6',
+      'balanceDue': 45000.0,
+      'status': 'ACTIVE',
+    },
+    {
+      'id': 'supp-003',
+      'name': 'Mumbai Bullion Traders',
+      'mobile': '+91 99887 77665',
+      'gstNo': '27KLMNO9012P3Q7',
+      'balanceDue': 305000.0,
+      'status': 'ACTIVE',
+    },
+    {
+      'id': 'supp-004',
+      'name': 'Pune Silver Emporium',
+      'mobile': '+91 88776 65544',
+      'gstNo': '27PQRST3456U4V8',
+      'balanceDue': 0.0,
+      'status': 'INACTIVE',
+    },
+  ];
 
   static final List<Map<String, dynamic>> _vaultOccupancy = [
     {'vaultName': 'Vault-A', 'occupied': 42, 'total': 80},

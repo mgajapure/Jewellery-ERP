@@ -42,4 +42,11 @@ class ApiEndpoints {
 
   // Interest
   static String interestLedger(String girviId) => '/interest/ledger/$girviId';
+
+  // Purchase
+  static const String purchases = '/purchases';
+  static const String purchaseDashboard = '/purchases/dashboard';
+  static const String purchaseLedger = '/purchases/ledger';
+  static String purchaseById(String id) => '/purchases/$id';
+  static const String suppliers = '/suppliers';
 }

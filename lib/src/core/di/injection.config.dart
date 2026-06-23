@@ -44,6 +44,18 @@ import '../../features/girvi/presentation/bloc/girvi_detail_bloc.dart'
 import '../../features/girvi/presentation/bloc/girvi_list_bloc.dart' as _i876;
 import '../../features/interest/data/repositories/interest_repository_impl.dart'
     as _i501;
+import '../../features/purchase/data/repositories/purchase_repository_impl.dart'
+    as _i701;
+import '../../features/purchase/domain/repositories/purchase_repository.dart'
+    as _i702;
+import '../../features/purchase/presentation/bloc/purchase_dashboard_bloc.dart'
+    as _i703;
+import '../../features/purchase/presentation/bloc/purchase_ledger_bloc.dart'
+    as _i704;
+import '../../features/purchase/presentation/bloc/new_purchase_bloc.dart'
+    as _i705;
+import '../../features/purchase/presentation/bloc/supplier_bloc.dart'
+    as _i706;
 import '../../features/vault/data/repositories/vault_repository_impl.dart'
     as _i601;
 import '../../features/vault/domain/repositories/vault_repository.dart'
@@ -135,6 +147,24 @@ Future<_i174.GetIt> $initGetIt(
   gh.factory<_i503.CalculatorBloc>(() => _i503.CalculatorBloc());
   gh.factory<_i504.LedgerBloc>(
     () => _i504.LedgerBloc(repository: gh<_i502.InterestRepository>()),
+  );
+  // Purchase
+  gh.lazySingleton<_i702.PurchaseRepository>(
+    () => _i701.PurchaseRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i703.PurchaseDashboardBloc>(
+    () => _i703.PurchaseDashboardBloc(
+        repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i704.PurchaseLedgerBloc>(
+    () =>
+        _i704.PurchaseLedgerBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i705.NewPurchaseBloc>(
+    () => _i705.NewPurchaseBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i706.SupplierBloc>(
+    () => _i706.SupplierBloc(repository: gh<_i702.PurchaseRepository>()),
   );
   // Vault
   gh.lazySingleton<_i602.VaultRepository>(

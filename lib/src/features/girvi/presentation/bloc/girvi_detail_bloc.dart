@@ -38,27 +38,23 @@ class GirviDetailBloc extends Bloc<GirviDetailEvent, GirviDetailState> {
     final current = state;
     if (current is! GirviDetailLoaded) return;
     emit(GirviOperationLoading(current.girvi));
-    final result = await _repository.makePayment(
+    final paymentResult = await _repository.makePayment(
       event.girviId,
       event.request,
     );
-    result.when(
-      success: (_) async {
-        final refreshed = await _repository.getGirviById(event.girviId);
-        refreshed.when(
-          success: (updated) => emit(
-            GirviOperationSuccess(updated, 'Payment recorded successfully.'),
-          ),
-          failure: (_) => emit(
-            GirviOperationSuccess(
-              current.girvi,
-              'Payment recorded successfully.',
-            ),
-          ),
-        );
-      },
-      failure: (error) => emit(
-        GirviOperationFailure(current.girvi, error.message),
+    if (paymentResult.isFailure) {
+      emit(GirviOperationFailure(
+        current.girvi,
+        paymentResult.errorOrNull!.message,
+      ));
+      return;
+    }
+    final refreshed = await _repository.getGirviById(event.girviId);
+    refreshed.when(
+      success: (updated) =>
+          emit(GirviOperationSuccess(updated, 'Payment recorded successfully.')),
+      failure: (_) => emit(
+        GirviOperationSuccess(current.girvi, 'Payment recorded successfully.'),
       ),
     );
   }
@@ -91,24 +87,20 @@ class GirviDetailBloc extends Bloc<GirviDetailEvent, GirviDetailState> {
     final current = state;
     if (current is! GirviDetailLoaded) return;
     emit(GirviOperationLoading(current.girvi));
-    final result = await _repository.redeemGirvi(event.girviId);
-    result.when(
-      success: (_) async {
-        final refreshed = await _repository.getGirviById(event.girviId);
-        refreshed.when(
-          success: (updated) => emit(
-            GirviOperationSuccess(updated, 'Girvi redeemed successfully.'),
-          ),
-          failure: (_) => emit(
-            GirviOperationSuccess(
-              current.girvi,
-              'Girvi redeemed successfully.',
-            ),
-          ),
-        );
-      },
-      failure: (error) => emit(
-        GirviOperationFailure(current.girvi, error.message),
+    final redeemResult = await _repository.redeemGirvi(event.girviId);
+    if (redeemResult.isFailure) {
+      emit(GirviOperationFailure(
+        current.girvi,
+        redeemResult.errorOrNull!.message,
+      ));
+      return;
+    }
+    final refreshed = await _repository.getGirviById(event.girviId);
+    refreshed.when(
+      success: (updated) =>
+          emit(GirviOperationSuccess(updated, 'Girvi redeemed successfully.')),
+      failure: (_) => emit(
+        GirviOperationSuccess(current.girvi, 'Girvi redeemed successfully.'),
       ),
     );
   }

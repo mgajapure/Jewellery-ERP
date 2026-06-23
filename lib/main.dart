@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'src/app/jewellery_erp_app.dart';
+import 'src/core/di/injection.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: JewelleryErpApp()));
+  await configureDependencies();
+  runApp(const JewelleryErpApp());
 }

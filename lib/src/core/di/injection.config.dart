@@ -14,17 +14,6 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
-import '../../features/customer/data/repositories/customer_repository_impl.dart'
-    as _i592;
-import '../../features/customer/domain/repositories/customer_repository.dart'
-    as _i547;
-import '../../features/customer/presentation/bloc/customer_bloc.dart' as _i897;
-import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
-    as _i509;
-import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
-    as _i665;
-import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart'
-    as _i652;
 import '../../features/girvi/data/repositories/girvi_repository_impl.dart'
     as _i731;
 import '../../features/girvi/domain/repositories/girvi_repository.dart'
@@ -58,18 +47,6 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.lazySingleton<_i277.ApiClient>(
     () => _i277.ApiClient(secureStorage: gh<_i619.SecureStorage>()),
-  );
-  gh.lazySingleton<_i547.CustomerRepository>(
-    () => _i592.CustomerRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
-  );
-  gh.factory<_i897.CustomerBloc>(
-    () => _i897.CustomerBloc(repository: gh<_i547.CustomerRepository>()),
-  );
-  gh.lazySingleton<_i665.DashboardRepository>(
-    () => _i509.DashboardRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
-  );
-  gh.factory<_i652.DashboardBloc>(
-    () => _i652.DashboardBloc(repository: gh<_i665.DashboardRepository>()),
   );
   gh.lazySingleton<_i812.GirviRepository>(
     () => _i731.GirviRepositoryImpl(apiClient: gh<_i277.ApiClient>()),

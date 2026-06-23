@@ -3,15 +3,15 @@ import 'package:flutter/material.dart';
 class AppEmptyState extends StatelessWidget {
   const AppEmptyState({
     super.key,
-    required this.labelMr,
-    required this.labelEn,
+    required this.title,
+    this.subtitle,
     this.icon = Icons.inbox_outlined,
     this.action,
     this.actionLabel,
   });
 
-  final String labelMr;
-  final String labelEn;
+  final String title;
+  final String? subtitle;
   final IconData icon;
   final VoidCallback? action;
   final String? actionLabel;
@@ -31,7 +31,7 @@ class AppEmptyState extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              labelMr,
+              title,
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w700,
@@ -39,16 +39,18 @@ class AppEmptyState extends StatelessWidget {
               ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 4),
-            Text(
-              labelEn,
-              style: const TextStyle(
-                fontSize: 13,
-                color: Color(0xFF5E6880),
-                fontWeight: FontWeight.w500,
+            if (subtitle != null) ...[
+              const SizedBox(height: 4),
+              Text(
+                subtitle!,
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF5E6880),
+                  fontWeight: FontWeight.w500,
+                ),
+                textAlign: TextAlign.center,
               ),
-              textAlign: TextAlign.center,
-            ),
+            ],
             if (action != null && actionLabel != null) ...[
               const SizedBox(height: 24),
               ElevatedButton(

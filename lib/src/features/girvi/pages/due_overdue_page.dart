@@ -1,77 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/di/injection.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../shared/widgets/app_error_state.dart';
+import '../../../shared/widgets/app_loader.dart';
+import '../domain/entities/girvi.dart';
+import '../presentation/bloc/girvi_list_bloc.dart';
+import '../presentation/bloc/girvi_list_event.dart';
+import '../presentation/bloc/girvi_list_state.dart';
 import '../theme/girvi_colors.dart';
+import 'girvi_details_page.dart';
 
-/// SCR-073 Due & Overdue Management
-///
-/// Collection management screen showing Girvi contracts that are due today,
-/// due this week, or overdue. Supports follow-up actions and reminders.
-class DueOverduePage extends StatefulWidget {
+class DueOverduePage extends StatelessWidget {
   const DueOverduePage({super.key});
 
   static const routeName = 'due-overdue';
 
   @override
-  State<DueOverduePage> createState() => _DueOverduePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<GirviListBloc>()..add(const LoadGirviList()),
+      child: const _DueOverdueView(),
+    );
+  }
 }
 
-class _DueOverduePageState extends State<DueOverduePage>
+class _DueOverdueView extends StatefulWidget {
+  const _DueOverdueView();
+
+  @override
+  State<_DueOverdueView> createState() => _DueOverdueViewState();
+}
+
+class _DueOverdueViewState extends State<_DueOverdueView>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-
-  final List<Map<String, dynamic>> _dueToday = const [
-    {
-      'girviId': 'GRV-2026-000101',
-      'customer': 'Ajay Shinde',
-      'mobile': '9876543210',
-      'amount': 45000.0,
-      'dueDate': 'Today',
-    },
-    {
-      'girviId': 'GRV-2026-000098',
-      'customer': 'Vijay More',
-      'mobile': '9123456780',
-      'amount': 72000.0,
-      'dueDate': 'Today',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _dueThisWeek = const [
-    {
-      'girviId': 'GRV-2026-000095',
-      'customer': 'Sanjay Kadam',
-      'mobile': '9988776655',
-      'amount': 30000.0,
-      'dueDate': 'Tomorrow',
-    },
-    {
-      'girviId': 'GRV-2026-000092',
-      'customer': 'Nitin Deshmukh',
-      'mobile': '9765432109',
-      'amount': 55000.0,
-      'dueDate': 'In 3 days',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _overdue = const [
-    {
-      'girviId': 'GRV-2026-000085',
-      'customer': 'Pravin Jadhav',
-      'mobile': '9876567890',
-      'amount': 85000.0,
-      'dueDate': '5 days overdue',
-      'days': 5,
-    },
-    {
-      'girviId': 'GRV-2026-000077',
-      'customer': 'Rahul Pawar',
-      'mobile': '9234567890',
-      'amount': 120000.0,
-      'dueDate': '12 days overdue',
-      'days': 12,
-    },
-  ];
 
   @override
   void initState() {
@@ -123,29 +89,75 @@ class _DueOverduePageState extends State<DueOverduePage>
                 ),
                 dividerColor: Colors.transparent,
                 tabs: const [
-                  Tab(text: 'Today'),
-                  Tab(text: 'This Week'),
-                  Tab(text: 'Overdue'),
+                  Tab(text: 'आज / Today'),
+                  Tab(text: 'या आठवड्यात'),
+                  Tab(text: 'मुदतीपूर्व'),
                 ],
               ),
             ),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: [
-                  _DueList(
-                    items: _dueToday,
-                    statusColor: GirviColors.gold,
-                  ),
-                  _DueList(
-                    items: _dueThisWeek,
-                    statusColor: GirviColors.orange,
-                  ),
-                  _DueList(
-                    items: _overdue,
-                    statusColor: GirviColors.red,
-                  ),
-                ],
+              child: BlocBuilder<GirviListBloc, GirviListState>(
+                builder: (context, state) {
+                  if (state is GirviListLoading || state is GirviListInitial) {
+                    return const AppLoader(
+                      message: 'देय यादी लोड होत आहे...',
+                    );
+                  }
+                  if (state is GirviListError) {
+                    return AppErrorState(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<GirviListBloc>()
+                          .add(const LoadGirviList()),
+                    );
+                  }
+                  if (state is GirviListLoaded) {
+                    final all = state.girviList;
+                    final today = all
+                        .where((g) =>
+                            (g.status == GirviStatus.active ||
+                                g.status == GirviStatus.partialPaid) &&
+                            g.daysLeft == 0)
+                        .toList();
+                    final thisWeek = all
+                        .where((g) =>
+                            (g.status == GirviStatus.active ||
+                                g.status == GirviStatus.partialPaid) &&
+                            g.daysLeft > 0 &&
+                            g.daysLeft <= 7)
+                        .toList();
+                    final overdue = all
+                        .where((g) =>
+                            g.status == GirviStatus.overdue || g.daysLeft < 0)
+                        .toList();
+
+                    return TabBarView(
+                      controller: _tabController,
+                      children: [
+                        _DueList(
+                          items: today,
+                          statusColor: GirviColors.gold,
+                          emptyLabel: 'आज कोणतेही देय नाही',
+                          emptyLabelEn: 'No payments due today',
+                        ),
+                        _DueList(
+                          items: thisWeek,
+                          statusColor: GirviColors.orange,
+                          emptyLabel: 'या आठवड्यात कोणतेही देय नाही',
+                          emptyLabelEn: 'No payments due this week',
+                        ),
+                        _DueList(
+                          items: overdue,
+                          statusColor: GirviColors.red,
+                          emptyLabel: 'मुदतीपूर्व कोणतेही नाही',
+                          emptyLabelEn: 'No overdue contracts',
+                          isOverdue: true,
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ],
@@ -159,40 +171,66 @@ class _DueList extends StatelessWidget {
   const _DueList({
     required this.items,
     required this.statusColor,
+    required this.emptyLabel,
+    required this.emptyLabelEn,
+    this.isOverdue = false,
   });
 
-  final List<Map<String, dynamic>> items;
+  final List<Girvi> items;
   final Color statusColor;
+  final String emptyLabel;
+  final String emptyLabelEn;
+  final bool isOverdue;
 
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) {
-      return const _EmptyState();
+      return _EmptyState(labelMr: emptyLabel, labelEn: emptyLabelEn);
     }
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-      children: items
-          .map((item) => _DueCard(item: item, statusColor: statusColor))
-          .toList(),
+    return RefreshIndicator(
+      onRefresh: () async =>
+          context.read<GirviListBloc>().add(const RefreshGirviList()),
+      child: ListView.builder(
+        padding: const EdgeInsets.fromLTRB(20, 4, 20, 20),
+        itemCount: items.length,
+        itemBuilder: (context, index) => _DueCard(
+          girvi: items[index],
+          statusColor: statusColor,
+          isOverdue: isOverdue,
+        ),
+      ),
     );
   }
 }
 
 class _DueCard extends StatelessWidget {
   const _DueCard({
-    required this.item,
+    required this.girvi,
     required this.statusColor,
+    required this.isOverdue,
   });
 
-  final Map<String, dynamic> item;
+  final Girvi girvi;
   final Color statusColor;
+  final bool isOverdue;
+
+  static final _fmt = NumberFormat('#,##,##0', 'en_IN');
+
+  String get _dueLabel {
+    if (isOverdue || girvi.daysLeft < 0) {
+      return '${girvi.daysLeft.abs()} days overdue';
+    }
+    if (girvi.daysLeft == 0) return 'Due Today';
+    return 'In ${girvi.daysLeft} days';
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () {
-        // TODO: open girvi details.
-      },
+      onTap: () => context.goNamed(
+        GirviDetailsPage.routeName,
+        pathParameters: {'id': girvi.id},
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -216,7 +254,7 @@ class _DueCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  item['girviId'] as String,
+                  girvi.serialId,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w900,
@@ -231,7 +269,7 @@ class _DueCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    item['dueDate'] as String,
+                    _dueLabel,
                     style: TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
@@ -242,14 +280,19 @@ class _DueCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _InfoRow(icon: Icons.person_outline, text: item['customer'] as String),
+            _InfoRow(
+              icon: Icons.person_outline,
+              text: girvi.customerNameEn,
+            ),
             const SizedBox(height: 6),
-            _InfoRow(icon: Icons.phone_outlined, text: item['mobile'] as String),
+            _InfoRow(
+              icon: Icons.phone_outlined,
+              text: girvi.customerMobile,
+            ),
             const SizedBox(height: 6),
             _InfoRow(
               icon: Icons.currency_rupee,
-              text:
-                  '₹ ${(item['amount'] as double).toStringAsFixed(2)}',
+              text: '₹ ${_fmt.format(girvi.outstandingAmount)}',
             ),
             const Divider(height: 22, color: GirviColors.line),
             Row(
@@ -257,25 +300,19 @@ class _DueCard extends StatelessWidget {
                 _ActionChip(
                   icon: Icons.phone,
                   label: 'Call',
-                  onTap: () {
-                    // TODO: initiate phone call.
-                  },
+                  onTap: () {},
                 ),
                 const SizedBox(width: 8),
                 _ActionChip(
                   icon: Icons.message_outlined,
                   label: 'WhatsApp',
-                  onTap: () {
-                    // TODO: open WhatsApp.
-                  },
+                  onTap: () {},
                 ),
                 const SizedBox(width: 8),
                 _ActionChip(
                   icon: Icons.alarm_outlined,
                   label: 'Reminder',
-                  onTap: () {
-                    // TODO: create reminder.
-                  },
+                  onTap: () {},
                 ),
               ],
             ),
@@ -355,7 +392,10 @@ class _ActionChip extends StatelessWidget {
 }
 
 class _EmptyState extends StatelessWidget {
-  const _EmptyState();
+  const _EmptyState({required this.labelMr, required this.labelEn});
+
+  final String labelMr;
+  final String labelEn;
 
   @override
   Widget build(BuildContext context) {
@@ -366,24 +406,24 @@ class _EmptyState extends StatelessWidget {
           Icon(
             Icons.check_circle_outline,
             size: 64,
-            color: GirviColors.muted.withValues(alpha: 0.5),
+            color: GirviColors.muted.withValues(alpha: 0.4),
           ),
           const SizedBox(height: 12),
-          const Text(
-            'कोणतेही नोंद नाही',
-            style: TextStyle(
-              fontSize: 16,
+          Text(
+            labelMr,
+            style: const TextStyle(
+              fontSize: 15,
               fontWeight: FontWeight.w800,
               color: GirviColors.ink,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            'No records in this category',
-            style: TextStyle(
+            labelEn,
+            style: const TextStyle(
               fontSize: 13,
               color: GirviColors.muted,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],

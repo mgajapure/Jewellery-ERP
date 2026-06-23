@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/girvi_colors.dart';
-import 'girvi_details_page.dart';
 import 'girvi_list_page.dart';
 
 class CreateGirviWizardPage extends StatefulWidget {
@@ -34,10 +33,7 @@ class _CreateGirviWizardPageState extends State<CreateGirviWizardPage> {
     if (_currentStep < _stepLabels.length - 1) {
       setState(() => _currentStep++);
     } else {
-      context.goNamed(
-        GirviDetailsPage.routeName,
-        pathParameters: {'id': 'GRV-2026-000099'},
-      );
+      context.goNamed(GirviListPage.routeName);
     }
   }
 

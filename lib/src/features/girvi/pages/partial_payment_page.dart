@@ -1,187 +1,311 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../shared/widgets/app_error_state.dart';
+import '../../../shared/widgets/app_loader.dart';
+import '../domain/entities/girvi.dart';
+import '../domain/repositories/girvi_repository.dart';
+import '../presentation/bloc/girvi_detail_bloc.dart';
+import '../presentation/bloc/girvi_detail_event.dart';
+import '../presentation/bloc/girvi_detail_state.dart';
 import '../theme/girvi_colors.dart';
 import 'girvi_details_page.dart';
 
-/// SCR-028 Partial Payment
-///
-/// Records a partial payment against a Girvi contract. Validates that the
-/// payment amount does not exceed the outstanding balance.
-class PartialPaymentPage extends StatefulWidget {
+class PartialPaymentPage extends StatelessWidget {
   const PartialPaymentPage({super.key});
 
   static const routeName = 'partial-payment';
 
   @override
-  State<PartialPaymentPage> createState() => _PartialPaymentPageState();
+  Widget build(BuildContext context) {
+    final id = GoRouterState.of(context).pathParameters['id']!;
+    return BlocProvider(
+      create: (_) => getIt<GirviDetailBloc>()..add(LoadGirviDetail(id)),
+      child: const _PartialPaymentView(),
+    );
+  }
 }
 
-class _PartialPaymentPageState extends State<PartialPaymentPage> {
-  String _paymentMode = 'Cash';
-  final TextEditingController _amountController = TextEditingController();
-  final TextEditingController _remarksController = TextEditingController();
+class _PartialPaymentView extends StatefulWidget {
+  const _PartialPaymentView();
 
-  final String _girviId = 'GRV-2026-000042';
-  final double _outstanding = 100917.81;
-  final double _accruedInterest = 5917.81;
+  @override
+  State<_PartialPaymentView> createState() => _PartialPaymentViewState();
+}
 
-  final List<String> _paymentModes = const [
-    'Cash',
-    'UPI',
-    'Bank Transfer',
-    'Cheque',
-  ];
+class _PartialPaymentViewState extends State<_PartialPaymentView> {
+  final _amountController = TextEditingController();
+  final _referenceController = TextEditingController();
+  final _remarksController = TextEditingController();
+  PaymentType _paymentType = PaymentType.cash;
 
-  double get _enteredAmount {
-    return double.tryParse(_amountController.text) ?? 0;
-  }
-
-  bool get _isValid {
-    return _enteredAmount > 0 && _enteredAmount <= _outstanding;
-  }
+  static final _fmt = NumberFormat('#,##,##0.00', 'en_IN');
 
   @override
   void dispose() {
     _amountController.dispose();
+    _referenceController.dispose();
     _remarksController.dispose();
     super.dispose();
   }
 
+  double get _enteredAmount => double.tryParse(_amountController.text) ?? 0;
+
+  bool _isValid(double outstanding) =>
+      _enteredAmount > 0 && _enteredAmount <= outstanding;
+
+  bool get _needsReference =>
+      _paymentType == PaymentType.upi ||
+      _paymentType == PaymentType.bankTransfer ||
+      _paymentType == PaymentType.cheque;
+
+  void _submit(BuildContext context, Girvi girvi) {
+    context.read<GirviDetailBloc>().add(
+          MakeGirviPayment(
+            girviId: girvi.id,
+            request: PaymentRequest(
+              amount: _enteredAmount,
+              paymentType: _paymentType,
+              referenceNumber: _referenceController.text.trim().isEmpty
+                  ? null
+                  : _referenceController.text.trim(),
+              notes: _remarksController.text.trim().isEmpty
+                  ? null
+                  : _remarksController.text.trim(),
+            ),
+          ),
+        );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: GirviColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: GirviColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
+    return BlocConsumer<GirviDetailBloc, GirviDetailState>(
+      listener: (context, state) {
+        if (state is GirviOperationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: GirviColors.green,
+            ),
+          );
+          AppNavigation.popOrGoNamed(
             context,
             GirviDetailsPage.routeName,
-            pathParameters: {'id': _girviId},
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'आंशिक पेमेंट',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            pathParameters: {'id': state.girvi.id},
+          );
+        } else if (state is GirviOperationFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: GirviColors.red,
             ),
-            Text(
-              'Partial Payment',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is GirviDetailInitial || state is GirviDetailLoading) {
+          return Scaffold(
+            backgroundColor: GirviColors.screenBg,
+            appBar: _NavBar(onBack: () => _navigateBack(context, null)),
+            body: const AppLoader(message: 'लोड होत आहे...'),
+          );
+        }
+
+        if (state is GirviDetailError) {
+          final id = GoRouterState.of(context).pathParameters['id']!;
+          return Scaffold(
+            backgroundColor: GirviColors.screenBg,
+            appBar: _NavBar(onBack: () => _navigateBack(context, id)),
+            body: AppErrorState(
+              message: state.message,
+              onRetry: () => context
+                  .read<GirviDetailBloc>()
+                  .add(LoadGirviDetail(id)),
             ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _OutstandingCard(
-                      outstanding: _outstanding,
-                      accruedInterest: _accruedInterest,
+          );
+        }
+
+        final Girvi girvi;
+        final bool isSubmitting;
+        if (state is GirviDetailLoaded) {
+          girvi = state.girvi;
+          isSubmitting = false;
+        } else if (state is GirviOperationLoading) {
+          girvi = state.girvi;
+          isSubmitting = true;
+        } else if (state is GirviOperationFailure) {
+          girvi = state.girvi;
+          isSubmitting = false;
+        } else {
+          girvi = (state as GirviOperationSuccess).girvi;
+          isSubmitting = false;
+        }
+
+        return Scaffold(
+          backgroundColor: GirviColors.screenBg,
+          appBar: _NavBar(onBack: () => _navigateBack(context, girvi.id)),
+          body: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _OutstandingCard(girvi: girvi, fmt: _fmt),
+                        const SizedBox(height: 20),
+                        const _SectionTitle(
+                          titleMr: 'पेमेंट तपशील',
+                          titleEn: 'Payment Details',
+                        ),
+                        const SizedBox(height: 12),
+                        _InputField(
+                          labelMr: 'रक्कम',
+                          labelEn: 'Amount',
+                          controller: _amountController,
+                          prefix: '₹',
+                          keyboardType: TextInputType.number,
+                          onChanged: (_) => setState(() {}),
+                        ),
+                        const SizedBox(height: 12),
+                        _PaymentModeSelector(
+                          selected: _paymentType,
+                          onSelected: (t) => setState(() => _paymentType = t),
+                        ),
+                        if (_needsReference) ...[
+                          const SizedBox(height: 12),
+                          _InputField(
+                            labelMr: 'संदर्भ क्रमांक',
+                            labelEn: 'Reference Number',
+                            controller: _referenceController,
+                          ),
+                        ],
+                        const SizedBox(height: 12),
+                        _InputField(
+                          labelMr: 'शेरा',
+                          labelEn: 'Remarks',
+                          controller: _remarksController,
+                          maxLines: 3,
+                        ),
+                        if (_enteredAmount > girvi.outstandingAmount) ...[
+                          const SizedBox(height: 16),
+                          _ErrorBanner(
+                            textMr: 'रक्कम बाकी रकमेपेक्षा जास्त असू शकत नाही.',
+                            textEn:
+                                'Amount cannot exceed outstanding balance of ₹${_fmt.format(girvi.outstandingAmount)}.',
+                          ),
+                        ],
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    _SectionTitle(
-                      titleMr: 'पेमेंट तपशील',
-                      titleEn: 'Payment Details',
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'रक्कम',
-                      labelEn: 'Amount',
-                      controller: _amountController,
-                      prefix: '₹',
-                      keyboardType: TextInputType.number,
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: 12),
-                    _PaymentModeSelector(
-                      modes: _paymentModes,
-                      selected: _paymentMode,
-                      onSelected: (mode) {
-                        setState(() => _paymentMode = mode);
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'शेरा',
-                      labelEn: 'Remarks',
-                      controller: _remarksController,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 16),
-                    if (_enteredAmount > _outstanding)
-                      _ErrorMessage(
-                        textMr: 'रक्कम बाकी रकमेपेक्षा जास्त असू शकत नाही.',
-                        textEn: 'Amount cannot exceed outstanding balance.',
+                  ),
+                ),
+                if (isSubmitting)
+                  const LinearProgressIndicator(
+                    backgroundColor: GirviColors.line,
+                    color: GirviColors.navy,
+                  ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: GirviColors.navy,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: GirviColors.line,
+                        disabledForegroundColor: GirviColors.muted,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 0,
                       ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: SizedBox(
-                width: double.infinity,
-                height: 52,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: GirviColors.navy,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: GirviColors.line,
-                    disabledForegroundColor: GirviColors.muted,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      onPressed: (!isSubmitting &&
+                              _isValid(girvi.outstandingAmount))
+                          ? () => _submit(context, girvi)
+                          : null,
+                      child: isSubmitting
+                          ? const _ButtonLoader()
+                          : const Text(
+                              'पेमेंट नोंदा / Record Payment',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                     ),
-                    elevation: 0,
-                  ),
-                  onPressed: _isValid
-                      ? () {
-                          // TODO: record payment and generate receipt.
-                          AppNavigation.popOrGoNamed(
-                            context,
-                            GirviDetailsPage.routeName,
-                            pathParameters: {'id': _girviId},
-                          );
-                        }
-                      : null,
-                  child: const Text(
-                    'पेमेंट नोंदा / Record Payment',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
                   ),
                 ),
-              ),
+              ],
             ),
-          ],
-        ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateBack(BuildContext context, String? girviId) {
+    if (girviId != null) {
+      AppNavigation.popOrGoNamed(
+        context,
+        GirviDetailsPage.routeName,
+        pathParameters: {'id': girviId},
+      );
+    } else {
+      AppNavigation.popOrGoNamed(context, GirviDetailsPage.routeName);
+    }
+  }
+}
+
+class _NavBar extends StatelessWidget implements PreferredSizeWidget {
+  const _NavBar({required this.onBack});
+
+  final VoidCallback onBack;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
+
+  @override
+  Widget build(BuildContext context) {
+    return AppBar(
+      backgroundColor: GirviColors.navy,
+      foregroundColor: Colors.white,
+      elevation: 0,
+      leading: IconButton(
+        icon: const Icon(Icons.arrow_back),
+        onPressed: onBack,
+      ),
+      title: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'आंशिक पेमेंट',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+          Text(
+            'Partial Payment',
+            style: TextStyle(fontSize: 12, color: Colors.white70),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _OutstandingCard extends StatelessWidget {
-  const _OutstandingCard({
-    required this.outstanding,
-    required this.accruedInterest,
-  });
+  const _OutstandingCard({required this.girvi, required this.fmt});
 
-  final double outstanding;
-  final double accruedInterest;
+  final Girvi girvi;
+  final NumberFormat fmt;
 
   @override
   Widget build(BuildContext context) {
@@ -195,22 +319,35 @@ class _OutstandingCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            girvi.serialId,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              color: GirviColors.gold,
+            ),
+          ),
+          Text(
+            girvi.customerNameEn,
+            style: const TextStyle(fontSize: 13, color: Colors.white70),
+          ),
+          const SizedBox(height: 16),
           const Text(
             'एकूण बाकी / Total Outstanding',
             style: TextStyle(fontSize: 12, color: Colors.white70),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 4),
           Text(
-            '₹ ${outstanding.toStringAsFixed(2)}',
+            '₹ ${fmt.format(girvi.outstandingAmount)}',
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
               color: GirviColors.gold,
             ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            'एकत्रित व्याज / Accrued Interest: ₹ ${accruedInterest.toStringAsFixed(2)}',
+            'एकत्रित व्याज / Accrued Interest: ₹ ${fmt.format(girvi.accruedInterest)}',
             style: const TextStyle(fontSize: 13, color: Colors.white70),
           ),
         ],
@@ -234,7 +371,7 @@ class _SectionTitle extends StatelessWidget {
           titleMr,
           style: const TextStyle(
             fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
             color: GirviColors.ink,
           ),
         ),
@@ -301,14 +438,19 @@ class _InputField extends StatelessWidget {
 
 class _PaymentModeSelector extends StatelessWidget {
   const _PaymentModeSelector({
-    required this.modes,
     required this.selected,
     required this.onSelected,
   });
 
-  final List<String> modes;
-  final String selected;
-  final ValueChanged<String> onSelected;
+  final PaymentType selected;
+  final ValueChanged<PaymentType> onSelected;
+
+  static const _modes = [
+    (PaymentType.cash, 'Cash'),
+    (PaymentType.upi, 'UPI'),
+    (PaymentType.bankTransfer, 'Bank Transfer'),
+    (PaymentType.cheque, 'Cheque'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -330,12 +472,12 @@ class _PaymentModeSelector extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: modes.map((mode) {
-              final isSelected = mode == selected;
+            children: _modes.map((entry) {
+              final isSelected = entry.$1 == selected;
               return ChoiceChip(
-                label: Text(mode),
+                label: Text(entry.$2),
                 selected: isSelected,
-                onSelected: (_) => onSelected(mode),
+                onSelected: (_) => onSelected(entry.$1),
                 selectedColor: GirviColors.navy,
                 backgroundColor: GirviColors.screenBg,
                 labelStyle: TextStyle(
@@ -358,8 +500,8 @@ class _PaymentModeSelector extends StatelessWidget {
   }
 }
 
-class _ErrorMessage extends StatelessWidget {
-  const _ErrorMessage({required this.textMr, required this.textEn});
+class _ErrorBanner extends StatelessWidget {
+  const _ErrorBanner({required this.textMr, required this.textEn});
 
   final String textMr;
   final String textEn;
@@ -370,9 +512,9 @@ class _ErrorMessage extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: GirviColors.red.withAlpha(10),
+        color: GirviColors.red.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: GirviColors.red.withAlpha(30)),
+        border: Border.all(color: GirviColors.red.withValues(alpha: 0.15)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,18 +523,35 @@ class _ErrorMessage extends StatelessWidget {
             textMr,
             style: const TextStyle(
               fontSize: 13,
-              fontWeight: FontWeight.w500,
+              fontWeight: FontWeight.w600,
               color: GirviColors.red,
             ),
           ),
+          const SizedBox(height: 2),
           Text(
             textEn,
             style: TextStyle(
               fontSize: 12,
-              color: GirviColors.red.withAlpha(180),
+              color: GirviColors.red.withValues(alpha: 0.75),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ButtonLoader extends StatelessWidget {
+  const _ButtonLoader();
+
+  @override
+  Widget build(BuildContext context) {
+    return const SizedBox(
+      width: 20,
+      height: 20,
+      child: CircularProgressIndicator(
+        strokeWidth: 2,
+        color: Colors.white,
       ),
     );
   }

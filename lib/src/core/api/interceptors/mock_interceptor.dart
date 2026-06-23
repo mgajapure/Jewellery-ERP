@@ -36,6 +36,38 @@ class MockInterceptor extends Interceptor {
   ) {
     // POST endpoints — return success acknowledgement
     if (method == 'POST') {
+      // Customer creation — simulate a new customer record
+      if (path == ApiEndpoints.customers) {
+        final now = DateTime.now().toIso8601String();
+        final newId = 'cust-${DateTime.now().millisecondsSinceEpoch}';
+        return {
+          'success': true,
+          'data': {
+            'id': newId,
+            'tenantId': 'tenant-001',
+            'digitalCustomerId':
+                'CUST-2026-${(1000 + _customers.length).toString().padLeft(6, '0')}',
+            'name': '—',
+            'nameEn': 'New Customer',
+            'mobile': '+91 00000 00000',
+            'alternateMobile': null,
+            'address': '',
+            'aadhaarMasked': null,
+            'panNumber': null,
+            'dateOfBirth': null,
+            'photoUrl': null,
+            'qrCodeUrl': null,
+            'riskCategory': 'LOW',
+            'isActive': true,
+            'activeGirvi': 0,
+            'outstanding': 0,
+            'createdAt': now,
+            'updatedAt': now,
+            'version': 1,
+          },
+        };
+      }
+
       final postPaths = [
         RegExp(r'^/girvi/[^/]+/payment$'),
         RegExp(r'^/girvi/[^/]+/redemption$'),

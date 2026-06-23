@@ -1,7 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
+import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../shared/widgets/app_error_state.dart';
+import '../../../shared/widgets/app_loader.dart';
+import '../domain/entities/customer.dart';
+import '../presentation/bloc/customer_detail_bloc.dart';
+import '../presentation/bloc/customer_detail_event.dart';
+import '../presentation/bloc/customer_detail_state.dart';
 import '../theme/customer_colors.dart';
 import 'customer_list_page.dart';
 
@@ -15,8 +24,71 @@ class CustomerDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final customerId = GoRouterState.of(context).pathParameters['id'] ?? '';
+    final id = GoRouterState.of(context).pathParameters['id'] ?? '';
+    return BlocProvider(
+      create: (_) =>
+          getIt<CustomerDetailBloc>()..add(LoadCustomerDetail(id)),
+      child: _CustomerDetailsView(customerId: id),
+    );
+  }
+}
 
+class _CustomerDetailsView extends StatelessWidget {
+  const _CustomerDetailsView({required this.customerId});
+
+  final String customerId;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<CustomerDetailBloc, CustomerDetailState>(
+      builder: (context, state) {
+        if (state is CustomerDetailLoading || state is CustomerDetailInitial) {
+          return const Scaffold(
+            backgroundColor: CustomerColors.screenBg,
+            body: AppLoader(message: 'ग्राहक माहिती लोड होत आहे...'),
+          );
+        }
+
+        if (state is CustomerDetailError) {
+          return Scaffold(
+            backgroundColor: CustomerColors.screenBg,
+            body: AppErrorState(
+              message: state.message,
+              onRetry: () => context
+                  .read<CustomerDetailBloc>()
+                  .add(LoadCustomerDetail(customerId)),
+            ),
+          );
+        }
+
+        final customer = switch (state) {
+          CustomerDetailLoaded(:final customer) => customer,
+          CustomerOperationLoading(:final customer) => customer,
+          CustomerOperationSuccess(:final customer) => customer,
+          CustomerOperationFailure(:final customer) => customer,
+          _ => null,
+        };
+
+        if (customer == null) {
+          return const Scaffold(
+            backgroundColor: CustomerColors.screenBg,
+            body: AppLoader(),
+          );
+        }
+
+        return _CustomerBody(customer: customer);
+      },
+    );
+  }
+}
+
+class _CustomerBody extends StatelessWidget {
+  const _CustomerBody({required this.customer});
+
+  final Customer customer;
+
+  @override
+  Widget build(BuildContext context) {
     return DefaultTabController(
       length: 4,
       child: Scaffold(
@@ -24,8 +96,8 @@ class CustomerDetailsPage extends StatelessWidget {
         body: SafeArea(
           child: Column(
             children: [
-              const _ProfileAppBar(),
-              _ProfileHeaderCard(customerId: customerId),
+              _ProfileAppBar(customer: customer),
+              _ProfileHeaderCard(customer: customer),
               Container(
                 color: Colors.white,
                 child: const TabBar(
@@ -49,27 +121,29 @@ class CustomerDetailsPage extends StatelessWidget {
                   ],
                 ),
               ),
-              const Expanded(
+              Expanded(
                 child: TabBarView(
                   children: [
-                    _ProfileTab(),
-                    _LoansTab(),
-                    _SchemesTab(),
-                    _HistoryTab(),
+                    _ProfileTab(customer: customer),
+                    const _LoansTab(),
+                    const _SchemesTab(),
+                    const _HistoryTab(),
                   ],
                 ),
               ),
             ],
           ),
         ),
-        bottomNavigationBar: const _BottomActionBar(),
+        bottomNavigationBar: _BottomActionBar(mobile: customer.mobile),
       ),
     );
   }
 }
 
 class _ProfileAppBar extends StatelessWidget {
-  const _ProfileAppBar();
+  const _ProfileAppBar({required this.customer});
+
+  final Customer customer;
 
   @override
   Widget build(BuildContext context) {
@@ -113,9 +187,18 @@ class _ProfileAppBar extends StatelessWidget {
 }
 
 class _ProfileHeaderCard extends StatelessWidget {
-  const _ProfileHeaderCard({required this.customerId});
+  const _ProfileHeaderCard({required this.customer});
 
-  final String customerId;
+  final Customer customer;
+
+  String _formatAmount(double amount) {
+    if (amount == 0) return '₹0';
+    final fmt = NumberFormat('#,##,###', 'en_IN');
+    return '₹${fmt.format(amount.toInt())}';
+  }
+
+  String _formatDate(DateTime dt) =>
+      DateFormat('dd MMM yyyy').format(dt);
 
   @override
   Widget build(BuildContext context) {
@@ -138,26 +221,35 @@ class _ProfileHeaderCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const _CustomerAvatar(),
+              _CustomerAvatar(name: customer.nameEn),
               const SizedBox(width: 14),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Ramesh Mahajan',
-                      style: TextStyle(
+                    Text(
+                      customer.name,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    const Text(
-                      '98765 43210',
-                      style: TextStyle(
+                    const SizedBox(height: 2),
+                    Text(
+                      customer.nameEn,
+                      style: const TextStyle(
                         color: Colors.white70,
-                        fontSize: 14,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      customer.mobile,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 13,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -165,7 +257,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                     Row(
                       children: [
                         Text(
-                          customerId.isEmpty ? 'CUS-000101' : customerId,
+                          customer.digitalCustomerId,
                           style: const TextStyle(
                             color: CustomerColors.gold,
                             fontSize: 13,
@@ -195,32 +287,27 @@ class _ProfileHeaderCard extends StatelessWidget {
                       vertical: 5,
                     ),
                     decoration: BoxDecoration(
-                      color: CustomerColors.green.withValues(alpha: 0.15),
+                      color: (customer.isActive
+                              ? CustomerColors.green
+                              : CustomerColors.red)
+                          .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: const Text(
-                      'सक्रिय / Active',
+                    child: Text(
+                      customer.isActive
+                          ? 'सक्रिय / Active'
+                          : 'निष्क्रिय / Inactive',
                       style: TextStyle(
-                        color: CustomerColors.green,
+                        color: customer.isActive
+                            ? CustomerColors.green
+                            : CustomerColors.red,
                         fontSize: 11,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: const Icon(
-                      Icons.qr_code_2,
-                      color: Colors.white,
-                      size: 32,
-                    ),
-                  ),
+                  _RiskBadge(category: customer.riskCategory),
                 ],
               ),
             ],
@@ -229,19 +316,19 @@ class _ProfileHeaderCard extends StatelessWidget {
           const Divider(height: 1, color: Colors.white24),
           const SizedBox(height: 16),
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: _HeaderStat(
                   labelMr: 'एकूण गिरवी',
                   labelEn: 'Total Loans',
-                  value: '2',
+                  value: customer.activeGirvi.toString(),
                 ),
               ),
               Expanded(
                 child: _HeaderStat(
                   labelMr: 'एकूण बकाया',
                   labelEn: 'Total Outstanding',
-                  value: '₹48,760',
+                  value: _formatAmount(customer.outstanding),
                   valueColor: CustomerColors.gold,
                 ),
               ),
@@ -249,7 +336,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: _HeaderStat(
                   labelMr: 'सदस्यता',
                   labelEn: 'Since',
-                  value: '12 Jan 2024',
+                  value: _formatDate(customer.createdAt),
                 ),
               ),
             ],
@@ -261,7 +348,18 @@ class _ProfileHeaderCard extends StatelessWidget {
 }
 
 class _CustomerAvatar extends StatelessWidget {
-  const _CustomerAvatar();
+  const _CustomerAvatar({required this.name});
+
+  final String name;
+
+  String get _initials {
+    final parts = name.trim().split(RegExp(r'\s+'));
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
+    }
+    return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -276,10 +374,45 @@ class _CustomerAvatar extends StatelessWidget {
           width: 2,
         ),
       ),
-      child: const Icon(
-        Icons.person,
-        color: CustomerColors.gold,
-        size: 38,
+      child: Center(
+        child: Text(
+          _initials,
+          style: const TextStyle(
+            color: CustomerColors.gold,
+            fontSize: 22,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RiskBadge extends StatelessWidget {
+  const _RiskBadge({required this.category});
+
+  final RiskCategory category;
+
+  @override
+  Widget build(BuildContext context) {
+    final (label, color) = switch (category) {
+      RiskCategory.low => ('कमी जोखीम / Low', CustomerColors.green),
+      RiskCategory.medium => ('मध्यम जोखीम / Med', Colors.orange),
+      RiskCategory.high => ('उच्च जोखीम / High', CustomerColors.red),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          color: color,
+          fontSize: 10,
+          fontWeight: FontWeight.w800,
+        ),
       ),
     );
   }
@@ -325,7 +458,7 @@ class _HeaderStat extends StatelessWidget {
           textAlign: TextAlign.center,
           style: TextStyle(
             color: valueColor,
-            fontSize: 15,
+            fontSize: 14,
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -349,10 +482,7 @@ class _TabLabel extends StatelessWidget {
         children: [
           Text(mr),
           const SizedBox(height: 2),
-          Text(
-            en,
-            style: const TextStyle(fontSize: 10),
-          ),
+          Text(en, style: const TextStyle(fontSize: 10)),
         ],
       ),
     );
@@ -360,7 +490,14 @@ class _TabLabel extends StatelessWidget {
 }
 
 class _ProfileTab extends StatelessWidget {
-  const _ProfileTab();
+  const _ProfileTab({required this.customer});
+
+  final Customer customer;
+
+  String _formatDob(DateTime? dob) {
+    if (dob == null) return '—';
+    return DateFormat('dd MMM yyyy').format(dob);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -386,44 +523,56 @@ class _ProfileTab extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: const [
+            children: [
               _InfoRow(
                 icon: Icons.person_outline,
                 label: 'नाव / Name',
-                value: 'Ramesh Mahajan',
+                value: '${customer.name} / ${customer.nameEn}',
               ),
-              _InfoDivider(),
+              const _InfoDivider(),
               _InfoRow(
-                icon: Icons.people_outline,
-                label: 'वडिलांचे नाव / Father\'s Name',
-                value: 'Mahadev Mahajan',
+                icon: Icons.phone_outlined,
+                label: 'मोबाईल / Mobile',
+                value: customer.mobile,
               ),
-              _InfoDivider(),
+              if (customer.alternateMobile != null) ...[
+                const _InfoDivider(),
+                _InfoRow(
+                  icon: Icons.phone_android_outlined,
+                  label: 'पर्यायी मोबाईल / Alternate Mobile',
+                  value: customer.alternateMobile!,
+                ),
+              ],
+              const _InfoDivider(),
               _InfoRow(
                 icon: Icons.location_on_outlined,
                 label: 'पत्ता / Address',
-                value: '123, Ganesh Peth, Pune, Maharashtra - 411002',
+                value: customer.address.isNotEmpty ? customer.address : '—',
               ),
-              _InfoDivider(),
+              const _InfoDivider(),
               _InfoRow(
                 icon: Icons.calendar_today_outlined,
                 label: 'जन्मतारीख / DOB',
-                value: '15 Aug 1985',
+                value: _formatDob(customer.dateOfBirth),
               ),
-              _InfoDivider(),
-              _InfoRow(
-                icon: Icons.badge_outlined,
-                label: 'आधार क्रमांक / Aadhaar No.',
-                value: 'XXXX XXXX 1234',
-                verified: true,
-              ),
-              _InfoDivider(),
-              _InfoRow(
-                icon: Icons.credit_card_outlined,
-                label: 'पॅन क्रमांक / PAN',
-                value: 'ABCDE1234F',
-                verified: true,
-              ),
+              if (customer.aadhaarMasked != null) ...[
+                const _InfoDivider(),
+                _InfoRow(
+                  icon: Icons.badge_outlined,
+                  label: 'आधार क्रमांक / Aadhaar No.',
+                  value: customer.aadhaarMasked!,
+                  verified: true,
+                ),
+              ],
+              if (customer.panNumber != null) ...[
+                const _InfoDivider(),
+                _InfoRow(
+                  icon: Icons.credit_card_outlined,
+                  label: 'पॅन क्रमांक / PAN',
+                  value: customer.panNumber!,
+                  verified: true,
+                ),
+              ],
             ],
           ),
         ),
@@ -448,7 +597,7 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 14, 14, 14),
+      padding: const EdgeInsets.all(14),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -514,9 +663,8 @@ class _InfoDivider extends StatelessWidget {
   const _InfoDivider();
 
   @override
-  Widget build(BuildContext context) {
-    return const Divider(height: 1, color: CustomerColors.line, indent: 46);
-  }
+  Widget build(BuildContext context) =>
+      const Divider(height: 1, color: CustomerColors.line, indent: 46);
 }
 
 class _SectionTitle extends StatelessWidget {
@@ -562,8 +710,8 @@ class _LoansTab extends StatelessWidget {
       children: [
         _EmptyState(
           icon: Icons.account_balance_wallet_outlined,
-          titleMr: 'कोणतीही गिरवी नाही',
-          titleEn: 'No loans found',
+          titleMr: 'गिरवी इतिहास लवकरच',
+          titleEn: 'Loan history coming soon',
         ),
       ],
     );
@@ -654,7 +802,9 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _BottomActionBar extends StatelessWidget {
-  const _BottomActionBar();
+  const _BottomActionBar({required this.mobile});
+
+  final String mobile;
 
   @override
   Widget build(BuildContext context) {
@@ -683,11 +833,7 @@ class _BottomActionBar extends StatelessWidget {
                   onTap: () {},
                 ),
               ),
-              Container(
-                width: 1,
-                height: 36,
-                color: CustomerColors.line,
-              ),
+              Container(width: 1, height: 36, color: CustomerColors.line),
               Expanded(
                 child: _ActionButton(
                   icon: Icons.chat_bubble_outline,
@@ -696,11 +842,7 @@ class _BottomActionBar extends StatelessWidget {
                   onTap: () {},
                 ),
               ),
-              Container(
-                width: 1,
-                height: 36,
-                color: CustomerColors.line,
-              ),
+              Container(width: 1, height: 36, color: CustomerColors.line),
               Expanded(
                 child: _ActionButton(
                   icon: Icons.share_outlined,

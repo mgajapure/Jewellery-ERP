@@ -1,22 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
+import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
+import '../../../shared/widgets/app_empty_state.dart';
+import '../../../shared/widgets/app_error_state.dart';
+import '../../../shared/widgets/app_loader.dart';
+import '../domain/entities/customer.dart';
+import '../presentation/bloc/customer_list_bloc.dart';
+import '../presentation/bloc/customer_list_event.dart';
+import '../presentation/bloc/customer_list_state.dart';
 import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_details_page.dart';
 import 'customer_search_page.dart';
 
 /// SCR-010 Customer List / Search
-/// Displays a searchable, filterable list of customers with pagination.
+/// Displays a searchable, filterable list of customers with real BLoC data.
 class CustomerListPage extends StatelessWidget {
   const CustomerListPage({super.key});
 
   static const routeName = 'customer-list';
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          getIt<CustomerListBloc>()..add(const LoadCustomerList()),
+      child: const _CustomerListView(),
+    );
+  }
+}
+
+class _CustomerListView extends StatelessWidget {
+  const _CustomerListView();
 
   @override
   Widget build(BuildContext context) {
@@ -35,63 +57,49 @@ class CustomerListPage extends StatelessWidget {
             const _FilterChips(),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                children: const [
-                  _CustomerTile(
-                    name: 'Ramesh Mahajan',
-                    mobile: '98765 43210',
-                    customerId: 'CUS-000101',
-                    active: true,
-                    avatarColor: Color(0xFFFFF7E9),
-                    initialsColor: Color(0xFFE7A726),
-                  ),
-                  SizedBox(height: 10),
-                  _CustomerTile(
-                    name: 'Suresh More',
-                    mobile: '87654 32109',
-                    customerId: 'CUS-000102',
-                    active: true,
-                    avatarColor: Color(0xFFF0F4FF),
-                    initialsColor: Color(0xFF5E72E4),
-                  ),
-                  SizedBox(height: 10),
-                  _CustomerTile(
-                    name: 'Priya Patil',
-                    mobile: '77788 99001',
-                    customerId: 'CUS-000103',
-                    active: true,
-                    avatarColor: Color(0xFFE6F7EF),
-                    initialsColor: Color(0xFF07934A),
-                  ),
-                  SizedBox(height: 10),
-                  _CustomerTile(
-                    name: 'Vikram Jadhav',
-                    mobile: '90909 12345',
-                    customerId: 'CUS-000104',
-                    active: false,
-                    avatarColor: Color(0xFFFFEBEE),
-                    initialsColor: Color(0xFFE21B2D),
-                  ),
-                  SizedBox(height: 10),
-                  _CustomerTile(
-                    name: 'Anil Kadam',
-                    mobile: '70203 45678',
-                    customerId: 'CUS-000105',
-                    active: true,
-                    avatarColor: Color(0xFFFFF3E0),
-                    initialsColor: Color(0xFFEF6C00),
-                  ),
-                  SizedBox(height: 10),
-                  _CustomerTile(
-                    name: 'Meena Deshmukh',
-                    mobile: '98220 33445',
-                    customerId: 'CUS-000106',
-                    active: true,
-                    avatarColor: Color(0xFFF3E5F5),
-                    initialsColor: Color(0xFF8E24AA),
-                  ),
-                ],
+              child: BlocBuilder<CustomerListBloc, CustomerListState>(
+                builder: (context, state) {
+                  if (state is CustomerListLoading ||
+                      state is CustomerListInitial) {
+                    return const AppLoader(
+                      message: 'ग्राहक यादी लोड होत आहे...',
+                    );
+                  }
+                  if (state is CustomerListError) {
+                    return AppErrorState(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<CustomerListBloc>()
+                          .add(const LoadCustomerList()),
+                    );
+                  }
+                  if (state is CustomerListLoaded) {
+                    if (state.displayList.isEmpty) {
+                      return AppEmptyState(
+                        icon: Icons.person_search_outlined,
+                        title: 'ग्राहक नाही / No Customers Found',
+                        subtitle: state.searchQuery.isNotEmpty
+                            ? 'इतर शब्दांनी शोधा / Try a different search'
+                            : 'नवीन ग्राहक जोडण्यासाठी + दाबा',
+                      );
+                    }
+                    return RefreshIndicator(
+                      color: CustomerColors.navy,
+                      onRefresh: () async => context
+                          .read<CustomerListBloc>()
+                          .add(const RefreshCustomerList()),
+                      child: ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                        itemCount: state.displayList.length,
+                        separatorBuilder: (_, __) =>
+                            const SizedBox(height: 10),
+                        itemBuilder: (context, index) =>
+                            _CustomerTile(customer: state.displayList[index]),
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
             const _PaginationFooter(),
@@ -196,7 +204,7 @@ class _SearchBar extends StatelessWidget {
               ),
             ),
             Text(
-              'Search name, mobile, customer ID',
+              'Search name, mobile, ID',
               style: TextStyle(
                 color: CustomerColors.muted,
                 fontSize: 11,
@@ -212,55 +220,78 @@ class _SearchBar extends StatelessWidget {
   }
 }
 
-class _FilterChips extends StatefulWidget {
+class _FilterChips extends StatelessWidget {
   const _FilterChips();
 
   @override
-  State<_FilterChips> createState() => _FilterChipsState();
-}
-
-class _FilterChipsState extends State<_FilterChips> {
-  final List<_FilterChipData> _filters = const [
-    _FilterChipData(mr: 'सर्व', en: 'All', count: 156),
-    _FilterChipData(mr: 'सक्रिय', en: 'Active', count: 112),
-    _FilterChipData(mr: 'निष्क्रिय', en: 'Inactive', count: 44),
-  ];
-  int _selected = 0;
-
-  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 40,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _filters.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final selected = index == _selected;
-          final filter = _filters[index];
-          return ChoiceChip(
-            label: Text(
-              '${filter.mr} / ${filter.en} (${filter.count})',
-              style: TextStyle(
-                color: selected ? Colors.white : CustomerColors.ink,
-                fontSize: 12,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            selected: selected,
-            selectedColor: CustomerColors.navy,
-            backgroundColor: Colors.white,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-              side: BorderSide(
-                color: selected ? CustomerColors.navy : CustomerColors.line,
-              ),
-            ),
-            onSelected: (_) => setState(() => _selected = index),
-          );
-        },
-      ),
+    return BlocBuilder<CustomerListBloc, CustomerListState>(
+      builder: (context, state) {
+        final total = state is CustomerListLoaded ? state.totalCount : 0;
+        final active = state is CustomerListLoaded ? state.activeCount : 0;
+        final inactive = state is CustomerListLoaded ? state.inactiveCount : 0;
+        final filter =
+            state is CustomerListLoaded ? state.activeFilter : null;
+        final filters = [
+          _FilterChipData(
+            mr: 'सर्व',
+            en: 'All',
+            count: total,
+            value: null,
+          ),
+          _FilterChipData(
+            mr: 'सक्रिय',
+            en: 'Active',
+            count: active,
+            value: true,
+          ),
+          _FilterChipData(
+            mr: 'निष्क्रिय',
+            en: 'Inactive',
+            count: inactive,
+            value: false,
+          ),
+        ];
+
+        return SizedBox(
+          height: 40,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            itemCount: filters.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) {
+              final chip = filters[index];
+              final selected = chip.value == filter;
+              return ChoiceChip(
+                label: Text(
+                  total > 0
+                      ? '${chip.mr} / ${chip.en} (${chip.count})'
+                      : '${chip.mr} / ${chip.en}',
+                  style: TextStyle(
+                    color: selected ? Colors.white : CustomerColors.ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                selected: selected,
+                selectedColor: CustomerColors.navy,
+                backgroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                  side: BorderSide(
+                    color:
+                        selected ? CustomerColors.navy : CustomerColors.line,
+                  ),
+                ),
+                onSelected: (_) => context
+                    .read<CustomerListBloc>()
+                    .add(FilterCustomerByStatus(chip.value)),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -270,36 +301,41 @@ class _FilterChipData {
     required this.mr,
     required this.en,
     required this.count,
+    required this.value,
   });
 
   final String mr;
   final String en;
   final int count;
+  final bool? value;
 }
 
 class _CustomerTile extends StatelessWidget {
-  const _CustomerTile({
-    required this.name,
-    required this.mobile,
-    required this.customerId,
-    required this.active,
-    required this.avatarColor,
-    required this.initialsColor,
-  });
+  const _CustomerTile({required this.customer});
 
-  final String name;
-  final String mobile;
-  final String customerId;
-  final bool active;
-  final Color avatarColor;
-  final Color initialsColor;
+  final Customer customer;
+
+  static const _avatarColors = [
+    (bg: Color(0xFFFFF7E9), fg: Color(0xFFE7A726)),
+    (bg: Color(0xFFF0F4FF), fg: Color(0xFF5E72E4)),
+    (bg: Color(0xFFE6F7EF), fg: Color(0xFF07934A)),
+    (bg: Color(0xFFFFEBEE), fg: Color(0xFFE21B2D)),
+    (bg: Color(0xFFFFF3E0), fg: Color(0xFFEF6C00)),
+    (bg: Color(0xFFF3E5F5), fg: Color(0xFF8E24AA)),
+  ];
+
+  ({Color bg, Color fg}) get _colors {
+    final hash = customer.nameEn.codeUnits.fold(0, (a, b) => a + b);
+    return _avatarColors[hash % _avatarColors.length];
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = _colors;
     return InkWell(
       onTap: () => context.goNamed(
         CustomerDetailsPage.routeName,
-        pathParameters: {'id': customerId},
+        pathParameters: {'id': customer.id},
       ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
@@ -319,9 +355,9 @@ class _CustomerTile extends StatelessWidget {
         child: Row(
           children: [
             _InitialsAvatar(
-              name: name,
-              backgroundColor: avatarColor,
-              foregroundColor: initialsColor,
+              name: customer.nameEn,
+              backgroundColor: colors.bg,
+              foregroundColor: colors.fg,
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -329,7 +365,7 @@ class _CustomerTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    customer.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -338,12 +374,23 @@ class _CustomerTile extends StatelessWidget {
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
                   Text(
-                    '$mobile • $customerId',
+                    customer.nameEn,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       color: CustomerColors.muted,
                       fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${customer.mobile} • ${customer.digitalCustomerId}',
+                    style: const TextStyle(
+                      color: CustomerColors.muted,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -354,15 +401,18 @@ class _CustomerTile extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color:
-                          (active ? CustomerColors.green : CustomerColors.red)
-                              .withValues(alpha: 0.1),
+                      color: (customer.isActive
+                              ? CustomerColors.green
+                              : CustomerColors.red)
+                          .withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      active ? 'सक्रिय / Active' : 'निष्क्रिय / Inactive',
+                      customer.isActive
+                          ? 'सक्रिय / Active'
+                          : 'निष्क्रिय / Inactive',
                       style: TextStyle(
-                        color: active
+                        color: customer.isActive
                             ? CustomerColors.green
                             : CustomerColors.red,
                         fontSize: 10,
@@ -373,15 +423,49 @@ class _CustomerTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.chevron_right,
-              color: CustomerColors.muted,
-              size: 22,
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  _formatAmount(customer.outstanding),
+                  style: const TextStyle(
+                    color: CustomerColors.ink,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${customer.activeGirvi} गिरवी',
+                  style: const TextStyle(
+                    color: CustomerColors.muted,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Icon(
+                  Icons.chevron_right,
+                  color: CustomerColors.muted,
+                  size: 20,
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _formatAmount(double amount) {
+    if (amount == 0) return '₹0';
+    if (amount >= 100000) {
+      return '₹${(amount / 100000).toStringAsFixed(2)}L';
+    }
+    if (amount >= 1000) {
+      return '₹${(amount / 1000).toStringAsFixed(0)}K';
+    }
+    return '₹${amount.toInt()}';
   }
 }
 
@@ -398,9 +482,9 @@ class _InitialsAvatar extends StatelessWidget {
 
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+'));
-    if (parts.isEmpty) return '';
+    if (parts.isEmpty) return '?';
     if (parts.length == 1) {
-      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '';
+      return parts[0].isNotEmpty ? parts[0][0].toUpperCase() : '?';
     }
     return '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();
   }
@@ -410,7 +494,10 @@ class _InitialsAvatar extends StatelessWidget {
     return Container(
       width: 48,
       height: 48,
-      decoration: BoxDecoration(color: backgroundColor, shape: BoxShape.circle),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        shape: BoxShape.circle,
+      ),
       child: Center(
         child: Text(
           _initials,
@@ -430,50 +517,38 @@ class _PaginationFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.chevron_left,
-              color: CustomerColors.muted,
-              size: 22,
-            ),
-            tooltip: 'Previous',
+    return BlocBuilder<CustomerListBloc, CustomerListState>(
+      builder: (context, state) {
+        final count = state is CustomerListLoaded
+            ? state.displayList.length
+            : 0;
+        final total = state is CustomerListLoaded ? state.totalCount : 0;
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                '$count / $total ग्राहक दाखवत आहे',
+                style: const TextStyle(
+                  color: CustomerColors.ink,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Text(
+                '• Showing customers',
+                style: TextStyle(
+                  color: CustomerColors.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(width: 8),
-          const Text(
-            'पृष्ठ 1 / 16',
-            style: TextStyle(
-              color: CustomerColors.ink,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Text(
-            '• Page 1 of 16',
-            style: TextStyle(
-              color: CustomerColors.muted,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.chevron_right,
-              color: CustomerColors.ink,
-              size: 22,
-            ),
-            tooltip: 'Next',
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }

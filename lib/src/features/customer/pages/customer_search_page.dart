@@ -1,35 +1,71 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../domain/entities/customer.dart';
+import '../presentation/bloc/customer_list_bloc.dart';
+import '../presentation/bloc/customer_list_event.dart';
+import '../presentation/bloc/customer_list_state.dart';
 import '../theme/customer_colors.dart';
 import 'customer_details_page.dart';
 import 'customer_list_page.dart';
 
-class CustomerSearchPage extends StatefulWidget {
+class CustomerSearchPage extends StatelessWidget {
   const CustomerSearchPage({super.key});
 
   static const routeName = 'customer-search';
 
   @override
-  State<CustomerSearchPage> createState() => _CustomerSearchPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => getIt<CustomerListBloc>(),
+      child: const _CustomerSearchView(),
+    );
+  }
 }
 
-class _CustomerSearchPageState extends State<CustomerSearchPage> {
+class _CustomerSearchView extends StatefulWidget {
+  const _CustomerSearchView();
+
+  @override
+  State<_CustomerSearchView> createState() => _CustomerSearchViewState();
+}
+
+class _CustomerSearchViewState extends State<_CustomerSearchView> {
   final _controller = TextEditingController();
+  Timer? _debounce;
   int _modeIndex = 0;
 
-  final List<String> _modes = const [
-    'नाव / Name',
-    'मोबाईल / Mobile',
-    'आयडी / ID',
-    'QR स्कॅन / QR Scan',
+  static const _modes = [
+    (label: 'नाव / Name', hint: 'ग्राहकाचे नाव टाका', kb: TextInputType.name),
+    (
+      label: 'मोबाईल / Mobile',
+      hint: 'मोबाईल नंबर टाका',
+      kb: TextInputType.phone,
+    ),
+    (label: 'आयडी / ID', hint: 'ग्राहक ID टाका', kb: TextInputType.text),
+    (label: 'QR स्कॅन / QR Scan', hint: 'QR कोड स्कॅन करा', kb: TextInputType.none),
   ];
 
   @override
   void dispose() {
     _controller.dispose();
+    _debounce?.cancel();
     super.dispose();
+  }
+
+  void _onTextChanged(String query) {
+    _debounce?.cancel();
+    if (_modeIndex == 3) return; // QR mode — no text search
+    _debounce = Timer(const Duration(milliseconds: 400), () {
+      if (mounted) {
+        context.read<CustomerListBloc>().add(SearchCustomerList(query));
+      }
+    });
   }
 
   @override
@@ -44,61 +80,69 @@ class _CustomerSearchPageState extends State<CustomerSearchPage> {
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
               child: _SearchField(
                 controller: _controller,
-                hint: _modes[_modeIndex],
+                hint: _modes[_modeIndex].hint,
+                keyboardType: _modes[_modeIndex].kb,
+                onChanged: _onTextChanged,
               ),
             ),
             _SearchModeTabs(
-              modes: _modes,
+              modes: _modes.map((m) => m.label).toList(),
               selectedIndex: _modeIndex,
-              onChanged: (index) => setState(() => _modeIndex = index),
+              onChanged: (index) {
+                setState(() => _modeIndex = index);
+                _controller.clear();
+                context
+                    .read<CustomerListBloc>()
+                    .add(const SearchCustomerList(''));
+              },
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                children: [
-                  _SearchResultCard(
-                    customerId: 'CUS-000201',
-                    name: 'सुरेश पाटील',
-                    nameEn: 'Suresh Patil',
-                    mobile: '+91 98765 43210',
-                    activeGirvi: 2,
-                    outstanding: '₹1,25,000',
-                    lastTransaction: '12 Jun 2026',
-                    onTap: () => context.goNamed(
-                      CustomerDetailsPage.routeName,
-                      pathParameters: {'id': 'CUS-000201'},
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _SearchResultCard(
-                    customerId: 'CUS-000202',
-                    name: 'मीना जाधव',
-                    nameEn: 'Meena Jadhav',
-                    mobile: '+91 87654 32109',
-                    activeGirvi: 1,
-                    outstanding: '₹45,000',
-                    lastTransaction: '10 Jun 2026',
-                    onTap: () => context.goNamed(
-                      CustomerDetailsPage.routeName,
-                      pathParameters: {'id': 'CUS-000202'},
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  _SearchResultCard(
-                    customerId: 'CUS-000203',
-                    name: 'अमोल देशमुख',
-                    nameEn: 'Amol Deshmukh',
-                    mobile: '+91 76543 21098',
-                    activeGirvi: 3,
-                    outstanding: '₹2,80,000',
-                    lastTransaction: '08 Jun 2026',
-                    onTap: () => context.goNamed(
-                      CustomerDetailsPage.routeName,
-                      pathParameters: {'id': 'CUS-000203'},
-                    ),
-                  ),
-                ],
+              child: BlocBuilder<CustomerListBloc, CustomerListState>(
+                builder: (context, state) {
+                  if (state is CustomerListInitial) {
+                    return _SearchHint(mode: _modes[_modeIndex].label);
+                  }
+                  if (state is CustomerListLoading) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: CustomerColors.navy,
+                        strokeWidth: 2.5,
+                      ),
+                    );
+                  }
+                  if (state is CustomerListError) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Text(
+                          state.message,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: CustomerColors.muted,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    );
+                  }
+                  if (state is CustomerListLoaded) {
+                    if (state.searchQuery.isEmpty) {
+                      return _SearchHint(mode: _modes[_modeIndex].label);
+                    }
+                    if (state.displayList.isEmpty) {
+                      return _NoResults(query: state.searchQuery);
+                    }
+                    return ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                      itemCount: state.displayList.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) =>
+                          _SearchResultCard(customer: state.displayList[index]),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ],
@@ -144,16 +188,25 @@ class _SearchHeader extends StatelessWidget {
 }
 
 class _SearchField extends StatelessWidget {
-  const _SearchField({required this.controller, required this.hint});
+  const _SearchField({
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.keyboardType,
+  });
 
   final TextEditingController controller;
   final String hint;
+  final ValueChanged<String> onChanged;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
       autofocus: true,
+      keyboardType: keyboardType,
+      onChanged: onChanged,
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.white,
@@ -164,7 +217,18 @@ class _SearchField extends StatelessWidget {
           fontWeight: FontWeight.w600,
         ),
         prefixIcon: const Icon(Icons.search, color: CustomerColors.muted),
-        suffixIcon: const Icon(Icons.mic, color: CustomerColors.muted),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (_, value, __) => value.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, color: CustomerColors.muted),
+                  onPressed: () {
+                    controller.clear();
+                    onChanged('');
+                  },
+                )
+              : const Icon(Icons.mic, color: CustomerColors.muted),
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: CustomerColors.line),
@@ -231,31 +295,113 @@ class _SearchModeTabs extends StatelessWidget {
   }
 }
 
-class _SearchResultCard extends StatelessWidget {
-  const _SearchResultCard({
-    required this.customerId,
-    required this.name,
-    required this.nameEn,
-    required this.mobile,
-    required this.activeGirvi,
-    required this.outstanding,
-    required this.lastTransaction,
-    this.onTap,
-  });
+class _SearchHint extends StatelessWidget {
+  const _SearchHint({required this.mode});
 
-  final String customerId;
-  final String name;
-  final String nameEn;
-  final String mobile;
-  final int activeGirvi;
-  final String outstanding;
-  final String lastTransaction;
-  final VoidCallback? onTap;
+  final String mode;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.search,
+              size: 56,
+              color: CustomerColors.muted.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'शोध सुरू करा / Start Searching',
+              style: TextStyle(
+                color: CustomerColors.ink,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'वर $mode वापरून शोधा',
+              style: const TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NoResults extends StatelessWidget {
+  const _NoResults({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_search_outlined,
+              size: 56,
+              color: CustomerColors.muted.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'ग्राहक सापडला नाही',
+              style: TextStyle(
+                color: CustomerColors.ink,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '"$query" साठी कोणताही ग्राहक नाही\nNo customer found for "$query"',
+              style: const TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchResultCard extends StatelessWidget {
+  const _SearchResultCard({required this.customer});
+
+  final Customer customer;
+
+  String _formatOutstanding(double amount) {
+    if (amount == 0) return '₹0';
+    if (amount >= 100000) return '₹${(amount / 100000).toStringAsFixed(2)}L';
+    if (amount >= 1000) return '₹${(amount / 1000).toStringAsFixed(0)}K';
+    return '₹${amount.toInt()}';
+  }
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () => context.goNamed(
+        CustomerDetailsPage.routeName,
+        pathParameters: {'id': customer.id},
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -292,7 +438,7 @@ class _SearchResultCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    name,
+                    customer.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -303,7 +449,7 @@ class _SearchResultCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    nameEn,
+                    customer.nameEn,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -312,17 +458,17 @@ class _SearchResultCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       const Icon(
                         Icons.phone_outlined,
-                        size: 14,
+                        size: 13,
                         color: CustomerColors.muted,
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        mobile,
+                        customer.mobile,
                         style: const TextStyle(
                           color: CustomerColors.ink,
                           fontSize: 12,
@@ -331,6 +477,15 @@ class _SearchResultCard extends StatelessWidget {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 2),
+                  Text(
+                    customer.digitalCustomerId,
+                    style: const TextStyle(
+                      color: CustomerColors.muted,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -338,7 +493,7 @@ class _SearchResultCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  outstanding,
+                  _formatOutstanding(customer.outstanding),
                   style: const TextStyle(
                     color: CustomerColors.ink,
                     fontSize: 15,
@@ -347,20 +502,35 @@ class _SearchResultCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '$activeGirvi गिरवी / Girvi',
+                  '${customer.activeGirvi} गिरवी / Girvi',
                   style: const TextStyle(
                     color: CustomerColors.muted,
                     fontSize: 10,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  lastTransaction,
-                  style: const TextStyle(
-                    color: CustomerColors.muted,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
+                const SizedBox(height: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: (customer.isActive
+                            ? CustomerColors.green
+                            : CustomerColors.red)
+                        .withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    customer.isActive ? 'Active' : 'Inactive',
+                    style: TextStyle(
+                      color: customer.isActive
+                          ? CustomerColors.green
+                          : CustomerColors.red,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
                   ),
                 ),
               ],

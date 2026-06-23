@@ -42,6 +42,13 @@ import '../../features/girvi/domain/repositories/girvi_repository.dart'
 import '../../features/girvi/presentation/bloc/girvi_detail_bloc.dart'
     as _i943;
 import '../../features/girvi/presentation/bloc/girvi_list_bloc.dart' as _i876;
+import '../../features/interest/data/repositories/interest_repository_impl.dart'
+    as _i501;
+import '../../features/interest/domain/repositories/interest_repository.dart'
+    as _i502;
+import '../../features/interest/presentation/bloc/calculator_bloc.dart'
+    as _i503;
+import '../../features/interest/presentation/bloc/ledger_bloc.dart' as _i504;
 import '../api/api_client.dart' as _i277;
 import '../storage/prefs_storage.dart' as _i223;
 import '../storage/secure_storage.dart' as _i619;
@@ -112,6 +119,14 @@ Future<_i174.GetIt> $initGetIt(
   );
   gh.factory<_i203.DashboardBloc>(
     () => _i203.DashboardBloc(repository: gh<_i202.DashboardRepository>()),
+  );
+  // Interest
+  gh.lazySingleton<_i502.InterestRepository>(
+    () => _i501.InterestRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i503.CalculatorBloc>(() => _i503.CalculatorBloc());
+  gh.factory<_i504.LedgerBloc>(
+    () => _i504.LedgerBloc(repository: gh<_i502.InterestRepository>()),
   );
   return getIt;
 }

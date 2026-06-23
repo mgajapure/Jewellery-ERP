@@ -32,4 +32,7 @@ class ApiEndpoints {
   // Vault
   static const String vaults = '/vaults';
   static const String vaultAssign = '/vaults/assign';
+
+  // Interest
+  static String interestLedger(String girviId) => '/interest/ledger/$girviId';
 }

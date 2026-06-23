@@ -284,9 +284,74 @@ class MockInterceptor extends Interceptor {
           }
         }
 
+        if (path.startsWith('/interest/ledger/')) {
+          return {'success': true, 'data': _interestLedger};
+        }
+
         return null;
     }
   }
+
+  static final Map<String, dynamic> _interestLedger = {
+    'girviId': 'GRV-2026-000042',
+    'customerName': 'रमेश पाटील',
+    'customerNameEn': 'Ramesh Patil',
+    'principal': 100000.0,
+    'interestType': 'simple',
+    'interestRate': 12.0,
+    'entries': [
+      {
+        'date': '2026-01-01T00:00:00Z',
+        'type': 'ACCRUAL',
+        'openingPrincipal': 100000.0,
+        'interest': 0.0,
+        'penalty': 0.0,
+        'payment': 0.0,
+        'closingPrincipal': 100000.0,
+        'notes': null,
+      },
+      {
+        'date': '2026-01-31T00:00:00Z',
+        'type': 'ACCRUAL',
+        'openingPrincipal': 100000.0,
+        'interest': 986.30,
+        'penalty': 0.0,
+        'payment': 0.0,
+        'closingPrincipal': 100000.0,
+        'notes': null,
+      },
+      {
+        'date': '2026-02-28T00:00:00Z',
+        'type': 'ACCRUAL',
+        'openingPrincipal': 100000.0,
+        'interest': 1013.70,
+        'penalty': 0.0,
+        'payment': 0.0,
+        'closingPrincipal': 100000.0,
+        'notes': null,
+      },
+      {
+        'date': '2026-03-15T00:00:00Z',
+        'type': 'PAYMENT',
+        'openingPrincipal': 100000.0,
+        'interest': 0.0,
+        'penalty': 0.0,
+        'payment': 5000.0,
+        'closingPrincipal': 95000.0,
+        'notes': 'Partial interest payment',
+      },
+      {
+        'date': '2026-06-30T00:00:00Z',
+        'type': 'ACCRUAL',
+        'openingPrincipal': 95000.0,
+        'interest': 4931.51,
+        'penalty': 0.0,
+        'payment': 0.0,
+        'closingPrincipal': 95000.0,
+        'notes': null,
+      },
+    ],
+  };
 
   static final List<Map<String, dynamic>> _customers = [
     {

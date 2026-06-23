@@ -19,15 +19,16 @@ class OtpVerificationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: AuthLightScaffold(
         child: Column(
           children: [
             AuthTopBar(
               onBackPressed: () => context.goNamed(SplashPage.routeName),
             ),
-            const Spacer(),
+            const Spacer(flex: 10),
             const AuthRoundIcon(icon: Icons.gpp_good),
-            const SizedBox(height: 28),
+            const Spacer(flex: 3),
             const Text(
               'OTP प्रविष्ट करा',
               textAlign: TextAlign.center,
@@ -46,7 +47,7 @@ class OtpVerificationPage extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 22),
+            const Spacer(flex: 2),
             const Text(
               '+91 98765 43210 वर पाठवलेला OTP\nOTP sent on +91 98765 43210',
               textAlign: TextAlign.center,
@@ -56,9 +57,9 @@ class OtpVerificationPage extends StatelessWidget {
                 height: 1.55,
               ),
             ),
-            const SizedBox(height: 24),
+            const Spacer(flex: 2),
             const OtpBoxes(),
-            const SizedBox(height: 12),
+            const Spacer(flex: 1),
             const Text.rich(
               TextSpan(
                 children: [
@@ -71,18 +72,18 @@ class OtpVerificationPage extends StatelessWidget {
               ),
               style: TextStyle(color: AuthColors.ink, fontSize: 13),
             ),
-            const SizedBox(height: 8),
+            const Spacer(flex: 1),
             const AuthInfoNotice(
               icon: Icons.verified_user_outlined,
               marathi: 'OTP कोणाशीही शेअर करू नका.',
               english: 'Do not share OTP with anyone.',
             ),
-            const SizedBox(height: 24),
+            const Spacer(flex: 2),
             const Text(
               'OTP आला नाही? / Didn\'t receive OTP?',
               style: TextStyle(color: AuthColors.ink, fontSize: 13),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             const Text(
               'पुन्हा पाठवा / Resend OTP',
               style: TextStyle(
@@ -91,15 +92,15 @@ class OtpVerificationPage extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            const SizedBox(height: 28),
+            const Spacer(flex: 3),
             PrimaryAuthButton(
               label: 'पडताळणी करा / Verify OTP',
               onPressed: () =>
                   context.goNamed(RegistrationPendingPage.routeName),
             ),
-            const SizedBox(height: 30),
+            const Spacer(flex: 2),
             const _AttemptsLine(),
-            const SizedBox(height: 30),
+            const Spacer(flex: 2),
           ],
         ),
       ),

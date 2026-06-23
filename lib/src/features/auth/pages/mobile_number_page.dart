@@ -20,15 +20,16 @@ class MobileNumberPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: false,
       body: AuthLightScaffold(
         child: Column(
           children: [
             AuthTopBar(
               onBackPressed: () => context.goNamed(SplashPage.routeName),
             ),
-            const Spacer(),
+            const Spacer(flex: 10),
             const AuthRoundIcon(icon: Icons.phone_android_outlined),
-            const SizedBox(height: 28),
+            const Spacer(flex: 3),
             const Text(
               'मोबाईल क्रमांक प्रविष्ट करा',
               textAlign: TextAlign.center,
@@ -47,7 +48,7 @@ class MobileNumberPage extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 22),
+            const Spacer(flex: 2),
             const Text(
               'आम्ही तुमच्या मोबाईलवर OTP पाठवू\nWe will send OTP on your mobile',
               textAlign: TextAlign.center,
@@ -57,22 +58,22 @@ class MobileNumberPage extends StatelessWidget {
                 height: 1.55,
               ),
             ),
-            const SizedBox(height: 24),
+            const Spacer(flex: 2),
             const MobileNumberInput(),
-            const SizedBox(height: 15),
+            const Spacer(flex: 2),
             const AuthInfoNotice(
               icon: Icons.verified_user_outlined,
               marathi: 'तुमचा क्रमांक सुरक्षित आहे.',
               english: 'Your number is safe with us.',
             ),
-            const SizedBox(height: 15),
+            const Spacer(flex: 2),
             PrimaryAuthButton(
               label: 'OTP पाठवा / Send OTP',
               onPressed: () => context.goNamed(OtpVerificationPage.routeName),
             ),
-            const SizedBox(height: 22),
+            const Spacer(flex: 2),
             const _NeedHelp(),
-            const SizedBox(height: 30),
+            const Spacer(flex: 2),
             const AuthFooter(),
           ],
         ),

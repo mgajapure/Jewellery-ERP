@@ -44,13 +44,12 @@ class _RegistrationPendingPageState extends State<RegistrationPendingPage> {
       body: AuthDarkBackground(
         child: SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(22, 12, 22, 22),
+            padding: EdgeInsets.fromLTRB(22, 12, 22, 0),
             child: Column(
               children: [
-                SizedBox(height: 10),
+                SizedBox(height: 8),
                 _PendingBadge(),
-                Spacer(),
-                _PendingSheet(),
+                Expanded(child: _PendingSheet()),
               ],
             ),
           ),
@@ -65,39 +64,41 @@ class _PendingBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = (MediaQuery.sizeOf(context).height * 0.16).clamp(80.0, 126.0);
+    final boxSize = size + 16;
     return SizedBox(
-      height: 142,
+      height: boxSize,
       child: Stack(
         alignment: Alignment.center,
         children: [
           Container(
-            width: 126,
-            height: 126,
+            width: size,
+            height: size,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: const Color(0xFF0C6F61).withValues(alpha: 0.65),
               border: Border.all(color: AuthColors.mutedGold),
             ),
-            child: const Icon(
+            child: Icon(
               Icons.hourglass_empty,
               color: AuthColors.gold,
-              size: 32,
+              size: size * 0.26,
             ),
           ),
-          const Positioned(
-            left: 42,
-            top: 22,
-            child: Icon(Icons.auto_awesome, color: AuthColors.gold, size: 15),
+          Positioned(
+            left: boxSize * 0.29,
+            top: boxSize * 0.15,
+            child: const Icon(Icons.auto_awesome, color: AuthColors.gold, size: 15),
           ),
-          const Positioned(
-            right: 44,
-            bottom: 28,
-            child: Icon(Icons.auto_awesome, color: AuthColors.gold, size: 15),
+          Positioned(
+            right: boxSize * 0.30,
+            bottom: boxSize * 0.20,
+            child: const Icon(Icons.auto_awesome, color: AuthColors.gold, size: 15),
           ),
-          const Positioned(
-            left: 18,
-            bottom: 44,
-            child: Icon(Icons.auto_awesome, color: AuthColors.gold, size: 18),
+          Positioned(
+            left: boxSize * 0.12,
+            bottom: boxSize * 0.30,
+            child: const Icon(Icons.auto_awesome, color: AuthColors.gold, size: 18),
           ),
         ],
       ),
@@ -112,59 +113,62 @@ class _PendingSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(22, 30, 22, 38),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: const [
-          Text(
-            'नोंदणी विनंती पाठवली आहे',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AuthColors.ink,
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 22),
+        child: Column(
+          children: const [
+            Spacer(flex: 3),
+            Text(
+              'नोंदणी विनंती पाठवली आहे',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: AuthColors.ink,
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ),
-          SizedBox(height: 6),
-          Text(
-            'Registration Request Sent',
-            style: TextStyle(
-              color: AuthColors.ink,
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+            SizedBox(height: 5),
+            Text(
+              'Registration Request Sent',
+              style: TextStyle(
+                color: AuthColors.ink,
+                fontSize: 20,
+                fontWeight: FontWeight.w600,
+              ),
             ),
-          ),
-          SizedBox(height: 26),
-          AuthDividerGem(width: double.infinity),
-          SizedBox(height: 28),
-          _PendingLine(
-            icon: Icons.person_outline,
-            marathi: 'तुमची विनंती मालकाकडे पाठवली आहे.',
-            english: 'Your request has been sent to the Owner.',
-          ),
-          SizedBox(height: 24),
-          _PendingLine(
-            icon: Icons.notifications_none,
-            marathi: 'मालक मंजुरी देईपर्यंत कृपया थांबा.',
-            english: 'Please wait until Owner approves.',
-          ),
-          SizedBox(height: 24),
-          _PendingLine(
-            icon: Icons.phone_android_outlined,
-            marathi: 'मंजुरीनंतर तुम्ही या डिव्हाइसवर लॉगिन करू शकाल.',
-            english: 'You will be able to login on this device after approval.',
-          ),
-          SizedBox(height: 32),
-          AuthInfoNotice(
-            icon: Icons.schedule_outlined,
-            marathi: 'हे सामान्यत: काही मिनिटांत पूर्ण होते.',
-            english: 'This usually takes a few minutes.',
-          ),
-        ],
+            Spacer(flex: 3),
+            AuthDividerGem(width: double.infinity),
+            Spacer(flex: 3),
+            _PendingLine(
+              icon: Icons.person_outline,
+              marathi: 'तुमची विनंती मालकाकडे पाठवली आहे.',
+              english: 'Your request has been sent to the Owner.',
+            ),
+            Spacer(flex: 2),
+            _PendingLine(
+              icon: Icons.notifications_none,
+              marathi: 'मालक मंजुरी देईपर्यंत कृपया थांबा.',
+              english: 'Please wait until Owner approves.',
+            ),
+            Spacer(flex: 2),
+            _PendingLine(
+              icon: Icons.phone_android_outlined,
+              marathi: 'मंजुरीनंतर तुम्ही या डिव्हाइसवर लॉगिन करू शकाल.',
+              english: 'You will be able to login on this device after approval.',
+            ),
+            Spacer(flex: 3),
+            AuthInfoNotice(
+              icon: Icons.schedule_outlined,
+              marathi: 'हे सामान्यत: काही मिनिटांत पूर्ण होते.',
+              english: 'This usually takes a few minutes.',
+            ),
+            Spacer(flex: 3),
+          ],
+        ),
       ),
     );
   }

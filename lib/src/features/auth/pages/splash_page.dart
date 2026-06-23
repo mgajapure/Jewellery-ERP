@@ -46,9 +46,9 @@ class _SplashPageState extends State<SplashPage> {
             padding: EdgeInsets.fromLTRB(28, 12, 28, 26),
             child: Column(
               children: [
+                Spacer(flex: 3),
+                AuthLogoMark(size: 120),
                 Spacer(flex: 2),
-                AuthLogoMark(size: 132),
-                SizedBox(height: 18),
                 Text(
                   'JEWELLERY ERP',
                   textAlign: TextAlign.center,
@@ -70,7 +70,7 @@ class _SplashPageState extends State<SplashPage> {
                     fontWeight: FontWeight.w800,
                   ),
                 ),
-                SizedBox(height: 26),
+                Spacer(flex: 2),
                 Text(
                   'Girvi Management Made Simple\nगिरवी व्यवस्थापन सोपे आणि स्मार्ट',
                   textAlign: TextAlign.center,
@@ -81,12 +81,12 @@ class _SplashPageState extends State<SplashPage> {
                     fontWeight: FontWeight.w500,
                   ),
                 ),
-                SizedBox(height: 34),
+                Spacer(flex: 3),
                 AuthDividerGem(width: 210),
-                Spacer(),
+                Spacer(flex: 3),
                 SizedBox(
-                  width: 58,
-                  height: 58,
+                  width: 52,
+                  height: 52,
                   child: CircularProgressIndicator(
                     strokeWidth: 4,
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -94,12 +94,12 @@ class _SplashPageState extends State<SplashPage> {
                     ),
                   ),
                 ),
-                SizedBox(height: 20),
+                Spacer(flex: 2),
                 Text(
                   'Loading... कृपया थांबा...',
                   style: TextStyle(color: Colors.white, fontSize: 14),
                 ),
-                SizedBox(height: 24),
+                Spacer(flex: 2),
                 Text(
                   'Secure • Smart • Reliable\nसुरक्षित • स्मार्ट • विश्वासार्ह',
                   textAlign: TextAlign.center,
@@ -109,7 +109,7 @@ class _SplashPageState extends State<SplashPage> {
                     height: 1.45,
                   ),
                 ),
-                Spacer(),
+                Spacer(flex: 3),
                 Text(
                   'Version 2.0.0',
                   style: TextStyle(color: Colors.white70, fontSize: 13),

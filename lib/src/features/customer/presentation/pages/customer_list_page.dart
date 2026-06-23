@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/extensions.dart';
 import '../../../../shared/widgets/app_bottom_nav.dart';
 import '../../../../shared/widgets/app_card.dart';
@@ -13,16 +12,16 @@ import '../../../../shared/widgets/app_error_state.dart';
 import '../../../../shared/widgets/app_header.dart';
 import '../../../../shared/widgets/app_loader.dart';
 import '../../../../shared/widgets/app_search_bar.dart';
-import '../../../dashboard/dashboard_page.dart';
+import '../../../dashboard/presentation/pages/dashboard_page.dart';
 import '../../../girvi/girvi.dart';
 import '../../../more/more.dart';
 import '../../domain/entities/customer.dart';
+import '../../pages/create_customer_page.dart';
+import '../../pages/customer_details_page.dart';
+import '../../pages/customer_search_page.dart';
 import '../bloc/customer_bloc.dart';
 import '../bloc/customer_event.dart';
 import '../bloc/customer_state.dart';
-import 'create_customer_page.dart';
-import 'customer_details_page.dart';
-import 'customer_search_page.dart';
 
 class CustomerListPage extends StatelessWidget {
   const CustomerListPage({super.key});

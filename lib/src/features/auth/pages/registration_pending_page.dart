@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../dashboard/dashboard_page.dart';
+import '../../dashboard/presentation/pages/dashboard_page.dart';
 import '../theme/auth_colors.dart';
 import '../widgets/auth_background.dart';
 import '../widgets/auth_divider_gem.dart';

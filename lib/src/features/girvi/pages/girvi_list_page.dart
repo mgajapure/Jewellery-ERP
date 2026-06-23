@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:jewellery_erp/src/features/customer/customer.dart';
-import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
+import 'package:jewellery_erp/src/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
 import '../../../core/widgets/app_bottom_nav.dart';

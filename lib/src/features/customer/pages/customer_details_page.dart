@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/customer_colors.dart';
-import 'customer_list_page.dart';
+import '../presentation/pages/customer_list_page.dart';
 
 /// SCR-011 Customer Profile View
 /// Displays the master customer profile with tabs for Profile, Loans,

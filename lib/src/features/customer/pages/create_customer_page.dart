@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/navigation/app_navigation.dart';
 import '../theme/customer_colors.dart';
 import 'customer_details_page.dart';
-import 'customer_list_page.dart';
+import '../presentation/pages/customer_list_page.dart';
 
 class CreateCustomerPage extends StatefulWidget {
   const CreateCustomerPage({super.key});

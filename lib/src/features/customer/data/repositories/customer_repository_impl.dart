@@ -109,6 +109,35 @@ class CustomerRepositoryImpl implements CustomerRepository {
     }
   }
 
+  @override
+  Future<Result<Customer>> updateCustomer(
+      UpdateCustomerRequest request) async {
+    try {
+      final response = await _apiClient.put(
+        ApiEndpoints.customerById(request.id),
+        data: {
+          'name': request.name,
+          if (request.alternateMobile != null)
+            'alternateMobile': request.alternateMobile,
+          'address':
+              '${request.address}, ${request.city}, ${request.state} - ${request.pincode}',
+          if (request.gender != null) 'gender': request.gender,
+          if (request.dateOfBirth != null) 'dateOfBirth': request.dateOfBirth,
+          if (request.panNumber != null) 'panNumber': request.panNumber,
+        },
+      );
+      final data = response.data as Map<String, dynamic>;
+      final customer = CustomerModel.fromJson(
+        data['data'] as Map<String, dynamic>,
+      ).toEntity();
+      return Result.success(customer);
+    } on DioException catch (e) {
+      return Result.failure(_mapDioError(e));
+    } catch (e) {
+      return Result.failure(ServerException(message: e.toString()));
+    }
+  }
+
   AppException _mapDioError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:

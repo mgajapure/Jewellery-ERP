@@ -13,6 +13,7 @@ class CustomerDetailBloc
         super(const CustomerDetailInitial()) {
     on<LoadCustomerDetail>(_onLoad);
     on<CreateCustomer>(_onCreate);
+    on<UpdateCustomer>(_onUpdate);
   }
 
   final CustomerRepository _repository;
@@ -43,6 +44,30 @@ class CustomerDetailBloc
         ),
       ),
       failure: (error) => emit(CustomerOperationFailure(error.message)),
+    );
+  }
+
+  Future<void> _onUpdate(
+    UpdateCustomer event,
+    Emitter<CustomerDetailState> emit,
+  ) async {
+    final current = switch (state) {
+      CustomerDetailLoaded(:final customer) => customer,
+      CustomerOperationSuccess(:final customer) => customer,
+      CustomerOperationFailure(:final customer) => customer,
+      _ => null,
+    };
+    emit(CustomerOperationLoading(current));
+    final result = await _repository.updateCustomer(event.request);
+    result.when(
+      success: (customer) => emit(
+        CustomerOperationSuccess(
+          customer,
+          'ग्राहक यशस्वीरित्या अपडेट झाला / Customer updated successfully',
+        ),
+      ),
+      failure: (error) =>
+          emit(CustomerOperationFailure(error.message, customer: current)),
     );
   }
 }

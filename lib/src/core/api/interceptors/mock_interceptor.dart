@@ -286,6 +286,26 @@ class MockInterceptor extends Interceptor {
     }
 
     if (method == 'PUT') {
+      // Customer — update
+      if (path.startsWith('/customers/') && path.split('/').length == 3) {
+        final id = path.split('/')[2];
+        final body = _extractBody(options) ?? {};
+        final idx = _customers.indexWhere((c) => c['id'] == id);
+        if (idx != -1) {
+          _customers[idx] = Map<String, dynamic>.from(_customers[idx])
+            ..['name'] = body['name'] ?? _customers[idx]['name']
+            ..['alternateMobile'] =
+                body['alternateMobile'] ?? _customers[idx]['alternateMobile']
+            ..['address'] = body['address'] ?? _customers[idx]['address']
+            ..['panNumber'] = body['panNumber'] ?? _customers[idx]['panNumber']
+            ..['dateOfBirth'] =
+                body['dateOfBirth'] ?? _customers[idx]['dateOfBirth']
+            ..['updatedAt'] = DateTime.now().toIso8601String();
+          return {'success': true, 'data': _customers[idx]};
+        }
+        return {'success': false, 'message': 'Customer not found.'};
+      }
+
       // Inventory — update status
       if (path.startsWith('/inventory/') && path.split('/').length == 3) {
         final id = path.split('/')[2];

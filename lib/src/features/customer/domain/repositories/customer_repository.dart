@@ -12,4 +12,6 @@ abstract class CustomerRepository {
   Future<Result<List<Customer>>> searchCustomers(String query);
 
   Future<Result<Customer>> createCustomer(CreateCustomerRequest request);
+
+  Future<Result<Customer>> updateCustomer(UpdateCustomerRequest request);
 }

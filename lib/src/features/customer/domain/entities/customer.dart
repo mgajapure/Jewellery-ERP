@@ -83,3 +83,29 @@ class CreateCustomerRequest {
   final String? aadhaarNumber;
   final String? panNumber;
 }
+
+class UpdateCustomerRequest {
+  const UpdateCustomerRequest({
+    required this.id,
+    required this.name,
+    this.alternateMobile,
+    required this.address,
+    required this.city,
+    required this.state,
+    required this.pincode,
+    this.gender,
+    this.dateOfBirth,
+    this.panNumber,
+  });
+
+  final String id;
+  final String name;
+  final String? alternateMobile;
+  final String address;
+  final String city;
+  final String state;
+  final String pincode;
+  final String? gender;
+  final String? dateOfBirth;
+  final String? panNumber;
+}

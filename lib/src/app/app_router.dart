@@ -84,6 +84,11 @@ final appRouter = GoRouter(
       builder: (context, state) => const CustomerDetailsPage(),
     ),
     GoRoute(
+      path: '/customers/:id/edit',
+      name: EditCustomerPage.routeName,
+      builder: (context, state) => const EditCustomerPage(),
+    ),
+    GoRoute(
       path: '/girvi',
       name: GirviListPage.routeName,
       builder: (context, state) => const GirviListPage(),

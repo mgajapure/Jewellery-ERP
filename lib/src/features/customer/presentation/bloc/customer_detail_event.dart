@@ -26,3 +26,12 @@ class CreateCustomer extends CustomerDetailEvent {
   @override
   List<Object?> get props => [request];
 }
+
+class UpdateCustomer extends CustomerDetailEvent {
+  const UpdateCustomer(this.request);
+
+  final UpdateCustomerRequest request;
+
+  @override
+  List<Object?> get props => [request];
+}

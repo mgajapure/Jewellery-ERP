@@ -13,6 +13,7 @@ import '../presentation/bloc/customer_detail_event.dart';
 import '../presentation/bloc/customer_detail_state.dart';
 import '../theme/customer_colors.dart';
 import 'customer_list_page.dart';
+import 'edit_customer_page.dart';
 
 /// SCR-011 Customer Profile View
 /// Displays the master customer profile with tabs for Profile, Loans,
@@ -171,7 +172,10 @@ class _ProfileAppBar extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () => context.pushNamed(
+              EditCustomerPage.routeName,
+              extra: customer,
+            ),
             icon: const Icon(Icons.edit_outlined, color: CustomerColors.ink),
             tooltip: 'Edit',
           ),

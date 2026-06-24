@@ -37,16 +37,54 @@ jobs:
       - name: Build APK (release)
         run: flutter build apk --release
 
-      - name: Upload debug APK
+      - name: Upload debug APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: jewellery-erp-debug
           path: build/app/outputs/flutter-apk/app-debug.apk
           retention-days: 30
 
-      - name: Upload release APK
+      - name: Upload release APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: jewellery-erp-release
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+
+      - name: Generate release tag
+        id: tag
+        run: |
+          BRANCH="${GITHUB_REF_NAME//\//-}"
+          TIMESTAMP=$(date -u +'%Y%m%d-%H%M%S')
+          SHORT_SHA="${GITHUB_SHA::7}"
+          echo "name=build-${BRANCH}-${TIMESTAMP}-${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+          echo "title=Build ${BRANCH} @ ${TIMESTAMP} (${SHORT_SHA})" >> "$GITHUB_OUTPUT"
+
+      - name: Rename APKs for release
+        run: |
+          TAG="${{ steps.tag.outputs.name }}"
+          cp build/app/outputs/flutter-apk/app-debug.apk   "jewellery-erp-debug-${TAG}.apk"
+          cp build/app/outputs/flutter-apk/app-release.apk "jewellery-erp-release-${TAG}.apk"
+
+      - name: Create GitHub Release with APKs
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.tag.outputs.name }}
+          name: ${{ steps.tag.outputs.title }}
+          body: |
+            **Branch:** `${{ github.ref_name }}`
+            **Commit:** ${{ github.sha }}
+            **Message:** ${{ github.event.head_commit.message }}
+
+            ### Downloads
+            | File | Description |
+            |------|-------------|
+            | `jewellery-erp-release-*.apk` | Release build — smaller, optimised |
+            | `jewellery-erp-debug-*.apk`   | Debug build — larger, unoptimised |
+
+            > Release assets download directly from GitHub CDN — no ZIP extraction needed.
+          files: |
+            jewellery-erp-debug-${{ steps.tag.outputs.name }}.apk
+            jewellery-erp-release-${{ steps.tag.outputs.name }}.apk
+          draft: false
+          prerelease: true

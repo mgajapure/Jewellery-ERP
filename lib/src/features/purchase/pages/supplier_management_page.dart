@@ -47,6 +47,15 @@ class _SupplierViewState extends State<_SupplierView> {
     super.dispose();
   }
 
+  void _showNewSupplierSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _NewSupplierSheet(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -64,7 +73,7 @@ class _SupplierViewState extends State<_SupplierView> {
                   icon: const Icon(Icons.add_circle,
                       color: PurchaseColors.ink),
                   tooltip: 'नवीन पुरवठादार / New Supplier',
-                  onPressed: () {},
+                  onPressed: () => _showNewSupplierSheet(context),
                 ),
               ],
             ),
@@ -245,7 +254,12 @@ class _SupplierCard extends StatelessWidget {
         isActive ? PurchaseColors.green : PurchaseColors.muted;
 
     return InkWell(
-      onTap: () {},
+      onTap: () => showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (_) => _SupplierDetailSheet(supplier: supplier),
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -452,6 +466,349 @@ class _ErrorView extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _NewSupplierSheet extends StatefulWidget {
+  const _NewSupplierSheet();
+
+  @override
+  State<_NewSupplierSheet> createState() => _NewSupplierSheetState();
+}
+
+class _NewSupplierSheetState extends State<_NewSupplierSheet> {
+  final _nameCtrl = TextEditingController();
+  final _mobileCtrl = TextEditingController();
+  final _gstCtrl = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _nameCtrl.dispose();
+    _mobileCtrl.dispose();
+    _gstCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    return Container(
+      padding: EdgeInsets.fromLTRB(24, 20, 24, 24 + bottom),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'नवीन पुरवठादार / New Supplier',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w900,
+                    color: PurchaseColors.ink,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, color: PurchaseColors.muted),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _SheetField(
+              controller: _nameCtrl,
+              labelMr: 'नाव',
+              labelEn: 'Name',
+              icon: Icons.business_outlined,
+              validator: (v) => (v == null || v.trim().isEmpty)
+                  ? 'नाव आवश्यक / Name required'
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            _SheetField(
+              controller: _mobileCtrl,
+              labelMr: 'मोबाईल',
+              labelEn: 'Mobile',
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              validator: (v) => (v == null || v.trim().length < 10)
+                  ? 'वैध मोबाईल / Valid mobile required'
+                  : null,
+            ),
+            const SizedBox(height: 12),
+            _SheetField(
+              controller: _gstCtrl,
+              labelMr: 'GST क्रमांक',
+              labelEn: 'GST No.',
+              icon: Icons.numbers_outlined,
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  if (_formKey.currentState!.validate()) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'पुरवठादार जोडणे लवकरच / Add supplier coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PurchaseColors.navy,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  'जतन करा / Save',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SheetField extends StatelessWidget {
+  const _SheetField({
+    required this.controller,
+    required this.labelMr,
+    required this.labelEn,
+    required this.icon,
+    this.keyboardType,
+    this.validator,
+  });
+
+  final TextEditingController controller;
+  final String labelMr;
+  final String labelEn;
+  final IconData icon;
+  final TextInputType? keyboardType;
+  final String? Function(String?)? validator;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboardType,
+      validator: validator,
+      decoration: InputDecoration(
+        prefixIcon: Icon(icon, color: PurchaseColors.muted, size: 20),
+        labelText: '$labelMr / $labelEn',
+        labelStyle: const TextStyle(color: PurchaseColors.muted, fontSize: 13),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: PurchaseColors.line),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: PurchaseColors.line),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: const BorderSide(color: PurchaseColors.navy, width: 2),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      ),
+    );
+  }
+}
+
+class _SupplierDetailSheet extends StatelessWidget {
+  const _SupplierDetailSheet({required this.supplier});
+
+  final Supplier supplier;
+
+  @override
+  Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+    final isActive = supplier.status == SupplierStatus.active;
+    final statusColor =
+        isActive ? PurchaseColors.green : PurchaseColors.muted;
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  supplier.name,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: PurchaseColors.ink,
+                  ),
+                ),
+              ),
+              Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                decoration: BoxDecoration(
+                  color: statusColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  supplier.status.labelEn,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w800,
+                    color: statusColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(Icons.close, color: PurchaseColors.muted),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _DetailRow(
+            icon: Icons.phone_outlined,
+            labelMr: 'मोबाईल',
+            labelEn: 'Mobile',
+            value: supplier.mobile,
+          ),
+          const Divider(color: PurchaseColors.line),
+          _DetailRow(
+            icon: Icons.numbers_outlined,
+            labelMr: 'GST क्रमांक',
+            labelEn: 'GST No.',
+            value: supplier.gstNo,
+          ),
+          const Divider(color: PurchaseColors.line),
+          _DetailRow(
+            icon: Icons.account_balance_wallet_outlined,
+            labelMr: 'येणे बाकी',
+            labelEn: 'Balance Due',
+            value: '₹${amtFmt.format(supplier.balanceDue)}',
+          ),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, size: 18),
+                  label: const Text('बंद करा / Close'),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: PurchaseColors.muted,
+                    side: const BorderSide(color: PurchaseColors.line),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content:
+                            Text('खरेदी इतिहास लवकरच / Purchase history coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.history, size: 18),
+                  label: const Text('इतिहास / History'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: PurchaseColors.navy,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({
+    required this.icon,
+    required this.labelMr,
+    required this.labelEn,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String labelMr;
+  final String labelEn;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: PurchaseColors.muted),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$labelMr / $labelEn',
+                style: const TextStyle(
+                  color: PurchaseColors.muted,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  color: PurchaseColors.ink,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

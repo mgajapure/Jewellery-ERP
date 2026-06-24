@@ -110,13 +110,23 @@ class _Forms11_12PageState extends State<Forms11_12Page>
           IconButton(
             icon: const Icon(Icons.picture_as_pdf_outlined),
             onPressed: () {
-              // TODO: export PDF.
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('PDF निर्यात लवकरच / PDF export coming soon'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
             },
           ),
           IconButton(
             icon: const Icon(Icons.print_outlined),
             onPressed: () {
-              // TODO: print forms.
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('प्रिंट लवकरच / Print coming soon'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
             },
           ),
         ],

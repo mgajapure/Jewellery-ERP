@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/widgets/app_header.dart';
 import '../domain/entities/vault_search_result.dart';
@@ -125,8 +126,17 @@ class _VaultSearchViewState extends State<_VaultSearchView> {
                             searchMode: _searchMode,
                             isSearching: ready.isSearching,
                             onChanged: _onSearchChanged,
-                            onScanTap: () {
-                              // TODO: open QR scanner
+                            onScanTap: () async {
+                              final scanned = await showModalBottomSheet<String>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => const _QrScannerModal(),
+                              );
+                              if (scanned != null && mounted) {
+                                _searchCtrl.text = scanned;
+                                _onSearchChanged(scanned);
+                              }
                             },
                           ),
                           const SizedBox(height: 12),
@@ -813,6 +823,90 @@ class _NoResultsState extends StatelessWidget {
               fontWeight: FontWeight.w600,
             ),
             textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QrScannerModal extends StatefulWidget {
+  const _QrScannerModal();
+
+  @override
+  State<_QrScannerModal> createState() => _QrScannerModalState();
+}
+
+class _QrScannerModalState extends State<_QrScannerModal> {
+  final MobileScannerController _ctrl = MobileScannerController();
+  bool _scanned = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    if (_scanned) return;
+    final barcode = capture.barcodes.firstOrNull;
+    final value = barcode?.rawValue;
+    if (value != null && value.isNotEmpty) {
+      setState(() => _scanned = true);
+      Navigator.pop(context, value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.65,
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'QR स्कॅन करा / Scan QR',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: MobileScanner(
+                controller: _ctrl,
+                onDetect: _onDetect,
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'QR कोड फ्रेममध्ये ठेवा / Place QR code within frame',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),

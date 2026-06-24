@@ -144,7 +144,14 @@ class _DetailsBody extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.print_outlined),
                 label: const Text('प्रिंट / Print'),
                 style: OutlinedButton.styleFrom(
@@ -160,7 +167,15 @@ class _DetailsBody extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'खरेदी संपादन लवकरच / Edit purchase coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.edit_outlined),
                 label: const Text('संपादन / Edit'),
                 style: ElevatedButton.styleFrom(

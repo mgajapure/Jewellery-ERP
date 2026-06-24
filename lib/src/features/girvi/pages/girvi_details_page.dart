@@ -72,7 +72,7 @@ class _GirviDetailsView extends StatelessWidget {
             body: SafeArea(
               child: Column(
                 children: [
-                  _header(context),
+                  _header(context, girvi: null),
                   Expanded(
                     child: AppErrorState(
                       message: state.message,
@@ -103,7 +103,7 @@ class _GirviDetailsView extends StatelessWidget {
             body: SafeArea(
               child: Column(
                 children: [
-                  _header(context),
+                  _header(context, girvi: girvi),
                   _GirviHeaderCard(girvi: girvi),
                   const _GirviTabBar(),
                   Expanded(
@@ -131,7 +131,7 @@ class _GirviDetailsView extends StatelessWidget {
     );
   }
 
-  static Widget _header(BuildContext context) {
+  static Widget _header(BuildContext context, {Girvi? girvi}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
       child: Row(
@@ -154,14 +154,97 @@ class _GirviDetailsView extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('प्रिंट लवकरच / Print coming soon'),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
             icon: const Icon(Icons.print_outlined, color: GirviColors.ink),
             tooltip: 'Print',
           ),
-          IconButton(
-            onPressed: () {},
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: GirviColors.ink),
             tooltip: 'More',
+            onSelected: (value) {
+              if (girvi == null) return;
+              switch (value) {
+                case 'partial-payment':
+                  context.goNamed(
+                    PartialPaymentPage.routeName,
+                    pathParameters: {'id': girvi.id},
+                  );
+                case 'renewal':
+                  context.goNamed(
+                    RenewalPage.routeName,
+                    pathParameters: {'id': girvi.id},
+                  );
+                case 'redemption':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'मोचन लवकरच / Redemption coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                case 'auction':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'लिलाव प्रक्रिया लवकरच / Auction coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'partial-payment',
+                child: Row(
+                  children: [
+                    Icon(Icons.currency_rupee, size: 18,
+                        color: GirviColors.navy),
+                    SizedBox(width: 10),
+                    Text('आंशिक पेमेंट / Partial Payment'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'renewal',
+                child: Row(
+                  children: [
+                    Icon(Icons.autorenew, size: 18,
+                        color: GirviColors.navy),
+                    SizedBox(width: 10),
+                    Text('नूतनीकरण / Renew'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'redemption',
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 18,
+                        color: GirviColors.green),
+                    SizedBox(width: 10),
+                    Text('मोचन / Redeem'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'auction',
+                child: Row(
+                  children: [
+                    Icon(Icons.gavel_outlined, size: 18,
+                        color: GirviColors.red),
+                    SizedBox(width: 10),
+                    Text('लिलाव / Auction Workflow'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),

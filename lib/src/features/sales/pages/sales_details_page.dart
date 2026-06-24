@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../domain/entities/sale_order.dart';
@@ -46,7 +47,17 @@ class SalesDetailsPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.share_outlined),
-            onPressed: () {},
+            onPressed: () {
+              final fmt = DateFormat('dd MMM yyyy');
+              final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+              final text = '''विक्री तपशील / Sale Details
+इन्व्हॉईस: ${order.invoiceNo}
+ग्राहक: ${order.customerName}
+दिनांक: ${fmt.format(order.date)}
+रक्कम: ₹${amtFmt.format(order.totalAmount)}
+पेमेंट: ${order.paymentMode.labelMr} / ${order.paymentMode.labelEn}''';
+              Share.share(text, subject: 'Invoice ${order.invoiceNo}');
+            },
           ),
         ],
       ),
@@ -148,7 +159,14 @@ class _DetailsBody extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.print_outlined),
                 label: const Text('प्रिंट / Print'),
                 style: OutlinedButton.styleFrom(

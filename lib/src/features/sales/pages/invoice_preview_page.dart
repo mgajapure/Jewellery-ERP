@@ -131,7 +131,14 @@ class _InvoiceBody extends StatelessWidget {
           children: [
             Expanded(
               child: OutlinedButton.icon(
-                onPressed: () {},
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.print_outlined),
                 label: const Text('प्रिंट / Print'),
                 style: OutlinedButton.styleFrom(

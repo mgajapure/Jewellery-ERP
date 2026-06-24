@@ -64,7 +64,39 @@ class _LedgerViewState extends State<_LedgerView> {
                 IconButton(
                   icon: const Icon(Icons.filter_list, color: PurchaseColors.ink),
                   tooltip: 'फिल्टर / Filter',
-                  onPressed: () {},
+                  onPressed: () async {
+                    final now = DateTime.now();
+                    final range = await showDateRangePicker(
+                      context: context,
+                      firstDate: DateTime(2020),
+                      lastDate: now,
+                      initialDateRange: DateTimeRange(
+                        start: DateTime(now.year, now.month, 1),
+                        end: now,
+                      ),
+                      helpText: 'तारीख श्रेणी निवडा / Select Date Range',
+                      builder: (ctx, child) => Theme(
+                        data: Theme.of(ctx).copyWith(
+                          colorScheme: const ColorScheme.light(
+                            primary: PurchaseColors.navy,
+                            onPrimary: Colors.white,
+                            secondary: PurchaseColors.gold,
+                          ),
+                        ),
+                        child: child!,
+                      ),
+                    );
+                    if (range != null && context.mounted) {
+                      final fmt = DateFormat('dd MMM');
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                              'तारीख फिल्टर: ${fmt.format(range.start)} – ${fmt.format(range.end)}'),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                    }
+                  },
                 ),
               ],
             ),

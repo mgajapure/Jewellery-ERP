@@ -56,7 +56,15 @@ class _SalesLedgerPageState extends State<SalesLedgerPage> {
                       icon: const Icon(Icons.download_outlined,
                           color: SalesColors.ink),
                       tooltip: 'एक्सपोर्ट / Export',
-                      onPressed: () {},
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'एक्सपोर्ट लवकरच / Export coming soon'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),

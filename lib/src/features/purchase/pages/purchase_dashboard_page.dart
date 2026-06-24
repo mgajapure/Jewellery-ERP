@@ -211,7 +211,7 @@ class _LoadedView extends StatelessWidget {
             icon: Icons.bar_chart_outlined,
             titleMr: 'अहवाल',
             titleEn: 'Reports',
-            onTap: () {},
+            onTap: () => context.goNamed('reports-dashboard'),
           ),
         ],
       ),

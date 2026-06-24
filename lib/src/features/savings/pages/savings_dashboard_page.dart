@@ -207,7 +207,7 @@ class _SummaryBanner extends StatelessWidget {
             ),
             child: Row(
               children: [
-                const Icon(Icons.savings_outlined,
+                const Icon(Icons.account_balance_wallet_outlined,
                     color: SavingsColors.gold, size: 20),
                 const SizedBox(width: 10),
                 Column(
@@ -311,7 +311,7 @@ class _PlanCard extends StatelessWidget {
                   color: SavingsColors.gold.withAlpha(20),
                   borderRadius: BorderRadius.circular(14),
                 ),
-                child: const Icon(Icons.savings_outlined,
+                child: const Icon(Icons.diamond,
                     color: SavingsColors.gold, size: 26),
               ),
               const SizedBox(width: 14),

@@ -80,36 +80,48 @@ class _DashboardBody extends StatelessWidget {
         'labelEn': "Today's Sales",
         'value': '${stats.todaySales}',
         'color': SalesColors.navy,
+        'icon': Icons.trending_up,
+        'iconColor': SalesColors.navy,
       },
       {
         'labelMr': 'आजचे उत्पन्न',
         'labelEn': "Today's Revenue",
         'value': '₹${amtFmt.format(stats.todayRevenue)}',
         'color': SalesColors.gold,
+        'icon': Icons.payments,
+        'iconColor': SalesColors.gold,
       },
       {
         'labelMr': 'मासिक उत्पन्न',
         'labelEn': 'Monthly Revenue',
         'value': '₹${amtFmt.format(stats.monthlyRevenue)}',
         'color': SalesColors.green,
+        'icon': Icons.bar_chart,
+        'iconColor': SalesColors.green,
       },
       {
         'labelMr': 'सरासरी इन्व्हॉईस',
         'labelEn': 'Avg Invoice',
         'value': '₹${amtFmt.format(stats.avgInvoice)}',
         'color': const Color(0xFF2563EB),
+        'icon': Icons.receipt_long,
+        'iconColor': const Color(0xFF2563EB),
       },
       {
         'labelMr': 'टॉप श्रेणी',
         'labelEn': 'Top Category',
         'value': stats.topCategory,
         'color': SalesColors.navy,
+        'icon': Icons.workspace_premium,
+        'iconColor': SalesColors.navy,
       },
       {
         'labelMr': 'प्रलंबित परतावा',
         'labelEn': 'Pending Returns',
         'value': '${stats.pendingReturns}',
         'color': SalesColors.orange,
+        'icon': Icons.assignment_return_outlined,
+        'iconColor': SalesColors.orange,
       },
     ];
 
@@ -143,21 +155,21 @@ class _DashboardBody extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             _ActionCard(
-              icon: Icons.point_of_sale_outlined,
+              icon: Icons.sell,
               titleMr: 'नवीन विक्री',
               titleEn: 'New Sale',
               onTap: () => context.goNamed('new-sale'),
             ),
             const SizedBox(height: 12),
             _ActionCard(
-              icon: Icons.qr_code_scanner_outlined,
+              icon: Icons.qr_code_scanner,
               titleMr: 'बारकोड विक्री',
               titleEn: 'Barcode Sale',
               onTap: () => context.goNamed('barcode-sale'),
             ),
             const SizedBox(height: 12),
             _ActionCard(
-              icon: Icons.menu_book_outlined,
+              icon: Icons.receipt_long,
               titleMr: 'विक्री खाते',
               titleEn: 'Sales Ledger',
               onTap: () => context.goNamed('sales-ledger'),
@@ -184,6 +196,8 @@ class _MetricCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = metric['color'] as Color;
+    final iconColor = metric['iconColor'] as Color;
+    final icon = metric['icon'] as IconData;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -202,15 +216,31 @@ class _MetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            metric['value'] as String,
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  metric['value'] as String,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor, size: 18),
+              ),
+            ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

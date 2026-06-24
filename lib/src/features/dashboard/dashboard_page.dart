@@ -438,6 +438,8 @@ class _MetricGrid extends StatelessWidget {
               ? '+${summary.newGirviToday} आज / today'
               : 'कोणतेही नाहीत',
           deltaColor: _green,
+          icon: Icons.lock_outlined,
+          iconColor: _navy,
         ),
         _MetricTile(
           titleMr: 'एकूण कर्ज एक्स्पोजर',
@@ -447,6 +449,8 @@ class _MetricGrid extends StatelessWidget {
               ? '+${_formatAmount(summary.disbursedToday)} आज'
               : 'आज नाही',
           deltaColor: _green,
+          icon: Icons.account_balance,
+          iconColor: _green,
         ),
         _MetricTile(
           titleMr: 'आजचे संकलन',
@@ -454,6 +458,8 @@ class _MetricGrid extends StatelessWidget {
           value: _formatAmount(summary.collectionsToday),
           delta: '${summary.dueToday} खाती येणे / due',
           deltaColor: _muted,
+          icon: Icons.payments,
+          iconColor: _gold,
         ),
         _MetricTile(
           titleMr: 'ओव्हरड्यू खाती',
@@ -464,6 +470,8 @@ class _MetricGrid extends StatelessWidget {
               ? 'तात्काळ कारवाई आवश्यक'
               : 'सर्व खाती ठीक आहेत',
           deltaColor: summary.overdue > 0 ? _red : _green,
+          icon: Icons.warning_amber_rounded,
+          iconColor: _red,
         ),
       ],
     );
@@ -476,6 +484,8 @@ class _MetricTile extends StatelessWidget {
     required this.titleEn,
     required this.value,
     required this.delta,
+    required this.icon,
+    required this.iconColor,
     this.valueColor = _ink,
     this.deltaColor = _green,
   });
@@ -484,6 +494,8 @@ class _MetricTile extends StatelessWidget {
   final String titleEn;
   final String value;
   final String delta;
+  final IconData icon;
+  final Color iconColor;
   final Color valueColor;
   final Color deltaColor;
 
@@ -506,26 +518,47 @@ class _MetricTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titleMr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: _ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            titleEn,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: _muted,
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      titleMr,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _ink,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      titleEn,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: _muted,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: iconColor.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, color: iconColor, size: 18),
+              ),
+            ],
           ),
           const Spacer(),
           Text(
@@ -585,7 +618,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.add,
+              icon: Icons.add_circle_outline,
               titleMr: 'नवीन गिरवी',
               titleEn: 'New Girvi',
               filled: true,
@@ -596,7 +629,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.search,
+              icon: Icons.person_search,
               titleMr: 'ग्राहक शोधा',
               titleEn: 'Search Customer',
               onTap: onSearchCustomerTap,
@@ -606,7 +639,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.account_balance,
+              icon: Icons.lock_outlined,
               titleMr: 'तिजोरी शोध',
               titleEn: 'Vault Search',
               onTap: onVaultSearchTap,
@@ -616,7 +649,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.calculate_outlined,
+              icon: Icons.percent,
               titleMr: 'व्याज गणना',
               titleEn: 'Interest Calc',
               onTap: onInterestCalcTap,
@@ -626,7 +659,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.verified_user_outlined,
+              icon: Icons.verified,
               titleMr: 'अनुपालन',
               titleEn: 'Compliance',
               onTap: onComplianceTap,
@@ -636,7 +669,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.shopping_bag_outlined,
+              icon: Icons.storefront,
               titleMr: 'खरेदी',
               titleEn: 'Purchase',
               onTap: onPurchaseTap,
@@ -646,7 +679,7 @@ class _QuickActions extends StatelessWidget {
           SizedBox(
             width: 76,
             child: _QuickAction(
-              icon: Icons.point_of_sale_outlined,
+              icon: Icons.sell,
               titleMr: 'विक्री',
               titleEn: 'Sales',
               onTap: onSalesTap,
@@ -919,14 +952,14 @@ class _MenuSheet extends StatelessWidget {
   const _MenuSheet();
 
   static const _menuItems = [
-    (icon: Icons.people_outline, labelMr: 'ग्राहक', labelEn: 'Customers', route: 'customer-list'),
-    (icon: Icons.account_balance_wallet_outlined, labelMr: 'गिरवी', labelEn: 'Girvi', route: 'girvi-list'),
-    (icon: Icons.point_of_sale_outlined, labelMr: 'विक्री', labelEn: 'Sales', route: 'sales-dashboard'),
-    (icon: Icons.shopping_bag_outlined, labelMr: 'खरेदी', labelEn: 'Purchase', route: 'purchase-dashboard'),
-    (icon: Icons.savings_outlined, labelMr: 'बचत योजना', labelEn: 'Savings', route: 'savings-dashboard'),
-    (icon: Icons.bar_chart_outlined, labelMr: 'अहवाल', labelEn: 'Reports', route: 'reports-dashboard'),
-    (icon: Icons.gavel_outlined, labelMr: 'अनुपालन', labelEn: 'Compliance', route: 'compliance-dashboard'),
-    (icon: Icons.calculate_outlined, labelMr: 'व्याज', labelEn: 'Interest', route: 'interest-calculator'),
+    (icon: Icons.groups, labelMr: 'ग्राहक', labelEn: 'Customers', route: 'customer-list'),
+    (icon: Icons.lock_outlined, labelMr: 'गिरवी', labelEn: 'Girvi', route: 'girvi-list'),
+    (icon: Icons.sell, labelMr: 'विक्री', labelEn: 'Sales', route: 'sales-dashboard'),
+    (icon: Icons.storefront, labelMr: 'खरेदी', labelEn: 'Purchase', route: 'purchase-dashboard'),
+    (icon: Icons.account_balance_wallet_outlined, labelMr: 'बचत योजना', labelEn: 'Savings', route: 'savings-dashboard'),
+    (icon: Icons.analytics, labelMr: 'अहवाल', labelEn: 'Reports', route: 'reports-dashboard'),
+    (icon: Icons.verified, labelMr: 'अनुपालन', labelEn: 'Compliance', route: 'compliance-dashboard'),
+    (icon: Icons.percent, labelMr: 'व्याज', labelEn: 'Interest', route: 'interest-calculator'),
   ];
 
   @override

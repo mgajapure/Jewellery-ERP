@@ -150,6 +150,7 @@ class _LoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _FormActionCard(
+            icon: Icons.gavel,
             titleMr: 'फॉर्म ६',
             titleEn: 'Form 6',
             subtitle: 'Money Lending License',
@@ -157,6 +158,7 @@ class _LoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _FormActionCard(
+            icon: Icons.today,
             titleMr: 'फॉर्म ९',
             titleEn: 'Form 9',
             subtitle: 'Daily Loan Register',
@@ -164,6 +166,7 @@ class _LoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _FormActionCard(
+            icon: Icons.lock_outlined,
             titleMr: 'फॉर्म ११ आणि १२',
             titleEn: 'Forms 11 & 12',
             subtitle: 'Pledged Articles & Loan Register',
@@ -171,6 +174,7 @@ class _LoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           _FormActionCard(
+            icon: Icons.summarize,
             titleMr: 'फॉर्म १३',
             titleEn: 'Form 13',
             subtitle: 'Annual Statutory Return',
@@ -400,12 +404,14 @@ class _AlertCard extends StatelessWidget {
 
 class _FormActionCard extends StatelessWidget {
   const _FormActionCard({
+    required this.icon,
     required this.titleMr,
     required this.titleEn,
     required this.subtitle,
     required this.onTap,
   });
 
+  final IconData icon;
   final String titleMr;
   final String titleEn;
   final String subtitle;
@@ -432,8 +438,8 @@ class _FormActionCard extends StatelessWidget {
                 color: ComplianceColors.navy.withAlpha(10),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: const Icon(
-                Icons.description_outlined,
+              child: Icon(
+                icon,
                 color: ComplianceColors.navy,
               ),
             ),

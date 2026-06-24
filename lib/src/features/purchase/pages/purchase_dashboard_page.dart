@@ -125,36 +125,42 @@ class _LoadedView extends StatelessWidget {
         labelEn: "Today's Purchases",
         value: '${stats.todayPurchases}',
         color: PurchaseColors.navy,
+        icon: Icons.shopping_cart,
       ),
       _Metric(
         labelMr: 'खरेदी मूल्य',
         labelEn: 'Purchase Value',
         value: '₹${fmt.format(stats.todayValue)}',
         color: PurchaseColors.gold,
+        icon: Icons.payments,
       ),
       _Metric(
         labelMr: 'प्रलंबित मंजुरी',
         labelEn: 'Pending Approvals',
         value: '${stats.pendingApprovals}',
         color: PurchaseColors.orange,
+        icon: Icons.pending_actions,
       ),
       _Metric(
         labelMr: 'पुरवठादार',
         labelEn: 'Suppliers',
         value: '${stats.totalSuppliers}',
         color: PurchaseColors.blue,
+        icon: Icons.storefront,
       ),
       _Metric(
         labelMr: 'स्क्रॅप खरेदी',
         labelEn: 'Scrap Purchases',
         value: '${stats.scrapPurchases}',
         color: PurchaseColors.green,
+        icon: Icons.recycling,
       ),
       _Metric(
         labelMr: 'इन्व्हेंटरी जोडले',
         labelEn: 'Inventory Added',
         value: '${stats.inventoryAdded}',
         color: PurchaseColors.navy,
+        icon: Icons.inventory_2,
       ),
     ];
 
@@ -187,28 +193,28 @@ class _LoadedView extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _ActionCard(
-            icon: Icons.add_shopping_cart_outlined,
+            icon: Icons.add_business,
             titleMr: 'नवीन खरेदी',
             titleEn: 'New Purchase',
             onTap: () => context.goNamed('new-purchase'),
           ),
           const SizedBox(height: 12),
           _ActionCard(
-            icon: Icons.menu_book_outlined,
+            icon: Icons.receipt_long,
             titleMr: 'खरेदी खाते',
             titleEn: 'Purchase Ledger',
             onTap: () => context.goNamed('purchase-ledger'),
           ),
           const SizedBox(height: 12),
           _ActionCard(
-            icon: Icons.business_outlined,
+            icon: Icons.storefront,
             titleMr: 'पुरवठादार',
             titleEn: 'Suppliers',
             onTap: () => context.goNamed('suppliers'),
           ),
           const SizedBox(height: 12),
           _ActionCard(
-            icon: Icons.bar_chart_outlined,
+            icon: Icons.analytics,
             titleMr: 'अहवाल',
             titleEn: 'Reports',
             onTap: () => context.goNamed('reports-dashboard'),
@@ -225,12 +231,14 @@ class _Metric {
     required this.labelEn,
     required this.value,
     required this.color,
+    required this.icon,
   });
 
   final String labelMr;
   final String labelEn;
   final String value;
   final Color color;
+  final IconData icon;
 }
 
 class _MetricCard extends StatelessWidget {
@@ -258,15 +266,31 @@ class _MetricCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            metric.value,
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: metric.color,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  metric.value,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: metric.color,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Container(
+                width: 34,
+                height: 34,
+                decoration: BoxDecoration(
+                  color: metric.color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(metric.icon, color: metric.color, size: 18),
+              ),
+            ],
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

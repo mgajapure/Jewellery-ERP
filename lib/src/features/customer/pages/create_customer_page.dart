@@ -53,6 +53,7 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
   String? _photoPath;
   String? _aadhaarImagePath;
   final _imagePicker = ImagePicker();
+  int _currentStep = 0;
 
   @override
   void dispose() {
@@ -183,208 +184,272 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
                   Expanded(
                     child: Form(
                       key: _formKey,
-                      child: ListView(
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                        children: [
-                          const _SectionTitle(
-                            titleMr: 'वैयक्तिक माहिती',
-                            titleEn: 'Personal Information',
+                      child: Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: const ColorScheme.light(
+                            primary: CustomerColors.navy,
+                            onPrimary: Colors.white,
                           ),
-                          const SizedBox(height: 12),
-                          _AppTextField(
-                            controller: _nameController,
-                            label: 'पूर्ण नाव / Full Name',
-                            hint: 'ग्राहकाचे पूर्ण नाव टाका',
-                            prefixIcon: Icons.person_outline,
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'नाव आवश्यक आहे / Name is required'
-                                : null,
-                          ),
-                          const SizedBox(height: 14),
-                          _AppTextField(
-                            controller: _mobileController,
-                            label: 'मोबाईल नंबर / Mobile Number',
-                            hint: '10 अंकी मोबाईल नंबर',
-                            prefixIcon: Icons.phone_outlined,
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            maxLength: 10,
-                            validator: (v) {
-                              if (v == null || v.trim().isEmpty) {
-                                return 'मोबाईल आवश्यक आहे / Mobile required';
-                              }
-                              if (v.trim().length != 10) {
-                                return '10 अंकी नंबर टाका / Enter 10-digit number';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          _AppTextField(
-                            controller: _altMobileController,
-                            label: 'पर्यायी मोबाईल / Alternate Mobile',
-                            hint: 'पर्यायी मोबाईल नंबर (ऐच्छिक)',
-                            prefixIcon: Icons.phone_android_outlined,
-                            keyboardType: TextInputType.phone,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            maxLength: 10,
-                          ),
-                          const SizedBox(height: 14),
-                          _GenderDropdown(
-                            value: _selectedGender,
-                            onChanged: (v) {
-                              if (v != null) {
-                                setState(() => _selectedGender = v);
-                              }
-                            },
-                          ),
-                          const SizedBox(height: 14),
-                          _DatePickerField(
-                            value: _selectedDob,
-                            onTap: _pickDate,
-                          ),
-                          const SizedBox(height: 22),
-                          const _SectionTitle(
-                            titleMr: 'पत्ता',
-                            titleEn: 'Address',
-                          ),
-                          const SizedBox(height: 12),
-                          _AppTextField(
-                            controller: _addressController,
-                            label: 'पत्ता / Address',
-                            hint: 'घर क्रमांक, रस्ता, परिसर',
-                            prefixIcon: Icons.home_outlined,
-                            maxLines: 2,
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'पत्ता आवश्यक आहे / Address required'
-                                : null,
-                          ),
-                          const SizedBox(height: 14),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _AppTextField(
-                                  controller: _cityController,
-                                  label: 'शहर / City',
-                                  hint: 'शहर',
-                                  prefixIcon: Icons.location_city_outlined,
-                                  validator: (v) =>
-                                      (v == null || v.trim().isEmpty)
-                                          ? 'शहर आवश्यक / City required'
-                                          : null,
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _AppTextField(
-                                  controller: _pincodeController,
-                                  label: 'पिनकोड / Pincode',
-                                  hint: '6 अंक',
-                                  prefixIcon: Icons.pin_drop_outlined,
-                                  keyboardType: TextInputType.number,
-                                  inputFormatters: [
-                                    FilteringTextInputFormatter.digitsOnly,
-                                  ],
-                                  maxLength: 6,
-                                  validator: (v) {
-                                    if (v == null || v.trim().isEmpty) {
-                                      return 'पिनकोड आवश्यक';
-                                    }
-                                    if (v.trim().length != 6) {
-                                      return '6 अंक टाका';
-                                    }
-                                    return null;
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 14),
-                          _AppTextField(
-                            controller: _stateController,
-                            label: 'राज्य / State',
-                            hint: 'राज्य',
-                            prefixIcon: Icons.map_outlined,
-                            validator: (v) => (v == null || v.trim().isEmpty)
-                                ? 'राज्य आवश्यक / State required'
-                                : null,
-                          ),
-                          const SizedBox(height: 22),
-                          const _SectionTitle(
-                            titleMr: 'KYC माहिती',
-                            titleEn: 'KYC Information',
-                          ),
-                          const SizedBox(height: 12),
-                          _AadhaarCaptureTile(
-                            imagePath: _aadhaarImagePath,
-                            onTap: _pickAadhaarImage,
-                          ),
-                          const SizedBox(height: 14),
-                          _AppTextField(
-                            controller: _aadhaarController,
-                            label: 'आधार क्रमांक / Aadhaar Number',
-                            hint: '12 अंकी आधार क्रमांक',
-                            prefixIcon: Icons.badge_outlined,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                            ],
-                            maxLength: 12,
-                          ),
-                          const SizedBox(height: 14),
-                          _AppTextField(
-                            controller: _panController,
-                            label: 'PAN क्रमांक / PAN Number',
-                            hint:
-                                'ABCDE1234F (₹50,000 पेक्षा जास्त व्यवहारासाठी अनिवार्य)',
-                            prefixIcon: Icons.credit_card_outlined,
-                            textCapitalization: TextCapitalization.characters,
-                          ),
-                          const SizedBox(height: 14),
-                          _CustomerPhotoTile(
-                            imagePath: _photoPath,
-                            onTap: _pickPhoto,
-                          ),
-                          const SizedBox(height: 28),
-                          SizedBox(
-                            width: double.infinity,
-                            height: 52,
-                            child: ElevatedButton(
-                              onPressed: isSubmitting ? null : _submit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: CustomerColors.navy,
-                                foregroundColor: CustomerColors.gold,
-                                disabledBackgroundColor:
-                                    CustomerColors.navy.withValues(alpha: 0.6),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                elevation: 0,
-                              ),
-                              child: isSubmitting
-                                  ? const SizedBox(
-                                      width: 22,
-                                      height: 22,
-                                      child: CircularProgressIndicator(
-                                        color: CustomerColors.gold,
-                                        strokeWidth: 2.5,
+                        ),
+                        child: Stepper(
+                          type: StepperType.horizontal,
+                          currentStep: _currentStep,
+                          onStepTapped: (i) => setState(() => _currentStep = i),
+                          onStepContinue: () {
+                            if (_currentStep < 2) {
+                              setState(() => _currentStep++);
+                            } else {
+                              _submit();
+                            }
+                          },
+                          onStepCancel: () {
+                            if (_currentStep > 0) {
+                              setState(() => _currentStep--);
+                            }
+                          },
+                          controlsBuilder: (context, details) {
+                            final isLast = _currentStep == 2;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 20),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: ElevatedButton(
+                                      onPressed: isSubmitting
+                                          ? null
+                                          : details.onStepContinue,
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: CustomerColors.navy,
+                                        foregroundColor: CustomerColors.gold,
+                                        disabledBackgroundColor:
+                                            CustomerColors.navy.withValues(alpha: 0.6),
+                                        minimumSize: const Size(0, 48),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                        elevation: 0,
                                       ),
-                                    )
-                                  : const Text(
-                                      'ग्राहक जतन करा / Save Customer',
-                                      style: TextStyle(
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.w800,
-                                      ),
+                                      child: isSubmitting && isLast
+                                          ? const SizedBox(
+                                              width: 20,
+                                              height: 20,
+                                              child: CircularProgressIndicator(
+                                                color: CustomerColors.gold,
+                                                strokeWidth: 2.5,
+                                              ),
+                                            )
+                                          : Text(
+                                              isLast
+                                                  ? 'ग्राहक जतन करा / Save Customer'
+                                                  : 'पुढे / Continue',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w800,
+                                              ),
+                                            ),
                                     ),
+                                  ),
+                                  if (_currentStep > 0) ...[
+                                    const SizedBox(width: 12),
+                                    OutlinedButton(
+                                      onPressed: details.onStepCancel,
+                                      style: OutlinedButton.styleFrom(
+                                        foregroundColor: CustomerColors.muted,
+                                        side: const BorderSide(color: CustomerColors.line),
+                                        minimumSize: const Size(80, 48),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                        ),
+                                      ),
+                                      child: const Text('मागे / Back'),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            );
+                          },
+                          steps: [
+                            Step(
+                              title: const Text('वैयक्तिक\nPersonal'),
+                              isActive: _currentStep >= 0,
+                              state: _currentStep > 0
+                                  ? StepState.complete
+                                  : StepState.indexed,
+                              content: Column(
+                                children: [
+                                  _AppTextField(
+                                    controller: _nameController,
+                                    label: 'पूर्ण नाव / Full Name',
+                                    hint: 'ग्राहकाचे पूर्ण नाव टाका',
+                                    prefixIcon: Icons.person_outline,
+                                    validator: (v) =>
+                                        (v == null || v.trim().isEmpty)
+                                            ? 'नाव आवश्यक आहे / Name is required'
+                                            : null,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _AppTextField(
+                                    controller: _mobileController,
+                                    label: 'मोबाईल नंबर / Mobile Number',
+                                    hint: '10 अंकी मोबाईल नंबर',
+                                    prefixIcon: Icons.phone_outlined,
+                                    keyboardType: TextInputType.phone,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    maxLength: 10,
+                                    validator: (v) {
+                                      if (v == null || v.trim().isEmpty) {
+                                        return 'मोबाईल आवश्यक आहे / Mobile required';
+                                      }
+                                      if (v.trim().length != 10) {
+                                        return '10 अंकी नंबर टाका / Enter 10-digit number';
+                                      }
+                                      return null;
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _AppTextField(
+                                    controller: _altMobileController,
+                                    label: 'पर्यायी मोबाईल / Alternate Mobile',
+                                    hint: 'पर्यायी मोबाईल नंबर (ऐच्छिक)',
+                                    prefixIcon: Icons.phone_android_outlined,
+                                    keyboardType: TextInputType.phone,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    maxLength: 10,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _GenderDropdown(
+                                    value: _selectedGender,
+                                    onChanged: (v) {
+                                      if (v != null) {
+                                        setState(() => _selectedGender = v);
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _DatePickerField(
+                                    value: _selectedDob,
+                                    onTap: _pickDate,
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ],
+                            Step(
+                              title: const Text('पत्ता\nAddress'),
+                              isActive: _currentStep >= 1,
+                              state: _currentStep > 1
+                                  ? StepState.complete
+                                  : StepState.indexed,
+                              content: Column(
+                                children: [
+                                  _AppTextField(
+                                    controller: _addressController,
+                                    label: 'पत्ता / Address',
+                                    hint: 'घर क्रमांक, रस्ता, परिसर',
+                                    prefixIcon: Icons.home_outlined,
+                                    maxLines: 2,
+                                    validator: (v) =>
+                                        (v == null || v.trim().isEmpty)
+                                            ? 'पत्ता आवश्यक आहे / Address required'
+                                            : null,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: _AppTextField(
+                                          controller: _cityController,
+                                          label: 'शहर / City',
+                                          hint: 'शहर',
+                                          prefixIcon: Icons.location_city_outlined,
+                                          validator: (v) =>
+                                              (v == null || v.trim().isEmpty)
+                                                  ? 'शहर आवश्यक / City required'
+                                                  : null,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: _AppTextField(
+                                          controller: _pincodeController,
+                                          label: 'पिनकोड / Pincode',
+                                          hint: '6 अंक',
+                                          prefixIcon: Icons.pin_drop_outlined,
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter.digitsOnly,
+                                          ],
+                                          maxLength: 6,
+                                          validator: (v) {
+                                            if (v == null || v.trim().isEmpty) {
+                                              return 'पिनकोड आवश्यक';
+                                            }
+                                            if (v.trim().length != 6) {
+                                              return '6 अंक टाका';
+                                            }
+                                            return null;
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _AppTextField(
+                                    controller: _stateController,
+                                    label: 'राज्य / State',
+                                    hint: 'राज्य',
+                                    prefixIcon: Icons.map_outlined,
+                                    validator: (v) =>
+                                        (v == null || v.trim().isEmpty)
+                                            ? 'राज्य आवश्यक / State required'
+                                            : null,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Step(
+                              title: const Text('KYC'),
+                              isActive: _currentStep >= 2,
+                              state: StepState.indexed,
+                              content: Column(
+                                children: [
+                                  _AadhaarCaptureTile(
+                                    imagePath: _aadhaarImagePath,
+                                    onTap: _pickAadhaarImage,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _AppTextField(
+                                    controller: _aadhaarController,
+                                    label: 'आधार क्रमांक / Aadhaar Number',
+                                    hint: '12 अंकी आधार क्रमांक',
+                                    prefixIcon: Icons.badge_outlined,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    maxLength: 12,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _AppTextField(
+                                    controller: _panController,
+                                    label: 'PAN क्रमांक / PAN Number',
+                                    hint: 'ABCDE1234F (₹50,000 पेक्षा जास्त व्यवहारासाठी अनिवार्य)',
+                                    prefixIcon: Icons.credit_card_outlined,
+                                    textCapitalization: TextCapitalization.characters,
+                                  ),
+                                  const SizedBox(height: 14),
+                                  _CustomerPhotoTile(
+                                    imagePath: _photoPath,
+                                    onTap: _pickPhoto,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
@@ -429,39 +494,6 @@ class _CreateCustomerHeader extends StatelessWidget {
           const SizedBox(width: 48),
         ],
       ),
-    );
-  }
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.titleMr, required this.titleEn});
-
-  final String titleMr;
-  final String titleEn;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titleMr,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          titleEn,
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }

@@ -127,7 +127,7 @@ class _CustomerBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         backgroundColor: CustomerColors.screenBg,
         body: SafeArea(
@@ -153,6 +153,7 @@ class _CustomerBody extends StatelessWidget {
                   tabs: [
                     _TabLabel(mr: 'प्रोफाइल', en: 'Profile'),
                     _TabLabel(mr: 'गिरवी', en: 'Loans'),
+                    _TabLabel(mr: 'पेमेंट', en: 'Payment'),
                     _TabLabel(mr: 'योजना', en: 'Schemes'),
                     _TabLabel(mr: 'इतिहास', en: 'History'),
                   ],
@@ -163,6 +164,7 @@ class _CustomerBody extends StatelessWidget {
                   children: [
                     _ProfileTab(customer: customer),
                     const _LoansTab(),
+                    const _PaymentTab(),
                     const _SchemesTab(),
                     const _HistoryTab(),
                   ],
@@ -796,15 +798,27 @@ class _LoansTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TabComingSoon(
+    return const _DataPlaceholder(
       icon: Icons.account_balance_wallet_outlined,
       titleMr: 'गिरवी इतिहास',
       titleEn: 'Loan History',
       bodyMr: 'या ग्राहकाचे सर्व गिरवी व्यवहार येथे दिसतील.',
       bodyEn: 'All girvi transactions for this customer will appear here.',
-      actionMr: 'गिरवी यादी पहा',
-      actionEn: 'View All Girvi',
-      onAction: () => context.goNamed('girvi-list'),
+    );
+  }
+}
+
+class _PaymentTab extends StatelessWidget {
+  const _PaymentTab();
+
+  @override
+  Widget build(BuildContext context) {
+    return const _DataPlaceholder(
+      icon: Icons.payments_outlined,
+      titleMr: 'पेमेंट इतिहास',
+      titleEn: 'Payment History',
+      bodyMr: 'ग्राहकाची सर्व देयके आणि व्यवहार येथे दिसतील.',
+      bodyEn: 'All customer payments and transactions will appear here.',
     );
   }
 }
@@ -814,15 +828,12 @@ class _SchemesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TabComingSoon(
+    return const _DataPlaceholder(
       icon: Icons.savings_outlined,
       titleMr: 'बचत योजना',
       titleEn: 'Savings Schemes',
       bodyMr: 'ग्राहकाच्या बचत योजना येथे दाखवल्या जातील.',
       bodyEn: 'Customer savings schemes will be displayed here.',
-      actionMr: 'बचत डॅशबोर्ड',
-      actionEn: 'Savings Dashboard',
-      onAction: () => context.goNamed('savings-dashboard'),
     );
   }
 }
@@ -832,36 +843,28 @@ class _HistoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _TabComingSoon(
+    return const _DataPlaceholder(
       icon: Icons.history_outlined,
       titleMr: 'व्यवहार इतिहास',
       titleEn: 'Transaction History',
       bodyMr: 'देयके, नूतनीकरण आणि इतर सर्व व्यवहार येथे दिसतील.',
       bodyEn: 'Payments, renewals and all transactions will appear here.',
-      actionMr: 'अहवाल पहा',
-      actionEn: 'View Reports',
-      onAction: () => context.goNamed('reports-dashboard'),
     );
   }
 }
 
-class _TabComingSoon extends StatelessWidget {
-  const _TabComingSoon({
+class _DataPlaceholder extends StatelessWidget {
+  const _DataPlaceholder({
     required this.icon,
     required this.titleMr,
     required this.titleEn,
     required this.bodyMr,
     required this.bodyEn,
-    required this.actionMr,
-    required this.actionEn,
-    required this.onAction,
   });
 
   final IconData icon;
   final String titleMr, titleEn;
   final String bodyMr, bodyEn;
-  final String actionMr, actionEn;
-  final VoidCallback onAction;
 
   @override
   Widget build(BuildContext context) {
@@ -912,23 +915,6 @@ class _TabComingSoon extends StatelessWidget {
                   color: CustomerColors.muted,
                   fontSize: 12,
                   height: 1.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: onAction,
-                icon: const Icon(Icons.arrow_forward, size: 16),
-                label: Text('$actionMr / $actionEn'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: CustomerColors.navy,
-                  side: const BorderSide(color: CustomerColors.navy),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 12,
-                  ),
                 ),
               ),
             ],

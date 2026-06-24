@@ -6,7 +6,6 @@ import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
 import '../../../core/di/injection.dart';
-import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_empty_state.dart';
 import '../../../shared/widgets/app_error_state.dart';
@@ -18,7 +17,6 @@ import '../presentation/bloc/customer_list_state.dart';
 import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_details_page.dart';
-import 'customer_search_page.dart';
 
 /// SCR-010 Customer List / Search
 /// Displays a searchable, filterable list of customers with real BLoC data.
@@ -50,8 +48,10 @@ class _CustomerListView extends StatelessWidget {
             const _CustomerListHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: _SearchBar(
-                onTap: () => context.goNamed(CustomerSearchPage.routeName),
+              child: _InlineSearchBar(
+                onChanged: (query) => context
+                    .read<CustomerListBloc>()
+                    .add(SearchCustomerList(query)),
               ),
             ),
             const _FilterChips(),
@@ -134,15 +134,10 @@ class _CustomerListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () =>
-                AppNavigation.popOrGoNamed(context, DashboardPage.routeName),
-            icon: const Icon(Icons.arrow_back, color: CustomerColors.ink),
-            tooltip: 'Back',
-          ),
+          const SizedBox(width: 48),
           const Expanded(
             child: Text(
               'ग्राहक सूची / Customers',
@@ -165,56 +160,75 @@ class _CustomerListHeader extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.onTap});
+class _InlineSearchBar extends StatefulWidget {
+  const _InlineSearchBar({required this.onChanged});
 
-  final VoidCallback onTap;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_InlineSearchBar> createState() => _InlineSearchBarState();
+}
+
+class _InlineSearchBarState extends State<_InlineSearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: CustomerColors.line),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x10000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          children: const [
-            Icon(Icons.search, color: CustomerColors.muted, size: 22),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                'नाव, मोबाईल, ग्राहक ID शोधा',
-                style: TextStyle(
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: CustomerColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x10000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.search, color: CustomerColors.muted, size: 22),
+          const SizedBox(width: 12),
+          Expanded(
+            child: TextField(
+              controller: _controller,
+              onChanged: (v) {
+                setState(() {});
+                widget.onChanged(v);
+              },
+              decoration: const InputDecoration(
+                hintText: 'नाव, मोबाईल, ID शोधा / Search name, mobile, ID',
+                hintStyle: TextStyle(
                   color: CustomerColors.muted,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
                 ),
+                border: InputBorder.none,
+                contentPadding: EdgeInsets.symmetric(vertical: 14),
               ),
             ),
-            Text(
-              'Search name, mobile, ID',
-              style: TextStyle(
-                color: CustomerColors.muted,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(width: 10),
-            Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
-          ],
-        ),
+          ),
+          if (_controller.text.isNotEmpty)
+            GestureDetector(
+              onTap: () {
+                _controller.clear();
+                setState(() {});
+                widget.onChanged('');
+              },
+              child: const Icon(Icons.close, color: CustomerColors.muted, size: 18),
+            )
+          else
+            const Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
+        ],
       ),
     );
   }

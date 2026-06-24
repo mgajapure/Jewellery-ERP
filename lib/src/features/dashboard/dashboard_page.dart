@@ -1025,7 +1025,7 @@ class _MenuSheet extends StatelessWidget {
               physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 4,
-                childAspectRatio: 0.85,
+                childAspectRatio: 0.75,
                 crossAxisSpacing: 8,
                 mainAxisSpacing: 8,
               ),
@@ -1057,6 +1057,18 @@ class _MenuSheet extends StatelessWidget {
                           color: _ink,
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        item.labelEn,
+                        style: const TextStyle(
+                          color: _muted,
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
                         ),
                         textAlign: TextAlign.center,
                         maxLines: 1,

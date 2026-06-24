@@ -216,7 +216,7 @@ class _PartialPaymentViewState extends State<_PartialPaymentView> {
                     height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: GirviColors.navy,
+                        backgroundColor: GirviColors.green,
                         foregroundColor: Colors.white,
                         disabledBackgroundColor: GirviColors.line,
                         disabledForegroundColor: GirviColors.muted,
@@ -273,7 +273,7 @@ class _NavBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: GirviColors.navy,
+      backgroundColor: GirviColors.green,
       foregroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(

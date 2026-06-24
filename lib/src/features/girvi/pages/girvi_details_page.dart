@@ -1108,106 +1108,81 @@ class _BottomActionBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
           child: Row(
             children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.call,
-                  labelMr: 'कॉल करा',
-                  labelEn: 'Call',
-                  backgroundColor: Colors.white,
-                  foregroundColor: GirviColors.ink,
-                  onTap: () {},
+              InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: GirviColors.screenBg,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: GirviColors.line),
+                  ),
+                  child: const Icon(Icons.call, color: GirviColors.ink, size: 22),
                 ),
               ),
-              Container(width: 1, height: 36, color: GirviColors.line),
+              const SizedBox(width: 10),
               Expanded(
-                child: _ActionButton(
-                  icon: Icons.currency_rupee,
-                  labelMr: 'पेमेंट घ्या',
-                  labelEn: 'Take Payment',
-                  backgroundColor:
-                      canShowActions ? GirviColors.navy : GirviColors.line,
-                  foregroundColor: canShowActions ? Colors.white : GirviColors.muted,
-                  onTap: canShowActions
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.currency_rupee, size: 18),
+                  label: const Text('पेमेंट घ्या / Take Payment'),
+                  onPressed: canShowActions
                       ? () => context.goNamed(
                             PartialPaymentPage.routeName,
                             pathParameters: {'id': girvi.id},
                           )
-                      : () {},
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GirviColors.navy,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: GirviColors.line,
+                    disabledForegroundColor: GirviColors.muted,
+                    minimumSize: const Size(0, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
-              Container(width: 1, height: 36, color: GirviColors.line),
+              const SizedBox(width: 10),
               Expanded(
-                child: _ActionButton(
-                  icon: Icons.autorenew,
-                  labelMr: 'नूतनीकरण',
-                  labelEn: 'Renew',
-                  backgroundColor: canShowActions ? GirviColors.gold : GirviColors.line,
-                  foregroundColor: canShowActions ? GirviColors.ink : GirviColors.muted,
-                  onTap: canShowActions
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.autorenew, size: 18),
+                  label: const Text('नूतनीकरण / Renew'),
+                  onPressed: canShowActions
                       ? () => context.goNamed(
                             RenewalPage.routeName,
                             pathParameters: {'id': girvi.id},
                           )
-                      : () {},
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GirviColors.gold,
+                    foregroundColor: GirviColors.ink,
+                    disabledBackgroundColor: GirviColors.line,
+                    disabledForegroundColor: GirviColors.muted,
+                    minimumSize: const Size(0, 52),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.labelMr,
-    required this.labelEn,
-    required this.backgroundColor,
-    required this.foregroundColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String labelMr;
-  final String labelEn;
-  final Color backgroundColor;
-  final Color foregroundColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: backgroundColor,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: foregroundColor, size: 22),
-            const SizedBox(height: 6),
-            Text(
-              labelMr,
-              style: TextStyle(
-                color: foregroundColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Text(
-              labelEn,
-              style: TextStyle(
-                color: foregroundColor.withValues(alpha: 0.8),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ),
     );

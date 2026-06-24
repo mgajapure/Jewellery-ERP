@@ -17,10 +17,8 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  static const _navy = Color(0xFF061C49);
   static const _gold = Color(0xFFE7A726);
   static const _ink = Color(0xFF071A49);
-  static const _muted = Color(0xFF5E6880);
   static const _line = Color(0xFFE5E8EF);
 
   final List<_NavItemConfig> _items = const [
@@ -93,9 +91,9 @@ class AppBottomNav extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: selected ? _ink : _muted,
+                      color: selected ? _gold : _ink,
                       fontSize: 9,
-                      fontWeight: FontWeight.w700,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],

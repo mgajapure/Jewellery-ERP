@@ -189,16 +189,17 @@ class _DashboardHeader extends StatelessWidget {
             icon: const Icon(Icons.menu, color: _ink),
             tooltip: 'Menu',
           ),
-          const Spacer(),
-          const Text(
-            'डॅशबोर्ड / Dashboard',
-            style: TextStyle(
-              color: _ink,
-              fontSize: 16,
-              fontWeight: FontWeight.w800,
+          const SizedBox(width: 4),
+          const Expanded(
+            child: Text(
+              'डॅशबोर्ड / Dashboard',
+              style: TextStyle(
+                color: _ink,
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
-          const Spacer(),
           Stack(
             clipBehavior: Clip.none,
             children: [
@@ -615,93 +616,65 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.add_circle_outline,
-              titleMr: 'नवीन गिरवी',
-              titleEn: 'New Girvi',
-              filled: true,
-              onTap: onNewGirviTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.person_search,
-              titleMr: 'ग्राहक शोधा',
-              titleEn: 'Search Customer',
-              onTap: onSearchCustomerTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.alarm_outlined,
-              titleMr: 'देय अलर्ट',
-              titleEn: 'Due Alerts',
-              onTap: onDueAlertsTap,
-              badgeColor: _red,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.lock_outlined,
-              titleMr: 'तिजोरी शोध',
-              titleEn: 'Vault Search',
-              onTap: onVaultSearchTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.percent,
-              titleMr: 'व्याज गणना',
-              titleEn: 'Interest Calc',
-              onTap: onInterestCalcTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.verified,
-              titleMr: 'अनुपालन',
-              titleEn: 'Compliance',
-              onTap: onComplianceTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.storefront,
-              titleMr: 'खरेदी',
-              titleEn: 'Purchase',
-              onTap: onPurchaseTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.sell,
-              titleMr: 'विक्री',
-              titleEn: 'Sales',
-              onTap: onSalesTap,
-            ),
-          ),
-        ],
-      ),
+    return GridView.count(
+      crossAxisCount: 4,
+      crossAxisSpacing: 8,
+      mainAxisSpacing: 12,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      childAspectRatio: 0.82,
+      children: [
+        _QuickAction(
+          icon: Icons.add_circle_outline,
+          titleMr: 'नवीन गिरवी',
+          titleEn: 'New Girvi',
+          filled: true,
+          onTap: onNewGirviTap,
+        ),
+        _QuickAction(
+          icon: Icons.person_search,
+          titleMr: 'ग्राहक शोधा',
+          titleEn: 'Search',
+          onTap: onSearchCustomerTap,
+        ),
+        _QuickAction(
+          icon: Icons.alarm_outlined,
+          titleMr: 'देय अलर्ट',
+          titleEn: 'Due Alerts',
+          onTap: onDueAlertsTap,
+          badgeColor: _red,
+        ),
+        _QuickAction(
+          icon: Icons.lock_outlined,
+          titleMr: 'तिजोरी',
+          titleEn: 'Vault',
+          onTap: onVaultSearchTap,
+        ),
+        _QuickAction(
+          icon: Icons.percent,
+          titleMr: 'व्याज',
+          titleEn: 'Interest',
+          onTap: onInterestCalcTap,
+        ),
+        _QuickAction(
+          icon: Icons.verified,
+          titleMr: 'अनुपालन',
+          titleEn: 'Compliance',
+          onTap: onComplianceTap,
+        ),
+        _QuickAction(
+          icon: Icons.storefront,
+          titleMr: 'खरेदी',
+          titleEn: 'Purchase',
+          onTap: onPurchaseTap,
+        ),
+        _QuickAction(
+          icon: Icons.sell,
+          titleMr: 'विक्री',
+          titleEn: 'Sales',
+          onTap: onSalesTap,
+        ),
+      ],
     );
   }
 }

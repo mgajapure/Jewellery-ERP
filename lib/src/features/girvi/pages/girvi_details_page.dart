@@ -1108,15 +1108,15 @@ class _BottomActionBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
               InkWell(
                 onTap: () {},
                 borderRadius: BorderRadius.circular(14),
                 child: Container(
-                  width: 52,
-                  height: 52,
+                  width: 42,
+                  height: 40,
                   decoration: BoxDecoration(
                     color: GirviColors.screenBg,
                     borderRadius: BorderRadius.circular(14),
@@ -1141,7 +1141,7 @@ class _BottomActionBar extends StatelessWidget {
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: GirviColors.line,
                     disabledForegroundColor: GirviColors.muted,
-                    minimumSize: const Size(0, 52),
+                    minimumSize: const Size(0, 40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
@@ -1169,7 +1169,7 @@ class _BottomActionBar extends StatelessWidget {
                     foregroundColor: GirviColors.ink,
                     disabledBackgroundColor: GirviColors.line,
                     disabledForegroundColor: GirviColors.muted,
-                    minimumSize: const Size(0, 52),
+                    minimumSize: const Size(0, 40),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),

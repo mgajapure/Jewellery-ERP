@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_bottom_nav.dart';
-import '../../../core/widgets/app_header.dart';
 import '../../compliance/compliance.dart';
 import '../../inventory/inventory.dart';
 import '../../interest/interest.dart';
@@ -102,42 +101,44 @@ class MorePage extends StatelessWidget {
       backgroundColor: const Color(0xFFF8F9FC),
       body: SafeArea(
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const AppListHeader(
-              titleMr: 'सर्व मॉड्यूल्स',
-              titleEn: 'All Modules',
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'अधिक मॉड्यूल्स / More Modules',
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
+              child: const Text(
+                'अधिक / More',
                 style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
                   color: Color(0xFF071A49),
+                  fontSize: 16,
+                  fontWeight: FontWeight.w800,
                 ),
               ),
-              const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _modules.map((module) => _ModuleCard(module: module)).toList(),
+            ),
+            Expanded(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(
+                    top: BorderSide(color: Color(0xFFE5E8EF)),
+                  ),
+                ),
+                child: ListView.separated(
+                  padding: EdgeInsets.zero,
+                  itemCount: _modules.length,
+                  separatorBuilder: (context, i) =>
+                      const Divider(height: 1, color: Color(0xFFE5E8EF)),
+                  itemBuilder: (context, i) => _ModuleTile(
+                    module: _modules[i],
+                    onTap: () =>
+                        context.pushNamed(_modules[i]['route'] as String),
+                  ),
+                ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
-    ],
-  ),
-),
-bottomNavigationBar: AppBottomNav(
+      bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
         onTap: (index) {
           switch (index) {
@@ -159,70 +160,60 @@ bottomNavigationBar: AppBottomNav(
   }
 }
 
-class _ModuleCard extends StatelessWidget {
-  const _ModuleCard({required this.module});
-
+class _ModuleTile extends StatelessWidget {
+  const _ModuleTile({required this.module, required this.onTap});
   final Map<String, dynamic> module;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final color = Color(module['color'] as int);
-    return InkWell(
-      onTap: () => context.pushNamed(module['route'] as String),
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: const Color(0xFFE5E8EF)),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x10000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                color: color.withAlpha(15),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                module['icon'] as IconData,
-                color: color,
-                size: 24,
-              ),
-            ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  module['titleMr'] as String,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF071A49),
-                  ),
+    return Material(
+      color: Colors.white,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  module['titleEn'] as String,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF5E6880),
-                  ),
+                child: Icon(module['icon'] as IconData, color: color, size: 20),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      module['titleMr'] as String,
+                      style: const TextStyle(
+                        color: Color(0xFF071A49),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 1),
+                    Text(
+                      module['titleEn'] as String,
+                      style: const TextStyle(
+                        color: Color(0xFF5E6880),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ],
+              ),
+              const Icon(Icons.chevron_right,
+                  color: Color(0xFF5E6880), size: 20),
+            ],
+          ),
         ),
       ),
     );

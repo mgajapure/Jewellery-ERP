@@ -65,20 +65,15 @@ class AppHeader extends StatelessWidget {
           else
             const SizedBox(width: 48),
           Expanded(
-            child: Column(
-              children: [
-                Text(
-                  '$titleMr / $titleEn',
-                  textAlign: TextAlign.center,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: Color(0xFF071A49),
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
+            child: Text(
+              '$titleMr / $titleEn',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                color: Color(0xFF071A49),
+                fontSize: 16,
+                fontWeight: FontWeight.w800,
+              ),
             ),
           ),
           if (actions.isNotEmpty)
@@ -121,12 +116,9 @@ class AppListHeader extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(12, 14, 18, 8),
       child: Row(
         children: [
-          const Expanded(child: SizedBox()),
           Expanded(
-            flex: 4,
             child: Text(
               '$titleMr / $titleEn',
-              textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: const TextStyle(
@@ -136,18 +128,14 @@ class AppListHeader extends StatelessWidget {
               ),
             ),
           ),
-          Expanded(
-            child: Align(
-              alignment: Alignment.centerRight,
-              child: actionIcon != null
-                  ? IconButton(
-                      onPressed: onAction,
-                      icon: Icon(actionIcon, color: const Color(0xFF071A49)),
-                      tooltip: actionTooltip,
-                    )
-                  : const SizedBox(width: 48),
-            ),
-          ),
+          if (actionIcon != null)
+            IconButton(
+              onPressed: onAction,
+              icon: Icon(actionIcon, color: const Color(0xFF071A49)),
+              tooltip: actionTooltip,
+            )
+          else
+            const SizedBox(width: 48),
         ],
       ),
     );

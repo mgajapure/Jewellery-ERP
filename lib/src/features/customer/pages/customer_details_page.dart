@@ -144,27 +144,32 @@ class _CustomerBody extends StatelessWidget {
               _ProfileAppBar(customer: customer),
               _ProfileHeaderCard(customer: customer),
               Container(
-                color: Colors.white,
-                child: const TabBar(
-                  isScrollable: true,
-                  indicatorColor: CustomerColors.gold,
-                  labelColor: CustomerColors.navy,
-                  unselectedLabelColor: CustomerColors.muted,
-                  labelStyle: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
+                margin: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: CustomerColors.line),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10),
+                  child: const TabBar(
+                    isScrollable: false,
+                    indicator: BoxDecoration(color: CustomerColors.navy),
+                    indicatorSize: TabBarIndicatorSize.tab,
+                    labelColor: Colors.white,
+                    unselectedLabelColor: CustomerColors.muted,
+                    labelStyle: TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.w800),
+                    unselectedLabelStyle: TextStyle(
+                        fontSize: 10, fontWeight: FontWeight.w600),
+                    tabs: [
+                      Tab(text: 'Profile'),
+                      Tab(text: 'Loans'),
+                      Tab(text: 'Payment'),
+                      Tab(text: 'Schemes'),
+                      Tab(text: 'History'),
+                    ],
                   ),
-                  unselectedLabelStyle: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                  ),
-                  tabs: [
-                    _TabLabel(mr: 'प्रोफाइल', en: 'Profile'),
-                    _TabLabel(mr: 'गिरवी', en: 'Loans'),
-                    _TabLabel(mr: 'पेमेंट', en: 'Payment'),
-                    _TabLabel(mr: 'योजना', en: 'Schemes'),
-                    _TabLabel(mr: 'इतिहास', en: 'History'),
-                  ],
                 ),
               ),
               Expanded(
@@ -564,28 +569,6 @@ class _HeaderStat extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _TabLabel extends StatelessWidget {
-  const _TabLabel({required this.mr, required this.en});
-
-  final String mr;
-  final String en;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(mr),
-          const SizedBox(height: 2),
-          Text(en, style: const TextStyle(fontSize: 10)),
-        ],
-      ),
     );
   }
 }
@@ -1431,43 +1414,48 @@ class _BottomActionBar extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: CustomerColors.line)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x14000000),
-            blurRadius: 12,
-            offset: Offset(0, -4),
-          ),
-        ],
       ),
       child: SafeArea(
+        top: false,
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
           child: Row(
             children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.call,
-                  labelMr: 'कॉल करा',
-                  labelEn: 'Call',
-                  onTap: () => _launchCall(context, customer.mobile),
-                ),
+              _CompactAction(
+                icon: Icons.call_outlined,
+                label: 'कॉल',
+                onTap: () => _launchCall(context, customer.mobile),
               ),
-              Container(width: 1, height: 36, color: CustomerColors.line),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.chat_bubble_outline,
-                  labelMr: 'WhatsApp',
-                  labelEn: 'WhatsApp',
-                  onTap: () => _launchWhatsApp(context, customer.mobile),
-                ),
+              const SizedBox(width: 8),
+              _CompactAction(
+                icon: Icons.chat_bubble_outline,
+                label: 'WhatsApp',
+                onTap: () => _launchWhatsApp(context, customer.mobile),
               ),
-              Container(width: 1, height: 36, color: CustomerColors.line),
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.share_outlined,
-                  labelMr: 'शेअर करा',
-                  labelEn: 'Share',
-                  onTap: () => _shareCustomer(customer),
+              const SizedBox(width: 8),
+              _CompactAction(
+                icon: Icons.share_outlined,
+                label: 'Share',
+                onTap: () => _shareCustomer(customer),
+              ),
+              const Spacer(),
+              SizedBox(
+                height: 36,
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.add, size: 14),
+                  label: const Text('New Girvi'),
+                  onPressed: () =>
+                      context.pushNamed(CreateGirviWizardPage.routeName),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: CustomerColors.navy,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(horizontal: 14),
+                    textStyle: const TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w700),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    elevation: 0,
+                  ),
                 ),
               ),
             ],
@@ -1478,44 +1466,31 @@ class _BottomActionBar extends StatelessWidget {
   }
 }
 
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.labelMr,
-    required this.labelEn,
-    required this.onTap,
-  });
-
+class _CompactAction extends StatelessWidget {
+  const _CompactAction(
+      {required this.icon, required this.label, required this.onTap});
   final IconData icon;
-  final String labelMr;
-  final String labelEn;
+  final String label;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(icon, color: CustomerColors.navy, size: 22),
-            const SizedBox(height: 6),
+            Icon(icon, size: 18, color: CustomerColors.ink),
+            const SizedBox(height: 2),
             Text(
-              labelMr,
+              label,
               style: const TextStyle(
                 color: CustomerColors.ink,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Text(
-              labelEn,
-              style: const TextStyle(
-                color: CustomerColors.muted,
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+                fontSize: 9,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ],

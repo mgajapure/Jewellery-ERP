@@ -10,6 +10,14 @@ import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
 import '../../../shared/widgets/app_error_state.dart';
 import '../../../shared/widgets/app_loader.dart';
+import '../../girvi/domain/entities/girvi.dart';
+import '../../girvi/pages/create_girvi_wizard_page.dart';
+import '../../girvi/pages/girvi_details_page.dart';
+import '../../girvi/pages/partial_payment_page.dart';
+import '../../girvi/pages/renewal_page.dart';
+import '../../girvi/presentation/bloc/girvi_list_bloc.dart';
+import '../../girvi/presentation/bloc/girvi_list_event.dart';
+import '../../girvi/presentation/bloc/girvi_list_state.dart';
 import '../domain/entities/customer.dart';
 import '../presentation/bloc/customer_detail_bloc.dart';
 import '../presentation/bloc/customer_detail_event.dart';
@@ -163,7 +171,7 @@ class _CustomerBody extends StatelessWidget {
                 child: TabBarView(
                   children: [
                     _ProfileTab(customer: customer),
-                    const _LoansTab(),
+                    _LoansTab(customer: customer),
                     const _PaymentTab(),
                     const _SchemesTab(),
                     const _HistoryTab(),
@@ -794,16 +802,503 @@ class _SectionTitle extends StatelessWidget {
 }
 
 class _LoansTab extends StatelessWidget {
-  const _LoansTab();
+  const _LoansTab({required this.customer});
+
+  final Customer customer;
 
   @override
   Widget build(BuildContext context) {
-    return const _DataPlaceholder(
-      icon: Icons.account_balance_wallet_outlined,
-      titleMr: 'गिरवी इतिहास',
-      titleEn: 'Loan History',
-      bodyMr: 'या ग्राहकाचे सर्व गिरवी व्यवहार येथे दिसतील.',
-      bodyEn: 'All girvi transactions for this customer will appear here.',
+    return BlocProvider(
+      create: (_) => getIt<GirviListBloc>()..add(const LoadGirviList()),
+      child: _LoansTabView(customer: customer),
+    );
+  }
+}
+
+class _LoansTabView extends StatelessWidget {
+  const _LoansTabView({required this.customer});
+
+  final Customer customer;
+
+  static final _fmt = NumberFormat('#,##,###', 'en_IN');
+
+  String _formatAmt(double v) => '₹${_fmt.format(v.toInt())}';
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<GirviListBloc, GirviListState>(
+      builder: (context, state) {
+        if (state is GirviListLoading || state is GirviListInitial) {
+          return const AppLoader(message: 'गिरवी लोड होत आहे...');
+        }
+        if (state is GirviListError) {
+          return AppErrorState(
+            message: state.message,
+            onRetry: () =>
+                context.read<GirviListBloc>().add(const LoadGirviList()),
+          );
+        }
+        if (state is GirviListLoaded) {
+          final loans = state.girviList
+              .where((g) => g.customerId == customer.id)
+              .toList();
+          final active = loans
+              .where((g) =>
+                  g.status == GirviStatus.active ||
+                  g.status == GirviStatus.partialPaid ||
+                  g.status == GirviStatus.overdue)
+              .toList();
+          final closed = loans
+              .where((g) =>
+                  g.status == GirviStatus.redeemed ||
+                  g.status == GirviStatus.renewed)
+              .toList();
+          final outstanding =
+              active.fold(0.0, (s, g) => s + g.outstandingAmount);
+
+          return ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
+            children: [
+              _LoansSummaryCard(
+                activeCount: active.length,
+                outstanding: outstanding,
+                formatAmt: _formatAmt,
+                onNewGirvi: () =>
+                    context.goNamed(CreateGirviWizardPage.routeName),
+              ),
+              const SizedBox(height: 16),
+              if (active.isNotEmpty) ...[
+                _LoansSectionHeader(
+                    titleMr: 'सक्रिय गिरवी', titleEn: 'Active Loans'),
+                const SizedBox(height: 10),
+                ...active.map((g) => _MiniLoanCard(
+                      girvi: g,
+                      formatAmt: _formatAmt,
+                    )),
+                const SizedBox(height: 16),
+              ],
+              if (closed.isNotEmpty) ...[
+                _LoansSectionHeader(
+                    titleMr: 'बंद गिरवी', titleEn: 'Closed Loans'),
+                const SizedBox(height: 10),
+                ...closed.map((g) => _MiniLoanCard(
+                      girvi: g,
+                      formatAmt: _formatAmt,
+                    )),
+              ],
+              if (loans.isEmpty) ...[
+                const SizedBox(height: 20),
+                _NoLoansBanner(
+                  onNewGirvi: () =>
+                      context.goNamed(CreateGirviWizardPage.routeName),
+                ),
+              ],
+            ],
+          );
+        }
+        return const SizedBox.shrink();
+      },
+    );
+  }
+}
+
+class _LoansSummaryCard extends StatelessWidget {
+  const _LoansSummaryCard({
+    required this.activeCount,
+    required this.outstanding,
+    required this.formatAmt,
+    required this.onNewGirvi,
+  });
+
+  final int activeCount;
+  final double outstanding;
+  final String Function(double) formatAmt;
+  final VoidCallback onNewGirvi;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: CustomerColors.navy,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x20000000),
+            blurRadius: 12,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'एकूण बकाया रक्कम',
+                      style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w700),
+                    ),
+                    const Text(
+                      'Total Outstanding',
+                      style: TextStyle(color: Colors.white54, fontSize: 10),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      formatAmt(outstanding),
+                      style: const TextStyle(
+                        color: CustomerColors.gold,
+                        fontSize: 24,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.white12,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      '$activeCount सक्रिय / Active',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: OutlinedButton.icon(
+              onPressed: onNewGirvi,
+              icon: const Icon(Icons.add_circle_outline, size: 16),
+              label: const Text('नवीन गिरवी तयार करा / New Girvi'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: CustomerColors.gold,
+                side: const BorderSide(color: CustomerColors.gold, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                textStyle: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LoansSectionHeader extends StatelessWidget {
+  const _LoansSectionHeader(
+      {required this.titleMr, required this.titleEn});
+
+  final String titleMr;
+  final String titleEn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          titleMr,
+          style: const TextStyle(
+            color: CustomerColors.ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          '/ $titleEn',
+          style: const TextStyle(
+            color: CustomerColors.muted,
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _MiniLoanCard extends StatelessWidget {
+  const _MiniLoanCard({required this.girvi, required this.formatAmt});
+
+  final Girvi girvi;
+  final String Function(double) formatAmt;
+
+  Color get _statusColor {
+    return switch (girvi.status) {
+      GirviStatus.overdue => CustomerColors.red,
+      GirviStatus.active => CustomerColors.green,
+      GirviStatus.partialPaid => const Color(0xFFF59E0B),
+      _ => CustomerColors.muted,
+    };
+  }
+
+  String get _statusLabel {
+    return switch (girvi.status) {
+      GirviStatus.active => 'सक्रिय / Active',
+      GirviStatus.partialPaid => 'आंशिक / Partial',
+      GirviStatus.overdue => 'मुदतीपूर्व / Overdue',
+      GirviStatus.redeemed => 'परत / Redeemed',
+      GirviStatus.renewed => 'नूतन / Renewed',
+    };
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: () => context.goNamed(
+        GirviDetailsPage.routeName,
+        pathParameters: {'id': girvi.id},
+      ),
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: CustomerColors.line),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x0A000000),
+              blurRadius: 8,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Text(
+                  girvi.serialId,
+                  style: const TextStyle(
+                    color: CustomerColors.navy,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w900,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: _statusColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _statusLabel,
+                    style: TextStyle(
+                      color: _statusColor,
+                      fontSize: 10,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Row(
+              children: [
+                _MiniStat(
+                  label: 'कर्ज / Loan',
+                  value: formatAmt(girvi.loanAmount),
+                ),
+                _MiniStat(
+                  label: 'बाकी / Outstanding',
+                  value: formatAmt(girvi.outstandingAmount),
+                  valueColor: CustomerColors.gold,
+                ),
+                _MiniStat(
+                  label: 'वस्तू / Items',
+                  value: '${girvi.items.length}',
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (girvi.status == GirviStatus.active ||
+                girvi.status == GirviStatus.partialPaid ||
+                girvi.status == GirviStatus.overdue)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  _MiniActionChip(
+                    icon: Icons.payments_outlined,
+                    label: 'Pay',
+                    onTap: () => context.goNamed(
+                      PartialPaymentPage.routeName,
+                      pathParameters: {'id': girvi.id},
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  _MiniActionChip(
+                    icon: Icons.refresh_outlined,
+                    label: 'Renew',
+                    onTap: () => context.goNamed(
+                      RenewalPage.routeName,
+                      pathParameters: {'id': girvi.id},
+                    ),
+                  ),
+                ],
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _MiniStat extends StatelessWidget {
+  const _MiniStat(
+      {required this.label,
+      required this.value,
+      this.valueColor = CustomerColors.ink});
+
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label,
+              style: const TextStyle(
+                  color: CustomerColors.muted,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600)),
+          const SizedBox(height: 2),
+          Text(value,
+              style: TextStyle(
+                  color: valueColor,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900)),
+        ],
+      ),
+    );
+  }
+}
+
+class _MiniActionChip extends StatelessWidget {
+  const _MiniActionChip(
+      {required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+        decoration: BoxDecoration(
+          color: CustomerColors.navy.withValues(alpha: 0.06),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: CustomerColors.navy),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: const TextStyle(
+                color: CustomerColors.navy,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NoLoansBanner extends StatelessWidget {
+  const _NoLoansBanner({required this.onNewGirvi});
+
+  final VoidCallback onNewGirvi;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: CustomerColors.line),
+      ),
+      child: Column(
+        children: [
+          const Icon(
+            Icons.account_balance_wallet_outlined,
+            size: 48,
+            color: CustomerColors.muted,
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'कोणतेही गिरवी नाही',
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 15,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const Text(
+            'No active or past loans found for this customer.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: CustomerColors.muted, fontSize: 12),
+          ),
+          const SizedBox(height: 16),
+          ElevatedButton.icon(
+            onPressed: onNewGirvi,
+            icon: const Icon(Icons.add, size: 16),
+            label: const Text('नवीन गिरवी तयार करा / New Girvi'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: CustomerColors.navy,
+              foregroundColor: CustomerColors.gold,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

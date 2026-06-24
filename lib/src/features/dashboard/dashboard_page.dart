@@ -123,6 +123,8 @@ class _DashboardView extends StatelessWidget {
                   context.goNamed(CreateGirviWizardPage.routeName),
               onSearchCustomerTap: () =>
                   context.goNamed(CustomerSearchPage.routeName),
+              onDueAlertsTap: () =>
+                  context.goNamed('due-overdue'),
               onVaultSearchTap: () =>
                   context.goNamed(VaultSearchPage.routeName),
               onInterestCalcTap: () =>
@@ -594,6 +596,7 @@ class _QuickActions extends StatelessWidget {
   const _QuickActions({
     this.onNewGirviTap,
     this.onSearchCustomerTap,
+    this.onDueAlertsTap,
     this.onVaultSearchTap,
     this.onInterestCalcTap,
     this.onComplianceTap,
@@ -603,6 +606,7 @@ class _QuickActions extends StatelessWidget {
 
   final VoidCallback? onNewGirviTap;
   final VoidCallback? onSearchCustomerTap;
+  final VoidCallback? onDueAlertsTap;
   final VoidCallback? onVaultSearchTap;
   final VoidCallback? onInterestCalcTap;
   final VoidCallback? onComplianceTap;
@@ -633,6 +637,17 @@ class _QuickActions extends StatelessWidget {
               titleMr: 'ग्राहक शोधा',
               titleEn: 'Search Customer',
               onTap: onSearchCustomerTap,
+            ),
+          ),
+          const SizedBox(width: 10),
+          SizedBox(
+            width: 76,
+            child: _QuickAction(
+              icon: Icons.alarm_outlined,
+              titleMr: 'देय अलर्ट',
+              titleEn: 'Due Alerts',
+              onTap: onDueAlertsTap,
+              badgeColor: _red,
             ),
           ),
           const SizedBox(width: 10),
@@ -697,6 +712,7 @@ class _QuickAction extends StatelessWidget {
     required this.titleMr,
     required this.titleEn,
     this.filled = false,
+    this.badgeColor,
     this.onTap,
   });
 
@@ -704,6 +720,7 @@ class _QuickAction extends StatelessWidget {
   final String titleMr;
   final String titleEn;
   final bool filled;
+  final Color? badgeColor;
   final VoidCallback? onTap;
 
   @override
@@ -712,23 +729,42 @@ class _QuickAction extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          Container(
-            width: 54,
-            height: 54,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              color: filled ? _navy : Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: filled ? _navy : _line),
-              boxShadow: const [
-                BoxShadow(
-                  color: Color(0x10000000),
-                  blurRadius: 10,
-                  offset: Offset(0, 4),
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: 54,
+                height: 54,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: filled ? _navy : Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: filled ? _navy : _line),
+                  boxShadow: const [
+                    BoxShadow(
+                      color: Color(0x10000000),
+                      blurRadius: 10,
+                      offset: Offset(0, 4),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
+                child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
+              ),
+              if (badgeColor != null)
+                Positioned(
+                  right: -2,
+                  top: -2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: badgeColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 1.5),
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(height: 8),
           Text(

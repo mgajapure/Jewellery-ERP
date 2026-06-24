@@ -18,6 +18,9 @@ import '../theme/girvi_colors.dart';
 import '../widgets/girvi_card.dart';
 import 'create_girvi_wizard_page.dart';
 import 'girvi_details_page.dart';
+import 'partial_payment_page.dart';
+import 'redemption_page.dart';
+import 'renewal_page.dart';
 
 class GirviListPage extends StatelessWidget {
   const GirviListPage({super.key});
@@ -76,27 +79,92 @@ class _GirviListView extends StatelessWidget {
                             'नवीन गिरवी तयार करण्यासाठी + बटण दाबा.',
                       );
                     }
-                    return RefreshIndicator(
-                      onRefresh: () async => context
-                          .read<GirviListBloc>()
-                          .add(const RefreshGirviList()),
-                      child: ListView.separated(
-                        padding:
-                            const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                        itemCount: state.girviList.length,
-                        separatorBuilder: (_, __) =>
-                            const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final girvi = state.girviList[index];
-                          return GirviCard(
-                            girvi: girvi,
-                            onTap: () => context.goNamed(
-                              GirviDetailsPage.routeName,
-                              pathParameters: {'id': girvi.id},
+
+                    final overdueCount = state.girviList
+                        .where((g) =>
+                            g.status == GirviStatus.overdue ||
+                            g.daysLeft < 0)
+                        .length;
+                    final dueSoonCount = state.girviList
+                        .where((g) =>
+                            (g.status == GirviStatus.active ||
+                                g.status == GirviStatus.partialPaid) &&
+                            g.daysLeft >= 0 &&
+                            g.daysLeft <= 7)
+                        .length;
+
+                    return Column(
+                      children: [
+                        if (overdueCount > 0)
+                          _AlertBanner(
+                            icon: Icons.warning_amber_rounded,
+                            message:
+                                '$overdueCount गिरवी मुदतीपूर्व / $overdueCount overdue',
+                            color: GirviColors.red,
+                            onTap: () => context.goNamed('due-overdue'),
+                          )
+                        else if (dueSoonCount > 0)
+                          _AlertBanner(
+                            icon: Icons.alarm_outlined,
+                            message:
+                                '$dueSoonCount गिरवी लवकरच देय / $dueSoonCount due soon',
+                            color: GirviColors.orange,
+                            onTap: () => context.goNamed('due-overdue'),
+                          ),
+                        Expanded(
+                          child: RefreshIndicator(
+                            onRefresh: () async => context
+                                .read<GirviListBloc>()
+                                .add(const RefreshGirviList()),
+                            child: ListView.separated(
+                              padding: const EdgeInsets.fromLTRB(
+                                  20, 0, 20, 20),
+                              itemCount: state.girviList.length,
+                              separatorBuilder: (_, __) =>
+                                  const SizedBox(height: 12),
+                              itemBuilder: (context, index) {
+                                final girvi = state.girviList[index];
+                                final isActionable = girvi.status ==
+                                        GirviStatus.active ||
+                                    girvi.status ==
+                                        GirviStatus.partialPaid ||
+                                    girvi.status == GirviStatus.overdue;
+                                return GirviCard(
+                                  girvi: girvi,
+                                  onTap: () => context.goNamed(
+                                    GirviDetailsPage.routeName,
+                                    pathParameters: {'id': girvi.id},
+                                  ),
+                                  onPayTap: isActionable
+                                      ? () => context.goNamed(
+                                            PartialPaymentPage.routeName,
+                                            pathParameters: {
+                                              'id': girvi.id
+                                            },
+                                          )
+                                      : null,
+                                  onRenewTap: isActionable
+                                      ? () => context.goNamed(
+                                            RenewalPage.routeName,
+                                            pathParameters: {
+                                              'id': girvi.id
+                                            },
+                                          )
+                                      : null,
+                                  onRedeemTap: isActionable
+                                      ? () => context.goNamed(
+                                            RedemptionPage.routeName,
+                                            pathParameters: {
+                                              'id': girvi.id
+                                            },
+                                          )
+                                      : null,
+                                );
+                              },
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        ),
+                      ],
                     );
                   }
                   return const SizedBox.shrink();
@@ -117,6 +185,60 @@ class _GirviListView extends StatelessWidget {
                     context.goNamed(MorePage.routeName);
                 }
               },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _AlertBanner extends StatelessWidget {
+  const _AlertBanner({
+    required this.icon,
+    required this.message,
+    required this.color,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String message;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(20, 0, 20, 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: color.withValues(alpha: 0.25)),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Text(
+                message,
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
+            Text(
+              'पहा / View →',
+              style: TextStyle(
+                color: color,
+                fontSize: 11,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),

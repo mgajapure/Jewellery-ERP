@@ -25,77 +25,134 @@ class CreateCustomerPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => getIt<CustomerDetailBloc>(),
-      child: const _CreateCustomerView(),
+      child: const _CreateCustomerWizard(),
     );
   }
 }
 
-class _CreateCustomerView extends StatefulWidget {
-  const _CreateCustomerView();
+class _CreateCustomerWizard extends StatefulWidget {
+  const _CreateCustomerWizard();
 
   @override
-  State<_CreateCustomerView> createState() => _CreateCustomerViewState();
+  State<_CreateCustomerWizard> createState() => _CreateCustomerWizardState();
 }
 
-class _CreateCustomerViewState extends State<_CreateCustomerView> {
-  final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
-  final _mobileController = TextEditingController();
-  final _altMobileController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _stateController = TextEditingController();
-  final _pincodeController = TextEditingController();
-  final _panController = TextEditingController();
-  final _aadhaarController = TextEditingController();
-  String _selectedGender = 'Male';
-  DateTime? _selectedDob;
-  String? _photoPath;
+class _CreateCustomerWizardState extends State<_CreateCustomerWizard> {
+  int _step = 0;
+  static const _totalSteps = 4;
+
+  // Personal
+  final _nameCtrl = TextEditingController();
+  final _nameEnCtrl = TextEditingController();
+  final _mobileCtrl = TextEditingController();
+  final _altMobileCtrl = TextEditingController();
+  String _gender = 'Male';
+  DateTime? _dob;
+
+  // Address
+  final _addressCtrl = TextEditingController();
+  final _cityCtrl = TextEditingController();
+  final _stateCtrl = TextEditingController();
+  final _pincodeCtrl = TextEditingController();
+
+  // KYC
   String? _aadhaarImagePath;
+  final _aadhaarCtrl = TextEditingController();
+  final _panCtrl = TextEditingController();
+
+  // Photo
+  String? _photoPath;
+
   final _imagePicker = ImagePicker();
-  int _currentStep = 0;
 
   @override
   void dispose() {
-    _nameController.dispose();
-    _mobileController.dispose();
-    _altMobileController.dispose();
-    _addressController.dispose();
-    _cityController.dispose();
-    _stateController.dispose();
-    _pincodeController.dispose();
-    _panController.dispose();
-    _aadhaarController.dispose();
+    _nameCtrl.dispose();
+    _nameEnCtrl.dispose();
+    _mobileCtrl.dispose();
+    _altMobileCtrl.dispose();
+    _addressCtrl.dispose();
+    _cityCtrl.dispose();
+    _stateCtrl.dispose();
+    _pincodeCtrl.dispose();
+    _aadhaarCtrl.dispose();
+    _panCtrl.dispose();
     super.dispose();
   }
 
-  Future<void> _pickPhoto() async {
-    final image = await _imagePicker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 800,
-      imageQuality: 80,
-    );
-    if (image != null && mounted) {
-      setState(() => _photoPath = image.path);
+  bool _validateStep() {
+    switch (_step) {
+      case 0:
+        if (_nameCtrl.text.trim().isEmpty) {
+          _showError('पूर्ण नाव आवश्यक आहे / Full name is required');
+          return false;
+        }
+        if (_mobileCtrl.text.trim().length != 10) {
+          _showError('10 अंकी मोबाईल नंबर टाका / Enter 10-digit mobile number');
+          return false;
+        }
+        return true;
+      case 1:
+        if (_addressCtrl.text.trim().isEmpty) {
+          _showError('पत्ता आवश्यक आहे / Address is required');
+          return false;
+        }
+        if (_cityCtrl.text.trim().isEmpty) {
+          _showError('शहर आवश्यक आहे / City is required');
+          return false;
+        }
+        if (_pincodeCtrl.text.trim().length != 6) {
+          _showError('6 अंकी पिनकोड टाका / Enter 6-digit pincode');
+          return false;
+        }
+        if (_stateCtrl.text.trim().isEmpty) {
+          _showError('राज्य आवश्यक आहे / State is required');
+          return false;
+        }
+        return true;
+      default:
+        return true;
     }
   }
 
-  Future<void> _pickAadhaarImage() async {
-    final image = await _imagePicker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 1200,
-      imageQuality: 90,
-    );
-    if (image != null && mounted) {
-      setState(() => _aadhaarImagePath = image.path);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-              'फोटो कॅप्चर झाला. आधार क्रमांक खाली टाका / Photo captured. Enter Aadhaar number below.'),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(msg),
+      backgroundColor: CustomerColors.red,
+      behavior: SnackBarBehavior.floating,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+    ));
+  }
+
+  void _next() {
+    if (!_validateStep()) return;
+    if (_step < _totalSteps - 1) {
+      setState(() => _step++);
+    } else {
+      _submit();
     }
+  }
+
+  void _back() {
+    if (_step > 0) setState(() => _step--);
+  }
+
+  void _submit() {
+    final request = CreateCustomerRequest(
+      name: _nameCtrl.text.trim(),
+      mobile: _mobileCtrl.text.trim(),
+      alternateMobile: _altMobileCtrl.text.trim().isEmpty
+          ? null
+          : _altMobileCtrl.text.trim(),
+      address: _addressCtrl.text.trim(),
+      city: _cityCtrl.text.trim(),
+      state: _stateCtrl.text.trim(),
+      pincode: _pincodeCtrl.text.trim(),
+      gender: _gender,
+      dateOfBirth: _dob?.toIso8601String().substring(0, 10),
+      panNumber: _panCtrl.text.trim().isEmpty ? null : _panCtrl.text.trim(),
+    );
+    context.read<CustomerDetailBloc>().add(CreateCustomer(request));
   }
 
   Future<void> _pickDate() async {
@@ -116,27 +173,66 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
         child: child!,
       ),
     );
-    if (picked != null) setState(() => _selectedDob = picked);
+    if (picked != null) setState(() => _dob = picked);
   }
 
-  void _submit() {
-    if (!_formKey.currentState!.validate()) return;
-    final request = CreateCustomerRequest(
-      name: _nameController.text.trim(),
-      mobile: _mobileController.text.trim(),
-      alternateMobile: _altMobileController.text.trim().isEmpty
-          ? null
-          : _altMobileController.text.trim(),
-      address: _addressController.text.trim(),
-      city: _cityController.text.trim(),
-      state: _stateController.text.trim(),
-      pincode: _pincodeController.text.trim(),
-      gender: _selectedGender,
-      dateOfBirth: _selectedDob?.toIso8601String().substring(0, 10),
-      panNumber:
-          _panController.text.trim().isEmpty ? null : _panController.text.trim(),
+  Future<void> _pickImage({bool isAadhaar = false}) async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (sheetCtx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 12),
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined,
+                  color: CustomerColors.navy),
+              title: const Text('कॅमेरा / Camera'),
+              onTap: () => Navigator.pop(sheetCtx, ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined,
+                  color: CustomerColors.navy),
+              title: const Text('गॅलरी / Gallery'),
+              onTap: () => Navigator.pop(sheetCtx, ImageSource.gallery),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
     );
-    context.read<CustomerDetailBloc>().add(CreateCustomer(request));
+    if (source == null || !mounted) return;
+    try {
+      final image = await _imagePicker.pickImage(
+        source: source,
+        maxWidth: isAadhaar ? 1200 : 800,
+        imageQuality: isAadhaar ? 90 : 80,
+      );
+      if (image != null && mounted) {
+        setState(() {
+          if (isAadhaar) {
+            _aadhaarImagePath = image.path;
+          } else {
+            _photoPath = image.path;
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          final mockPath =
+              'mock://photo-${DateTime.now().millisecondsSinceEpoch}.jpg';
+          if (isAadhaar) {
+            _aadhaarImagePath = mockPath;
+          } else {
+            _photoPath = mockPath;
+          }
+        });
+      }
+    }
   }
 
   @override
@@ -144,32 +240,28 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
     return BlocListener<CustomerDetailBloc, CustomerDetailState>(
       listener: (context, state) {
         if (state is CustomerOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: CustomerColors.green,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: CustomerColors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-          );
+          ));
           context.goNamed(
             CustomerDetailsPage.routeName,
             pathParameters: {'id': state.customer.id},
           );
         }
         if (state is CustomerOperationFailure) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: CustomerColors.red,
-              behavior: SnackBarBehavior.floating,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text(state.message),
+            backgroundColor: CustomerColors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
             ),
-          );
+          ));
         }
       },
       child: BlocBuilder<CustomerDetailBloc, CustomerDetailState>(
@@ -180,278 +272,69 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
             body: SafeArea(
               child: Column(
                 children: [
-                  const _CreateCustomerHeader(),
+                  _WizardHeader(step: _step),
+                  const SizedBox(height: 4),
+                  _StepIndicator(
+                    current: _step,
+                    total: _totalSteps,
+                    labels: const [
+                      'वैयक्तिक\nPersonal',
+                      'पत्ता\nAddress',
+                      'KYC',
+                      'पुष्टी\nConfirm',
+                    ],
+                  ),
+                  const SizedBox(height: 8),
                   Expanded(
-                    child: Form(
-                      key: _formKey,
-                      child: Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: const ColorScheme.light(
-                            primary: CustomerColors.navy,
-                            onPrimary: Colors.white,
+                    child: SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
+                      child: IndexedStack(
+                        index: _step,
+                        children: [
+                          _PersonalStep(
+                            nameCtrl: _nameCtrl,
+                            nameEnCtrl: _nameEnCtrl,
+                            mobileCtrl: _mobileCtrl,
+                            altMobileCtrl: _altMobileCtrl,
+                            gender: _gender,
+                            dob: _dob,
+                            onGenderChanged: (v) {
+                              if (v != null) setState(() => _gender = v);
+                            },
+                            onDobTap: _pickDate,
                           ),
-                        ),
-                        child: Stepper(
-                          type: StepperType.horizontal,
-                          currentStep: _currentStep,
-                          onStepTapped: (i) => setState(() => _currentStep = i),
-                          onStepContinue: () {
-                            if (_currentStep < 2) {
-                              setState(() => _currentStep++);
-                            } else {
-                              _submit();
-                            }
-                          },
-                          onStepCancel: () {
-                            if (_currentStep > 0) {
-                              setState(() => _currentStep--);
-                            }
-                          },
-                          controlsBuilder: (context, details) {
-                            final isLast = _currentStep == 2;
-                            return Padding(
-                              padding: const EdgeInsets.only(top: 20),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: ElevatedButton(
-                                      onPressed: isSubmitting
-                                          ? null
-                                          : details.onStepContinue,
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: CustomerColors.navy,
-                                        foregroundColor: CustomerColors.gold,
-                                        disabledBackgroundColor:
-                                            CustomerColors.navy.withValues(alpha: 0.6),
-                                        minimumSize: const Size(0, 48),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                        elevation: 0,
-                                      ),
-                                      child: isSubmitting && isLast
-                                          ? const SizedBox(
-                                              width: 20,
-                                              height: 20,
-                                              child: CircularProgressIndicator(
-                                                color: CustomerColors.gold,
-                                                strokeWidth: 2.5,
-                                              ),
-                                            )
-                                          : Text(
-                                              isLast
-                                                  ? 'ग्राहक जतन करा / Save Customer'
-                                                  : 'पुढे / Continue',
-                                              style: const TextStyle(
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w800,
-                                              ),
-                                            ),
-                                    ),
-                                  ),
-                                  if (_currentStep > 0) ...[
-                                    const SizedBox(width: 12),
-                                    OutlinedButton(
-                                      onPressed: details.onStepCancel,
-                                      style: OutlinedButton.styleFrom(
-                                        foregroundColor: CustomerColors.muted,
-                                        side: const BorderSide(color: CustomerColors.line),
-                                        minimumSize: const Size(80, 48),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(12),
-                                        ),
-                                      ),
-                                      child: const Text('मागे / Back'),
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            );
-                          },
-                          steps: [
-                            Step(
-                              title: const Text('वैयक्तिक\nPersonal'),
-                              isActive: _currentStep >= 0,
-                              state: _currentStep > 0
-                                  ? StepState.complete
-                                  : StepState.indexed,
-                              content: Column(
-                                children: [
-                                  _AppTextField(
-                                    controller: _nameController,
-                                    label: 'पूर्ण नाव / Full Name',
-                                    hint: 'ग्राहकाचे पूर्ण नाव टाका',
-                                    prefixIcon: Icons.person_outline,
-                                    validator: (v) =>
-                                        (v == null || v.trim().isEmpty)
-                                            ? 'नाव आवश्यक आहे / Name is required'
-                                            : null,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _AppTextField(
-                                    controller: _mobileController,
-                                    label: 'मोबाईल नंबर / Mobile Number',
-                                    hint: '10 अंकी मोबाईल नंबर',
-                                    prefixIcon: Icons.phone_outlined,
-                                    keyboardType: TextInputType.phone,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    maxLength: 10,
-                                    validator: (v) {
-                                      if (v == null || v.trim().isEmpty) {
-                                        return 'मोबाईल आवश्यक आहे / Mobile required';
-                                      }
-                                      if (v.trim().length != 10) {
-                                        return '10 अंकी नंबर टाका / Enter 10-digit number';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _AppTextField(
-                                    controller: _altMobileController,
-                                    label: 'पर्यायी मोबाईल / Alternate Mobile',
-                                    hint: 'पर्यायी मोबाईल नंबर (ऐच्छिक)',
-                                    prefixIcon: Icons.phone_android_outlined,
-                                    keyboardType: TextInputType.phone,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    maxLength: 10,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _GenderDropdown(
-                                    value: _selectedGender,
-                                    onChanged: (v) {
-                                      if (v != null) {
-                                        setState(() => _selectedGender = v);
-                                      }
-                                    },
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _DatePickerField(
-                                    value: _selectedDob,
-                                    onTap: _pickDate,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Step(
-                              title: const Text('पत्ता\nAddress'),
-                              isActive: _currentStep >= 1,
-                              state: _currentStep > 1
-                                  ? StepState.complete
-                                  : StepState.indexed,
-                              content: Column(
-                                children: [
-                                  _AppTextField(
-                                    controller: _addressController,
-                                    label: 'पत्ता / Address',
-                                    hint: 'घर क्रमांक, रस्ता, परिसर',
-                                    prefixIcon: Icons.home_outlined,
-                                    maxLines: 2,
-                                    validator: (v) =>
-                                        (v == null || v.trim().isEmpty)
-                                            ? 'पत्ता आवश्यक आहे / Address required'
-                                            : null,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: _AppTextField(
-                                          controller: _cityController,
-                                          label: 'शहर / City',
-                                          hint: 'शहर',
-                                          prefixIcon: Icons.location_city_outlined,
-                                          validator: (v) =>
-                                              (v == null || v.trim().isEmpty)
-                                                  ? 'शहर आवश्यक / City required'
-                                                  : null,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: _AppTextField(
-                                          controller: _pincodeController,
-                                          label: 'पिनकोड / Pincode',
-                                          hint: '6 अंक',
-                                          prefixIcon: Icons.pin_drop_outlined,
-                                          keyboardType: TextInputType.number,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter.digitsOnly,
-                                          ],
-                                          maxLength: 6,
-                                          validator: (v) {
-                                            if (v == null || v.trim().isEmpty) {
-                                              return 'पिनकोड आवश्यक';
-                                            }
-                                            if (v.trim().length != 6) {
-                                              return '6 अंक टाका';
-                                            }
-                                            return null;
-                                          },
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _AppTextField(
-                                    controller: _stateController,
-                                    label: 'राज्य / State',
-                                    hint: 'राज्य',
-                                    prefixIcon: Icons.map_outlined,
-                                    validator: (v) =>
-                                        (v == null || v.trim().isEmpty)
-                                            ? 'राज्य आवश्यक / State required'
-                                            : null,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Step(
-                              title: const Text('KYC'),
-                              isActive: _currentStep >= 2,
-                              state: StepState.indexed,
-                              content: Column(
-                                children: [
-                                  _AadhaarCaptureTile(
-                                    imagePath: _aadhaarImagePath,
-                                    onTap: _pickAadhaarImage,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _AppTextField(
-                                    controller: _aadhaarController,
-                                    label: 'आधार क्रमांक / Aadhaar Number',
-                                    hint: '12 अंकी आधार क्रमांक',
-                                    prefixIcon: Icons.badge_outlined,
-                                    keyboardType: TextInputType.number,
-                                    inputFormatters: [
-                                      FilteringTextInputFormatter.digitsOnly,
-                                    ],
-                                    maxLength: 12,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _AppTextField(
-                                    controller: _panController,
-                                    label: 'PAN क्रमांक / PAN Number',
-                                    hint: 'ABCDE1234F (₹50,000 पेक्षा जास्त व्यवहारासाठी अनिवार्य)',
-                                    prefixIcon: Icons.credit_card_outlined,
-                                    textCapitalization: TextCapitalization.characters,
-                                  ),
-                                  const SizedBox(height: 14),
-                                  _CustomerPhotoTile(
-                                    imagePath: _photoPath,
-                                    onTap: _pickPhoto,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
+                          _AddressStep(
+                            addressCtrl: _addressCtrl,
+                            cityCtrl: _cityCtrl,
+                            stateCtrl: _stateCtrl,
+                            pincodeCtrl: _pincodeCtrl,
+                          ),
+                          _KycStep(
+                            aadhaarImagePath: _aadhaarImagePath,
+                            aadhaarCtrl: _aadhaarCtrl,
+                            panCtrl: _panCtrl,
+                            onPickAadhaar: () => _pickImage(isAadhaar: true),
+                          ),
+                          _ConfirmStep(
+                            photoPath: _photoPath,
+                            onPickPhoto: _pickImage,
+                            name: _nameCtrl.text,
+                            nameEn: _nameEnCtrl.text,
+                            mobile: _mobileCtrl.text,
+                            address: _addressCtrl.text,
+                            city: _cityCtrl.text,
+                            state: _stateCtrl.text,
+                          ),
+                        ],
                       ),
                     ),
+                  ),
+                  _WizardFooter(
+                    step: _step,
+                    totalSteps: _totalSteps,
+                    isSubmitting: isSubmitting,
+                    onBack: _back,
+                    onNext: _next,
                   ),
                 ],
               ),
@@ -463,13 +346,24 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
   }
 }
 
-class _CreateCustomerHeader extends StatelessWidget {
-  const _CreateCustomerHeader();
+// ─── Header ──────────────────────────────────────────────────────────────────
+
+class _WizardHeader extends StatelessWidget {
+  const _WizardHeader({required this.step});
+
+  final int step;
+
+  static const _titles = [
+    'वैयक्तिक माहिती / Personal',
+    'पत्ता / Address',
+    'KYC दस्तऐवज / Documents',
+    'पुष्टीकरण / Confirm',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 14, 18, 8),
+      padding: const EdgeInsets.fromLTRB(4, 10, 16, 4),
       child: Row(
         children: [
           IconButton(
@@ -478,21 +372,548 @@ class _CreateCustomerHeader extends StatelessWidget {
               CustomerListPage.routeName,
             ),
             icon: const Icon(Icons.arrow_back, color: CustomerColors.ink),
-            tooltip: 'Back',
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'नवीन ग्राहक / Create Customer',
+              'नवीन ग्राहक / ${_titles[step]}',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 color: CustomerColors.ink,
-                fontSize: 16,
+                fontSize: 15,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
           const SizedBox(width: 48),
         ],
+      ),
+    );
+  }
+}
+
+// ─── Step Indicator ───────────────────────────────────────────────────────────
+
+class _StepIndicator extends StatelessWidget {
+  const _StepIndicator({
+    required this.current,
+    required this.total,
+    required this.labels,
+  });
+
+  final int current;
+  final int total;
+  final List<String> labels;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Row(
+        children: List.generate(total * 2 - 1, (i) {
+          if (i.isOdd) {
+            final stepIndex = i ~/ 2;
+            final done = stepIndex < current;
+            return Expanded(
+              child: Container(
+                height: 2,
+                color: done
+                    ? CustomerColors.navy
+                    : CustomerColors.line,
+              ),
+            );
+          }
+          final stepIndex = i ~/ 2;
+          final done = stepIndex < current;
+          final active = stepIndex == current;
+          return Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 28,
+                height: 28,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: done
+                      ? CustomerColors.navy
+                      : active
+                          ? CustomerColors.gold
+                          : Colors.white,
+                  border: Border.all(
+                    color: done || active
+                        ? Colors.transparent
+                        : CustomerColors.line,
+                    width: 1.5,
+                  ),
+                ),
+                child: done
+                    ? const Icon(Icons.check, color: Colors.white, size: 14)
+                    : Text(
+                        '${stepIndex + 1}',
+                        style: TextStyle(
+                          color: active
+                              ? CustomerColors.navy
+                              : CustomerColors.muted,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+              ),
+              const SizedBox(height: 4),
+              SizedBox(
+                width: 52,
+                child: Text(
+                  labels[stepIndex],
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: active
+                        ? CustomerColors.navy
+                        : done
+                            ? CustomerColors.ink
+                            : CustomerColors.muted,
+                    fontSize: 8,
+                    fontWeight: FontWeight.w700,
+                    height: 1.2,
+                  ),
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+}
+
+// ─── Footer ───────────────────────────────────────────────────────────────────
+
+class _WizardFooter extends StatelessWidget {
+  const _WizardFooter({
+    required this.step,
+    required this.totalSteps,
+    required this.isSubmitting,
+    required this.onBack,
+    required this.onNext,
+  });
+
+  final int step;
+  final int totalSteps;
+  final bool isSubmitting;
+  final VoidCallback onBack;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    final isLast = step == totalSteps - 1;
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: CustomerColors.line)),
+      ),
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+      child: Row(
+        children: [
+          if (step > 0) ...[
+            OutlinedButton(
+              onPressed: isSubmitting ? null : onBack,
+              style: OutlinedButton.styleFrom(
+                foregroundColor: CustomerColors.muted,
+                side: const BorderSide(color: CustomerColors.line),
+                minimumSize: const Size(88, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              child: const Text('मागे / Back'),
+            ),
+            const SizedBox(width: 12),
+          ],
+          Expanded(
+            child: ElevatedButton(
+              onPressed: isSubmitting ? null : onNext,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: CustomerColors.navy,
+                foregroundColor: CustomerColors.gold,
+                disabledBackgroundColor:
+                    CustomerColors.navy.withValues(alpha: 0.6),
+                minimumSize: const Size(0, 50),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: isSubmitting && isLast
+                  ? const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: CustomerColors.gold,
+                        strokeWidth: 2.5,
+                      ),
+                    )
+                  : Text(
+                      isLast
+                          ? 'ग्राहक जतन करा / Save Customer'
+                          : 'पुढे जा / Continue',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w800,
+                      ),
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Step 1: Personal ─────────────────────────────────────────────────────────
+
+class _PersonalStep extends StatelessWidget {
+  const _PersonalStep({
+    required this.nameCtrl,
+    required this.nameEnCtrl,
+    required this.mobileCtrl,
+    required this.altMobileCtrl,
+    required this.gender,
+    required this.dob,
+    required this.onGenderChanged,
+    required this.onDobTap,
+  });
+
+  final TextEditingController nameCtrl;
+  final TextEditingController nameEnCtrl;
+  final TextEditingController mobileCtrl;
+  final TextEditingController altMobileCtrl;
+  final String gender;
+  final DateTime? dob;
+  final ValueChanged<String?> onGenderChanged;
+  final VoidCallback onDobTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepCard(
+      children: [
+        _AppTextField(
+          controller: nameCtrl,
+          label: 'पूर्ण नाव / Full Name (मराठी)',
+          hint: 'मराठी नाव टाका',
+          prefixIcon: Icons.person_outline,
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: nameEnCtrl,
+          label: 'Name in English',
+          hint: 'English name',
+          prefixIcon: Icons.person_outline,
+          textCapitalization: TextCapitalization.words,
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: mobileCtrl,
+          label: 'मोबाईल नंबर / Mobile Number',
+          hint: '10 अंकी मोबाईल नंबर',
+          prefixIcon: Icons.phone_outlined,
+          keyboardType: TextInputType.phone,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          maxLength: 10,
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: altMobileCtrl,
+          label: 'पर्यायी मोबाईल / Alternate Mobile (ऐच्छिक)',
+          hint: 'पर्यायी मोबाईल नंबर',
+          prefixIcon: Icons.phone_android_outlined,
+          keyboardType: TextInputType.phone,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          maxLength: 10,
+        ),
+        const SizedBox(height: 14),
+        _GenderPicker(value: gender, onChanged: onGenderChanged),
+        const SizedBox(height: 14),
+        _DobPicker(value: dob, onTap: onDobTap),
+      ],
+    );
+  }
+}
+
+// ─── Step 2: Address ──────────────────────────────────────────────────────────
+
+class _AddressStep extends StatelessWidget {
+  const _AddressStep({
+    required this.addressCtrl,
+    required this.cityCtrl,
+    required this.stateCtrl,
+    required this.pincodeCtrl,
+  });
+
+  final TextEditingController addressCtrl;
+  final TextEditingController cityCtrl;
+  final TextEditingController stateCtrl;
+  final TextEditingController pincodeCtrl;
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepCard(
+      children: [
+        _AppTextField(
+          controller: addressCtrl,
+          label: 'पत्ता / Address',
+          hint: 'घर क्रमांक, रस्ता, परिसर',
+          prefixIcon: Icons.home_outlined,
+          maxLines: 2,
+        ),
+        const SizedBox(height: 14),
+        Row(
+          children: [
+            Expanded(
+              child: _AppTextField(
+                controller: cityCtrl,
+                label: 'शहर / City',
+                hint: 'शहर',
+                prefixIcon: Icons.location_city_outlined,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: _AppTextField(
+                controller: pincodeCtrl,
+                label: 'पिनकोड / Pincode',
+                hint: '6 अंक',
+                prefixIcon: Icons.pin_drop_outlined,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                maxLength: 6,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: stateCtrl,
+          label: 'राज्य / State',
+          hint: 'राज्य',
+          prefixIcon: Icons.map_outlined,
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Step 3: KYC ─────────────────────────────────────────────────────────────
+
+class _KycStep extends StatelessWidget {
+  const _KycStep({
+    required this.aadhaarImagePath,
+    required this.aadhaarCtrl,
+    required this.panCtrl,
+    required this.onPickAadhaar,
+  });
+
+  final String? aadhaarImagePath;
+  final TextEditingController aadhaarCtrl;
+  final TextEditingController panCtrl;
+  final VoidCallback onPickAadhaar;
+
+  @override
+  Widget build(BuildContext context) {
+    return _StepCard(
+      children: [
+        _DocCaptureTile(
+          icon: Icons.document_scanner_outlined,
+          titleMr: 'आधार कार्ड फोटो',
+          titleEn: 'Aadhaar Card Photo',
+          capturedMr: 'आधार फोटो कॅप्चर झाला',
+          capturedEn: 'Aadhaar captured · Tap to retake',
+          imagePath: aadhaarImagePath,
+          onTap: onPickAadhaar,
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: aadhaarCtrl,
+          label: 'आधार क्रमांक / Aadhaar Number',
+          hint: '12 अंकी आधार क्रमांक',
+          prefixIcon: Icons.badge_outlined,
+          keyboardType: TextInputType.number,
+          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+          maxLength: 12,
+        ),
+        const SizedBox(height: 14),
+        _AppTextField(
+          controller: panCtrl,
+          label: 'PAN क्रमांक / PAN Number (ऐच्छिक)',
+          hint: 'ABCDE1234F',
+          prefixIcon: Icons.credit_card_outlined,
+          textCapitalization: TextCapitalization.characters,
+          maxLength: 10,
+        ),
+        const SizedBox(height: 8),
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: CustomerColors.gold.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+              color: CustomerColors.gold.withValues(alpha: 0.25),
+            ),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.info_outline,
+                  color: CustomerColors.gold, size: 16),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  '₹50,000 पेक्षा जास्त व्यवहारासाठी PAN अनिवार्य\nPAN mandatory for transactions above ₹50,000',
+                  style: TextStyle(
+                    color: CustomerColors.ink,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Step 4: Confirm ─────────────────────────────────────────────────────────
+
+class _ConfirmStep extends StatelessWidget {
+  const _ConfirmStep({
+    required this.photoPath,
+    required this.onPickPhoto,
+    required this.name,
+    required this.nameEn,
+    required this.mobile,
+    required this.address,
+    required this.city,
+    required this.state,
+  });
+
+  final String? photoPath;
+  final VoidCallback onPickPhoto;
+  final String name;
+  final String nameEn;
+  final String mobile;
+  final String address;
+  final String city;
+  final String state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _DocCaptureTile(
+          icon: Icons.person_outline,
+          titleMr: 'ग्राहकाचा फोटो',
+          titleEn: 'Customer Photo',
+          capturedMr: 'फोटो कॅप्चर झाला',
+          capturedEn: 'Photo captured · Tap to retake',
+          imagePath: photoPath,
+          onTap: onPickPhoto,
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: CustomerColors.line),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x0A000000),
+                blurRadius: 8,
+                offset: Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const _ReviewSectionTitle(
+                  titleMr: 'माहिती पुनरावलोकन',
+                  titleEn: 'Review Information'),
+              const SizedBox(height: 12),
+              _ReviewRow(label: 'नाव / Name', value: name.isEmpty ? '—' : name),
+              _ReviewRow(
+                  label: 'English Name',
+                  value: nameEn.isEmpty ? '—' : nameEn),
+              _ReviewRow(
+                  label: 'मोबाईल / Mobile',
+                  value: mobile.isEmpty ? '—' : mobile),
+              _ReviewRow(
+                  label: 'पत्ता / Address',
+                  value: [address, city, state]
+                      .where((s) => s.isNotEmpty)
+                      .join(', ')),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: CustomerColors.navy.withValues(alpha: 0.05),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(
+                color: CustomerColors.navy.withValues(alpha: 0.15)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.check_circle_outline,
+                  color: CustomerColors.navy, size: 18),
+              SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'सर्व माहिती तपासा आणि "ग्राहक जतन करा" दाबा\nReview all details before saving the customer',
+                  style: TextStyle(
+                    color: CustomerColors.ink,
+                    fontSize: 12,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// ─── Shared Widgets ───────────────────────────────────────────────────────────
+
+class _StepCard extends StatelessWidget {
+  const _StepCard({required this.children});
+
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: CustomerColors.line),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x0A000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: children,
       ),
     );
   }
@@ -508,10 +929,7 @@ class _AppTextField extends StatelessWidget {
     this.inputFormatters,
     this.maxLength,
     this.maxLines = 1,
-    this.readOnly = false,
-    this.onTap,
     this.textCapitalization = TextCapitalization.words,
-    this.validator,
   });
 
   final TextEditingController? controller;
@@ -522,10 +940,7 @@ class _AppTextField extends StatelessWidget {
   final List<TextInputFormatter>? inputFormatters;
   final int? maxLength;
   final int maxLines;
-  final bool readOnly;
-  final VoidCallback? onTap;
   final TextCapitalization textCapitalization;
-  final FormFieldValidator<String>? validator;
 
   @override
   Widget build(BuildContext context) {
@@ -536,21 +951,18 @@ class _AppTextField extends StatelessWidget {
           label,
           style: const TextStyle(
             color: CustomerColors.ink,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 6),
-        TextFormField(
+        TextField(
           controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
           maxLength: maxLength,
           maxLines: maxLines,
-          readOnly: readOnly,
-          onTap: onTap,
           textCapitalization: textCapitalization,
-          validator: validator,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
@@ -561,35 +973,23 @@ class _AppTextField extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
             prefixIcon: prefixIcon != null
-                ? Icon(prefixIcon, color: CustomerColors.muted, size: 22)
+                ? Icon(prefixIcon, color: CustomerColors.muted, size: 20)
                 : null,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: CustomerColors.line),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide: const BorderSide(color: CustomerColors.line),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(10),
               borderSide:
                   const BorderSide(color: CustomerColors.navy, width: 1.5),
             ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: CustomerColors.red, width: 1.5),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide:
-                  const BorderSide(color: CustomerColors.red, width: 1.5),
-            ),
-            contentPadding: const EdgeInsets.symmetric(
-              vertical: 16,
-              horizontal: 14,
-            ),
+            contentPadding:
+                const EdgeInsets.symmetric(vertical: 14, horizontal: 14),
             counterText: '',
           ),
         ),
@@ -598,73 +998,8 @@ class _AppTextField extends StatelessWidget {
   }
 }
 
-class _DatePickerField extends StatelessWidget {
-  const _DatePickerField({required this.value, required this.onTap});
-
-  final DateTime? value;
-  final VoidCallback onTap;
-
-  String get _displayText {
-    if (value == null) return 'DD/MM/YYYY';
-    return '${value!.day.toString().padLeft(2, '0')}/'
-        '${value!.month.toString().padLeft(2, '0')}/'
-        '${value!.year}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'जन्मतारीख / Date of Birth',
-          style: TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 13,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 6),
-        InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: CustomerColors.line),
-            ),
-            child: Row(
-              children: [
-                const Icon(
-                  Icons.calendar_today_outlined,
-                  color: CustomerColors.muted,
-                  size: 22,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  _displayText,
-                  style: TextStyle(
-                    color: value != null
-                        ? CustomerColors.ink
-                        : CustomerColors.muted,
-                    fontSize: 13,
-                    fontWeight:
-                        value != null ? FontWeight.w700 : FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _GenderDropdown extends StatelessWidget {
-  const _GenderDropdown({required this.value, required this.onChanged});
+class _GenderPicker extends StatelessWidget {
+  const _GenderPicker({required this.value, required this.onChanged});
 
   final String value;
   final ValueChanged<String?> onChanged;
@@ -678,33 +1013,31 @@ class _GenderDropdown extends StatelessWidget {
           'लिंग / Gender',
           style: TextStyle(
             color: CustomerColors.ink,
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w800,
           ),
         ),
         const SizedBox(height: 6),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14),
+          padding: const EdgeInsets.symmetric(horizontal: 12),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(color: CustomerColors.line),
           ),
           child: DropdownButtonHideUnderline(
             child: DropdownButton<String>(
               value: value,
               isExpanded: true,
-              icon: const Icon(
-                Icons.keyboard_arrow_down,
-                color: CustomerColors.muted,
-              ),
+              icon: const Icon(Icons.keyboard_arrow_down,
+                  color: CustomerColors.muted),
               items: const [
-                DropdownMenuItem(value: 'Male', child: Text('पुरुष / Male')),
                 DropdownMenuItem(
-                  value: 'Female',
-                  child: Text('स्त्री / Female'),
-                ),
-                DropdownMenuItem(value: 'Other', child: Text('इतर / Other')),
+                    value: 'Male', child: Text('पुरुष / Male')),
+                DropdownMenuItem(
+                    value: 'Female', child: Text('स्त्री / Female')),
+                DropdownMenuItem(
+                    value: 'Other', child: Text('इतर / Other')),
               ],
               onChanged: onChanged,
             ),
@@ -715,57 +1048,136 @@ class _GenderDropdown extends StatelessWidget {
   }
 }
 
-class _AadhaarCaptureTile extends StatelessWidget {
-  const _AadhaarCaptureTile({
-    required this.onTap,
-    this.imagePath,
-  });
+class _DobPicker extends StatelessWidget {
+  const _DobPicker({required this.value, required this.onTap});
 
+  final DateTime? value;
   final VoidCallback onTap;
-  final String? imagePath;
+
+  String get _display {
+    if (value == null) return 'DD/MM/YYYY';
+    return '${value!.day.toString().padLeft(2, '0')}/'
+        '${value!.month.toString().padLeft(2, '0')}/${value!.year}';
+  }
 
   @override
   Widget build(BuildContext context) {
-    final captured = imagePath != null;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'जन्मतारीख / Date of Birth',
+          style: TextStyle(
+            color: CustomerColors.ink,
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: CustomerColors.line),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.calendar_today_outlined,
+                    color: CustomerColors.muted, size: 20),
+                const SizedBox(width: 12),
+                Text(
+                  _display,
+                  style: TextStyle(
+                    color: value != null
+                        ? CustomerColors.ink
+                        : CustomerColors.muted,
+                    fontSize: 13,
+                    fontWeight: value != null
+                        ? FontWeight.w700
+                        : FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DocCaptureTile extends StatelessWidget {
+  const _DocCaptureTile({
+    required this.icon,
+    required this.titleMr,
+    required this.titleEn,
+    required this.capturedMr,
+    required this.capturedEn,
+    required this.imagePath,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String titleMr;
+  final String titleEn;
+  final String capturedMr;
+  final String capturedEn;
+  final String? imagePath;
+  final VoidCallback onTap;
+
+  bool get _captured => imagePath != null;
+  bool get _isMock =>
+      imagePath?.startsWith('mock://') ?? false;
+
+  @override
+  Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: captured
-              ? CustomerColors.green.withValues(alpha: 0.06)
+          color: _captured
+              ? CustomerColors.green.withValues(alpha: 0.05)
               : CustomerColors.cream,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: captured
-                ? CustomerColors.green.withValues(alpha: 0.4)
+            color: _captured
+                ? CustomerColors.green.withValues(alpha: 0.35)
                 : CustomerColors.gold.withValues(alpha: 0.3),
           ),
         ),
         child: Row(
           children: [
-            if (captured)
+            if (_captured && !_isMock)
               ClipRRect(
                 borderRadius: BorderRadius.circular(10),
                 child: Image.file(
                   File(imagePath!),
-                  width: 46,
-                  height: 46,
+                  width: 50,
+                  height: 50,
                   fit: BoxFit.cover,
                 ),
               )
             else
               Container(
-                width: 46,
-                height: 46,
+                width: 50,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: CustomerColors.navy,
+                  color: _captured
+                      ? CustomerColors.green.withValues(alpha: 0.15)
+                      : CustomerColors.navy,
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
-                  Icons.document_scanner_outlined,
-                  color: CustomerColors.gold,
+                child: Icon(
+                  _captured ? Icons.check : icon,
+                  color: _captured
+                      ? CustomerColors.green
+                      : CustomerColors.gold,
                   size: 24,
                 ),
               ),
@@ -775,46 +1187,33 @@ class _AadhaarCaptureTile extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    captured
-                        ? 'आधार फोटो कॅप्चर झाला'
-                        : 'आधार कार्ड फोटो काढा',
+                    _captured ? capturedMr : titleMr,
                     style: TextStyle(
-                      color: captured
+                      color: _captured
                           ? CustomerColors.green
                           : CustomerColors.ink,
-                      fontSize: 14,
+                      fontSize: 13,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    captured
-                        ? 'Aadhaar photo captured · Tap to retake'
-                        : 'Capture Aadhaar card photo',
+                    _captured ? capturedEn : titleEn,
                     style: const TextStyle(
                       color: CustomerColors.muted,
-                      fontSize: 12,
+                      fontSize: 11,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  if (!captured) ...[
-                    const SizedBox(height: 4),
-                    const Text(
-                      'खाली Aadhaar नंबर टाका / Enter Aadhaar number below',
-                      style: TextStyle(
-                        color: CustomerColors.muted,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
             Icon(
-              captured ? Icons.check_circle : Icons.arrow_forward_ios,
-              color: captured ? CustomerColors.green : CustomerColors.muted,
-              size: captured ? 22 : 16,
+              _captured ? Icons.check_circle : Icons.arrow_forward_ios,
+              color: _captured
+                  ? CustomerColors.green
+                  : CustomerColors.muted,
+              size: _captured ? 22 : 14,
             ),
           ],
         ),
@@ -823,93 +1222,77 @@ class _AadhaarCaptureTile extends StatelessWidget {
   }
 }
 
-class _CustomerPhotoTile extends StatelessWidget {
-  const _CustomerPhotoTile({
-    required this.onTap,
-    this.imagePath,
-  });
+class _ReviewSectionTitle extends StatelessWidget {
+  const _ReviewSectionTitle(
+      {required this.titleMr, required this.titleEn});
 
-  final VoidCallback onTap;
-  final String? imagePath;
+  final String titleMr;
+  final String titleEn;
 
   @override
   Widget build(BuildContext context) {
-    final captured = imagePath != null;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: captured
-                ? CustomerColors.green.withValues(alpha: 0.4)
-                : CustomerColors.line,
+    return Row(
+      children: [
+        const Icon(Icons.checklist_outlined,
+            color: CustomerColors.navy, size: 18),
+        const SizedBox(width: 8),
+        Text(
+          titleMr,
+          style: const TextStyle(
+            color: CustomerColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w900,
           ),
         ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: captured
-                  ? Image.file(
-                      File(imagePath!),
-                      width: 56,
-                      height: 56,
-                      fit: BoxFit.cover,
-                    )
-                  : Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        color: CustomerColors.navy.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: const Icon(
-                        Icons.person_outline,
-                        color: CustomerColors.navy,
-                        size: 28,
-                      ),
-                    ),
-            ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    captured ? 'फोटो कॅप्चर झाला' : 'ग्राहकाचा फोटो काढा',
-                    style: TextStyle(
-                      color: captured
-                          ? CustomerColors.green
-                          : CustomerColors.ink,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    captured
-                        ? 'Capture Customer Photo · Tap to retake'
-                        : 'Capture Customer Photo',
-                    style: const TextStyle(
-                      color: CustomerColors.muted,
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+        const SizedBox(width: 4),
+        Text(
+          '/ $titleEn',
+          style: const TextStyle(
+            color: CustomerColors.muted,
+            fontSize: 12,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ReviewRow extends StatelessWidget {
+  const _ReviewRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
               ),
             ),
-            Icon(
-              captured ? Icons.check_circle : Icons.add_a_photo_outlined,
-              color: captured ? CustomerColors.green : CustomerColors.muted,
-              size: 22,
+          ),
+          Expanded(
+            child: Text(
+              value.isEmpty ? '—' : value,
+              style: const TextStyle(
+                color: CustomerColors.ink,
+                fontSize: 13,
+                fontWeight: FontWeight.w800,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

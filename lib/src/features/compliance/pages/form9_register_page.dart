@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/compliance_entities.dart';
 import '../presentation/bloc/form9_bloc.dart';
 import '../theme/compliance_colors.dart';
@@ -86,48 +86,25 @@ class _Form9ScaffoldState extends State<_Form9Scaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ComplianceColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: ComplianceColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            ComplianceDashboardPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'फॉर्म ९ रजिस्टर',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Form 9 Register',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            onPressed: () {},
-          ),
-          IconButton(
-            icon: const Icon(Icons.table_chart_outlined),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: SafeArea(
         child: Column(
           children: [
+            AppHeader(
+              titleMr: 'फॉर्म ९ रजिस्टर',
+              titleEn: 'Form 9 Register',
+              showBackButton: true,
+              backFallbackRoute: ComplianceDashboardPage.routeName,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF071A49)),
+                  onPressed: () {},
+                ),
+                IconButton(
+                  icon: const Icon(Icons.table_chart_outlined, color: Color(0xFF071A49)),
+                  onPressed: () {},
+                ),
+              ],
+            ),
             _FilterBar(
               from: _from,
               to: _to,

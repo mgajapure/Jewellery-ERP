@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../presentation/bloc/sales_return_bloc.dart';
 import '../theme/sales_colors.dart';
 
@@ -68,38 +69,18 @@ class _SalesReturnScaffoldState extends State<_SalesReturnScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SalesColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SalesColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              AppNavigation.popOrGoNamed(context, 'sales-dashboard'),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'विक्री परतावा',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white),
-            ),
-            Text(
-              'Sales Return',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
         child: BlocBuilder<SalesReturnBloc, SalesReturnState>(
           builder: (context, state) {
             final isSubmitting = state is SalesReturnSubmitting;
             return Column(
               children: [
+                AppHeader(
+                  titleMr: 'विक्री परतावा',
+                  titleEn: 'Sales Return',
+                  showBackButton: true,
+                  backFallbackRoute: 'sales-dashboard',
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),

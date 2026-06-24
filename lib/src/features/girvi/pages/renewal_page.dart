@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../../../shared/widgets/app_error_state.dart';
 import '../../../shared/widgets/app_loader.dart';
 import '../domain/entities/girvi.dart';
@@ -119,8 +120,21 @@ class _RenewalViewState extends State<_RenewalView> {
         if (state is GirviDetailInitial || state is GirviDetailLoading) {
           return Scaffold(
             backgroundColor: GirviColors.screenBg,
-            appBar: _NavBar(onBack: () => _navigateBack(context, null)),
-            body: const AppLoader(message: 'लोड होत आहे...'),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  AppHeader(
+                    titleMr: 'नूतनीकरण',
+                    titleEn: 'Renewal',
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF071A49)),
+                      onPressed: () => _navigateBack(context, null),
+                    ),
+                  ),
+                  const Expanded(child: AppLoader(message: 'लोड होत आहे...')),
+                ],
+              ),
+            ),
           );
         }
 
@@ -128,12 +142,27 @@ class _RenewalViewState extends State<_RenewalView> {
           final id = GoRouterState.of(context).pathParameters['id']!;
           return Scaffold(
             backgroundColor: GirviColors.screenBg,
-            appBar: _NavBar(onBack: () => _navigateBack(context, id)),
-            body: AppErrorState(
-              message: state.message,
-              onRetry: () => context
-                  .read<GirviDetailBloc>()
-                  .add(LoadGirviDetail(id)),
+            body: SafeArea(
+              child: Column(
+                children: [
+                  AppHeader(
+                    titleMr: 'नूतनीकरण',
+                    titleEn: 'Renewal',
+                    leading: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Color(0xFF071A49)),
+                      onPressed: () => _navigateBack(context, id),
+                    ),
+                  ),
+                  Expanded(
+                    child: AppErrorState(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<GirviDetailBloc>()
+                          .add(LoadGirviDetail(id)),
+                    ),
+                  ),
+                ],
+              ),
             ),
           );
         }
@@ -156,10 +185,17 @@ class _RenewalViewState extends State<_RenewalView> {
 
         return Scaffold(
           backgroundColor: GirviColors.screenBg,
-          appBar: _NavBar(onBack: () => _navigateBack(context, girvi.id)),
           body: SafeArea(
             child: Column(
               children: [
+                AppHeader(
+                  titleMr: 'नूतनीकरण',
+                  titleEn: 'Renewal',
+                  leading: IconButton(
+                    icon: const Icon(Icons.arrow_back, color: Color(0xFF071A49)),
+                    onPressed: () => _navigateBack(context, girvi.id),
+                  ),
+                ),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(16),
@@ -286,45 +322,6 @@ class _RenewalViewState extends State<_RenewalView> {
     } else {
       AppNavigation.popOrGoNamed(context, GirviDetailsPage.routeName);
     }
-  }
-}
-
-class _NavBar extends StatelessWidget implements PreferredSizeWidget {
-  const _NavBar({required this.onBack});
-
-  final VoidCallback onBack;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
-
-  @override
-  Widget build(BuildContext context) {
-    return AppBar(
-      backgroundColor: GirviColors.orange,
-      foregroundColor: Colors.white,
-      elevation: 0,
-      leading: IconButton(
-        icon: const Icon(Icons.arrow_back),
-        onPressed: onBack,
-      ),
-      title: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            'नूतनीकरण',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Colors.white,
-            ),
-          ),
-          Text(
-            'Renewal',
-            style: TextStyle(fontSize: 12, color: Colors.white70),
-          ),
-        ],
-      ),
-    );
   }
 }
 

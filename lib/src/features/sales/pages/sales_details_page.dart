@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/sale_order.dart';
 import '../theme/sales_colors.dart';
 
@@ -19,52 +19,38 @@ class SalesDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SalesColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SalesColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              AppNavigation.popOrGoNamed(context, 'sales-ledger'),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'विक्री तपशील',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white),
-            ),
-            Text(
-              'Sales Details',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () {
-              final fmt = DateFormat('dd MMM yyyy');
-              final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
-              final text = '''विक्री तपशील / Sale Details
+            AppHeader(
+              titleMr: 'विक्री तपशील',
+              titleEn: 'Sales Details',
+              showBackButton: true,
+              backFallbackRoute: 'sales-ledger',
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.share_outlined, color: Color(0xFF071A49)),
+                  onPressed: () {
+                    final fmt = DateFormat('dd MMM yyyy');
+                    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+                    final text = '''विक्री तपशील / Sale Details
 इन्व्हॉईस: ${order.invoiceNo}
 ग्राहक: ${order.customerName}
 दिनांक: ${fmt.format(order.date)}
 रक्कम: ₹${amtFmt.format(order.totalAmount)}
 पेमेंट: ${order.paymentMode.labelMr} / ${order.paymentMode.labelEn}''';
-              Share.share(text, subject: 'Invoice ${order.invoiceNo}');
-            },
-          ),
-        ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: _DetailsBody(order: order),
+                    Share.share(text, subject: 'Invoice ${order.invoiceNo}');
+                  },
+                ),
+              ],
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: _DetailsBody(order: order),
+              ),
+            ),
+          ],
         ),
       ),
     );

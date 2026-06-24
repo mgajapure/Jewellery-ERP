@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../presentation/bloc/add_inventory_bloc.dart';
 import '../theme/inventory_colors.dart';
 
@@ -123,37 +124,19 @@ class _AddInventoryScaffoldState extends State<_AddInventoryScaffold> {
       },
       child: Scaffold(
         backgroundColor: InventoryColors.screenBg,
-        appBar: AppBar(
-          backgroundColor: InventoryColors.navy,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () =>
-                AppNavigation.popOrGoNamed(context, 'inventory-list'),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'नवीन वस्तू जोडा',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'Add New Item',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
         body: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'नवीन वस्तू जोडा',
+                titleEn: 'Add New Item',
+                showBackButton: true,
+                backFallbackRoute: 'inventory-list',
+              ),
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -303,6 +286,9 @@ class _AddInventoryScaffoldState extends State<_AddInventoryScaffold> {
                 ],
               ),
             ),
+          ),
+              ),
+            ],
           ),
         ),
       ),

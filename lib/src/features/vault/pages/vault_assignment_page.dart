@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/vault_slot.dart';
 import '../presentation/bloc/vault_assignment_bloc.dart';
 import '../presentation/bloc/vault_assignment_event.dart';
@@ -42,38 +43,16 @@ class _VaultAssignmentView extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: VaultColors.screenBg,
-        appBar: AppBar(
-          backgroundColor: VaultColors.navy,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => context.pop(),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'तिजोरी नियुक्ती',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'Vault Assignment',
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white70,
-                ),
-              ),
-            ],
-          ),
-        ),
         body: SafeArea(
-          child: BlocBuilder<VaultAssignmentBloc, VaultAssignmentState>(
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'तिजोरी नियुक्ती',
+                titleEn: 'Vault Assignment',
+                showBackButton: true,
+              ),
+              Expanded(
+                child: BlocBuilder<VaultAssignmentBloc, VaultAssignmentState>(
             builder: (context, state) {
               if (state is VaultAssignmentLoading ||
                   state is VaultAssignmentInitial) {
@@ -268,6 +247,9 @@ class _VaultAssignmentView extends StatelessWidget {
                 ],
               );
             },
+          ),
+              ),
+            ],
           ),
         ),
       ),

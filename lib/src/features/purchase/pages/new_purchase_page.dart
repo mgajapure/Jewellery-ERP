@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/purchase_entry.dart';
 import '../presentation/bloc/new_purchase_bloc.dart';
 import '../theme/purchase_colors.dart';
@@ -107,39 +108,19 @@ class _NewPurchaseViewState extends State<_NewPurchaseView> {
       },
       child: Scaffold(
         backgroundColor: PurchaseColors.screenBg,
-        appBar: AppBar(
-          backgroundColor: PurchaseColors.navy,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => AppNavigation.popOrGoNamed(
-              context,
-              PurchaseDashboardPage.routeName,
-            ),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'नवीन खरेदी नोंद',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'New Purchase Entry',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
         body: SafeArea(
-          child: Form(
-            key: _formKey,
-            child: ListView(
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'नवीन खरेदी नोंद',
+                titleEn: 'New Purchase Entry',
+                showBackButton: true,
+                backFallbackRoute: PurchaseDashboardPage.routeName,
+              ),
+              Expanded(
+                child: Form(
+                  key: _formKey,
+                  child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                 _SectionTitle(
@@ -355,6 +336,9 @@ class _NewPurchaseViewState extends State<_NewPurchaseView> {
                 ),
               ],
             ),
+          ),
+              ),
+            ],
           ),
         ),
       ),

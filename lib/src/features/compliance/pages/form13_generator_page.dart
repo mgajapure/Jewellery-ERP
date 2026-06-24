@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../presentation/bloc/generate_form_bloc.dart';
 import '../theme/compliance_colors.dart';
 import 'compliance_dashboard_page.dart';
@@ -112,38 +112,15 @@ class _Form13ScaffoldState extends State<_Form13Scaffold> {
       },
       child: Scaffold(
         backgroundColor: ComplianceColors.screenBg,
-        appBar: AppBar(
-          backgroundColor: ComplianceColors.navy,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => AppNavigation.popOrGoNamed(
-              context,
-              ComplianceDashboardPage.routeName,
-            ),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'फॉर्म १३ जनरेटर',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'Form 13 Generator',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
-          ),
-        ),
         body: SafeArea(
           child: Column(
             children: [
+              AppHeader(
+                titleMr: 'फॉर्म १३ जनरेटर',
+                titleEn: 'Form 13 Generator',
+                showBackButton: true,
+                backFallbackRoute: ComplianceDashboardPage.routeName,
+              ),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(16),

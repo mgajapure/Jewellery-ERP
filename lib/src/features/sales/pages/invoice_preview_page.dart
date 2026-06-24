@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/sale_order.dart';
 import '../theme/sales_colors.dart';
 
@@ -18,36 +18,22 @@ class InvoicePreviewPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SalesColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SalesColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              AppNavigation.popOrGoNamed(context, 'sales-dashboard'),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'इन्व्हॉईस पूर्वावलोकन',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white),
+            AppHeader(
+              titleMr: 'इन्व्हॉईस पूर्वावलोकन',
+              titleEn: 'Invoice Preview',
+              showBackButton: true,
+              backFallbackRoute: 'sales-dashboard',
             ),
-            Text(
-              'Invoice Preview',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: _InvoiceBody(order: order),
+              ),
             ),
           ],
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: _InvoiceBody(order: order),
         ),
       ),
     );

@@ -4,7 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../presentation/bloc/barcode_sale_bloc.dart';
 import '../theme/sales_colors.dart';
 
@@ -67,32 +67,6 @@ class _BarcodeSaleScaffoldState extends State<_BarcodeSaleScaffold> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SalesColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SalesColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () =>
-              AppNavigation.popOrGoNamed(context, 'sales-dashboard'),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'बारकोड विक्री',
-              style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white),
-            ),
-            Text(
-              'Barcode Sale',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
         child: BlocBuilder<BarcodeSaleBloc, BarcodeSaleState>(
           builder: (context, state) {
@@ -103,6 +77,12 @@ class _BarcodeSaleScaffoldState extends State<_BarcodeSaleScaffold> {
 
             return Column(
               children: [
+                AppHeader(
+                  titleMr: 'बारकोड विक्री',
+                  titleEn: 'Barcode Sale',
+                  showBackButton: true,
+                  backFallbackRoute: 'sales-dashboard',
+                ),
                 Padding(
                   padding: const EdgeInsets.all(16),
                   child: Row(

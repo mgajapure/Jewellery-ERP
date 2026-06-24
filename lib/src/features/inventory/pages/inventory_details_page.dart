@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/inventory_item.dart';
 import '../presentation/bloc/inventory_detail_bloc.dart';
 import '../theme/inventory_colors.dart';
@@ -86,44 +86,24 @@ class _InventoryDetailsScaffoldState
       },
       child: Scaffold(
         backgroundColor: InventoryColors.screenBg,
-        appBar: AppBar(
-          backgroundColor: InventoryColors.navy,
-          foregroundColor: Colors.white,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back),
-            onPressed: () => AppNavigation.popOrGoNamed(
-              context,
-              InventoryListPage.routeName,
-            ),
-          ),
-          title: const Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'इन्व्हेंटरी तपशील',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                'Inventory Details',
-                style: TextStyle(fontSize: 12, color: Colors.white70),
-              ),
-            ],
-          ),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.print_outlined),
-              onPressed: () => _showPrintDialog(context),
-            ),
-          ],
-        ),
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'इन्व्हेंटरी तपशील',
+                titleEn: 'Inventory Details',
+                showBackButton: true,
+                backFallbackRoute: InventoryListPage.routeName,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.print_outlined, color: Color(0xFF071A49)),
+                    onPressed: () => _showPrintDialog(context),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -203,6 +183,9 @@ class _InventoryDetailsScaffoldState
                   _MovementHistory(movements: _item.movements),
               ],
             ),
+          ),
+              ),
+            ],
           ),
         ),
         bottomSheet: _BottomActions(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../domain/entities/purchase_entry.dart';
 import '../theme/purchase_colors.dart';
 import 'purchase_ledger_page.dart';
@@ -18,39 +18,22 @@ class PurchaseDetailsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: PurchaseColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: PurchaseColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            PurchaseLedgerPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'खरेदी तपशील',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+            AppHeader(
+              titleMr: 'खरेदी तपशील',
+              titleEn: 'Purchase Details',
+              showBackButton: true,
+              backFallbackRoute: PurchaseLedgerPage.routeName,
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: _DetailsBody(entry: entry),
               ),
             ),
-            Text(
-              'Purchase Details',
-              style: TextStyle(fontSize: 12, color: Colors.white70),
-            ),
           ],
-        ),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: _DetailsBody(entry: entry),
         ),
       ),
     );

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
 import '../theme/compliance_colors.dart';
 import 'compliance_dashboard_page.dart';
 
@@ -75,78 +75,61 @@ class _Forms11_12PageState extends State<Forms11_12Page>
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ComplianceColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: ComplianceColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            ComplianceDashboardPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'फॉर्म ११ आणि १२',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Forms 11 & 12',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('PDF निर्यात लवकरच / PDF export coming soon'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.print_outlined),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('प्रिंट लवकरच / Print coming soon'),
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
-          ),
-        ],
-        bottom: TabBar(
-          controller: _tabController,
-          indicatorColor: ComplianceColors.gold,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: 'Form 11'),
-            Tab(text: 'Form 12'),
-          ],
-        ),
-      ),
       body: SafeArea(
-        child: TabBarView(
-          controller: _tabController,
+        child: Column(
           children: [
-            _Form11Tab(rows: _form11Rows),
-            _Form12Tab(rows: _form12Rows, format: _format),
+            AppHeader(
+              titleMr: 'फॉर्म ११ आणि १२',
+              titleEn: 'Forms 11 & 12',
+              showBackButton: true,
+              backFallbackRoute: ComplianceDashboardPage.routeName,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.picture_as_pdf_outlined, color: Color(0xFF071A49)),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('PDF निर्यात लवकरच / PDF export coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+                IconButton(
+                  icon: const Icon(Icons.print_outlined, color: Color(0xFF071A49)),
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('प्रिंट लवकरच / Print coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            Container(
+              color: Colors.white,
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: ComplianceColors.gold,
+                labelColor: ComplianceColors.navy,
+                unselectedLabelColor: ComplianceColors.muted,
+                tabs: const [
+                  Tab(text: 'Form 11'),
+                  Tab(text: 'Form 12'),
+                ],
+              ),
+            ),
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _Form11Tab(rows: _form11Rows),
+                  _Form12Tab(rows: _form12Rows, format: _format),
+                ],
+              ),
+            ),
           ],
         ),
       ),

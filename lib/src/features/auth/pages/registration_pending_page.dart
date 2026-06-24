@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -20,36 +18,20 @@ class RegistrationPendingPage extends StatefulWidget {
 }
 
 class _RegistrationPendingPageState extends State<RegistrationPendingPage> {
-  Timer? _dashboardTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _dashboardTimer = Timer(const Duration(seconds: 1), () {
-      if (mounted) {
-        context.goNamed(DashboardPage.routeName);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _dashboardTimer?.cancel();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: AuthDarkBackground(
         child: SafeArea(
           child: Padding(
-            padding: EdgeInsets.fromLTRB(22, 12, 22, 0),
+            padding: const EdgeInsets.fromLTRB(22, 12, 22, 0),
             child: Column(
               children: [
-                SizedBox(height: 8),
-                _PendingBadge(),
-                Expanded(child: _PendingSheet()),
+                const SizedBox(height: 8),
+                const _PendingBadge(),
+                Expanded(child: _PendingSheet(onContinue: () {
+                  context.goNamed(DashboardPage.routeName);
+                })),
               ],
             ),
           ),
@@ -107,7 +89,9 @@ class _PendingBadge extends StatelessWidget {
 }
 
 class _PendingSheet extends StatelessWidget {
-  const _PendingSheet();
+  const _PendingSheet({required this.onContinue});
+
+  final VoidCallback onContinue;
 
   @override
   Widget build(BuildContext context) {
@@ -120,9 +104,9 @@ class _PendingSheet extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 22),
         child: Column(
-          children: const [
-            Spacer(flex: 3),
-            Text(
+          children: [
+            const Spacer(flex: 3),
+            const Text(
               'नोंदणी विनंती पाठवली आहे',
               textAlign: TextAlign.center,
               style: TextStyle(
@@ -131,8 +115,8 @@ class _PendingSheet extends StatelessWidget {
                 fontWeight: FontWeight.w800,
               ),
             ),
-            SizedBox(height: 5),
-            Text(
+            const SizedBox(height: 5),
+            const Text(
               'Registration Request Sent',
               style: TextStyle(
                 color: AuthColors.ink,
@@ -140,33 +124,52 @@ class _PendingSheet extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            Spacer(flex: 3),
-            AuthDividerGem(width: double.infinity),
-            Spacer(flex: 3),
-            _PendingLine(
+            const Spacer(flex: 3),
+            const AuthDividerGem(width: double.infinity),
+            const Spacer(flex: 3),
+            const _PendingLine(
               icon: Icons.person_outline,
               marathi: 'तुमची विनंती मालकाकडे पाठवली आहे.',
               english: 'Your request has been sent to the Owner.',
             ),
-            Spacer(flex: 2),
-            _PendingLine(
+            const Spacer(flex: 2),
+            const _PendingLine(
               icon: Icons.notifications_none,
               marathi: 'मालक मंजुरी देईपर्यंत कृपया थांबा.',
               english: 'Please wait until Owner approves.',
             ),
-            Spacer(flex: 2),
-            _PendingLine(
+            const Spacer(flex: 2),
+            const _PendingLine(
               icon: Icons.phone_android_outlined,
               marathi: 'मंजुरीनंतर तुम्ही या डिव्हाइसवर लॉगिन करू शकाल.',
               english: 'You will be able to login on this device after approval.',
             ),
-            Spacer(flex: 3),
-            AuthInfoNotice(
+            const Spacer(flex: 3),
+            const AuthInfoNotice(
               icon: Icons.schedule_outlined,
               marathi: 'हे सामान्यत: काही मिनिटांत पूर्ण होते.',
               english: 'This usually takes a few minutes.',
             ),
-            Spacer(flex: 3),
+            const Spacer(flex: 3),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: onContinue,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AuthColors.ink,
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
+                child: const Text(
+                  'ठीक आहे, डॅशबोर्डवर जा / Go to Dashboard',
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800),
+                ),
+              ),
+            ),
+            const Spacer(flex: 2),
           ],
         ),
       ),

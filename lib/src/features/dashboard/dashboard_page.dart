@@ -156,6 +156,24 @@ class _DashboardHeader extends StatelessWidget {
 
   final int alertCount;
 
+  void _showMenuSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => const _MenuSheet(),
+    );
+  }
+
+  void _showNotificationsSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => _NotificationsSheet(alertCount: alertCount),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -163,7 +181,7 @@ class _DashboardHeader extends StatelessWidget {
       child: Row(
         children: [
           IconButton(
-            onPressed: () {},
+            onPressed: () => _showMenuSheet(context),
             icon: const Icon(Icons.menu, color: _ink),
             tooltip: 'Menu',
           ),
@@ -181,7 +199,7 @@ class _DashboardHeader extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () => _showNotificationsSheet(context),
                 icon: const Icon(Icons.notifications_none, color: _ink),
                 tooltip: 'Notifications',
               ),
@@ -882,4 +900,317 @@ class _ListDivider extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       const Divider(height: 1, color: _line, indent: 68);
+}
+
+// ─── Menu Sheet ───────────────────────────────────────────────────────────────
+
+class _MenuSheet extends StatelessWidget {
+  const _MenuSheet();
+
+  static const _menuItems = [
+    (icon: Icons.people_outline, labelMr: 'ग्राहक', labelEn: 'Customers', route: 'customer-list'),
+    (icon: Icons.account_balance_wallet_outlined, labelMr: 'गिरवी', labelEn: 'Girvi', route: 'girvi-list'),
+    (icon: Icons.point_of_sale_outlined, labelMr: 'विक्री', labelEn: 'Sales', route: 'sales-dashboard'),
+    (icon: Icons.shopping_bag_outlined, labelMr: 'खरेदी', labelEn: 'Purchase', route: 'purchase-dashboard'),
+    (icon: Icons.savings_outlined, labelMr: 'बचत योजना', labelEn: 'Savings', route: 'savings-dashboard'),
+    (icon: Icons.bar_chart_outlined, labelMr: 'अहवाल', labelEn: 'Reports', route: 'reports-dashboard'),
+    (icon: Icons.gavel_outlined, labelMr: 'अनुपालन', labelEn: 'Compliance', route: 'compliance-dashboard'),
+    (icon: Icons.calculate_outlined, labelMr: 'व्याज', labelEn: 'Interest', route: 'interest-calculator'),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: _navy,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(Icons.diamond_outlined, color: _gold, size: 22),
+                  ),
+                  const SizedBox(width: 14),
+                  const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'प्रकाश ज्वेलर्स',
+                        style: TextStyle(
+                          color: _ink,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                      Text(
+                        'Prakash Jewellers · ERP v0.1',
+                        style: TextStyle(color: _muted, fontSize: 12),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Divider(height: 1, color: _line),
+            GridView.builder(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 4,
+                childAspectRatio: 0.85,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+              ),
+              itemCount: _menuItems.length,
+              itemBuilder: (context, i) {
+                final item = _menuItems[i];
+                return InkWell(
+                  onTap: () {
+                    Navigator.of(context).pop();
+                    context.goNamed(item.route);
+                  },
+                  borderRadius: BorderRadius.circular(12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: _navy.withValues(alpha: 0.07),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(item.icon, color: _navy, size: 22),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        item.labelMr,
+                        style: const TextStyle(
+                          color: _ink,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                        ),
+                        textAlign: TextAlign.center,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Notifications Sheet ──────────────────────────────────────────────────────
+
+class _NotificationsSheet extends StatelessWidget {
+  const _NotificationsSheet({required this.alertCount});
+
+  final int alertCount;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 8),
+            Container(
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: _line,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+              child: Row(
+                children: [
+                  const Text(
+                    'सूचना / Notifications',
+                    style: TextStyle(
+                      color: _ink,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                  const Spacer(),
+                  if (alertCount > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEECEC),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        '$alertCount अलर्ट / alerts',
+                        style: const TextStyle(
+                          color: _red,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const Divider(height: 1, color: _line),
+            if (alertCount == 0)
+              const Padding(
+                padding: EdgeInsets.all(32),
+                child: Column(
+                  children: [
+                    Icon(Icons.notifications_none, size: 48, color: _muted),
+                    SizedBox(height: 12),
+                    Text(
+                      'कोणत्याही सूचना नाहीत\nNo notifications',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: _muted, fontSize: 13),
+                    ),
+                  ],
+                ),
+              )
+            else ...[
+              _NotificationTile(
+                icon: Icons.warning_amber_outlined,
+                color: _red,
+                titleMr: 'अतिदेय गिरवी खाती',
+                titleEn: 'Overdue Girvi Accounts',
+                bodyMr: '$alertCount खाती तात्काळ कारवाई आवश्यक',
+                bodyEn: '$alertCount accounts need immediate attention',
+              ),
+              const Divider(height: 1, color: _line, indent: 20),
+              _NotificationTile(
+                icon: Icons.schedule_outlined,
+                color: const Color(0xFFF59E0B),
+                titleMr: 'देय तारखा जवळ आहेत',
+                titleEn: 'Due Dates Approaching',
+                bodyMr: 'काही गिरवी या आठवड्यात देय आहेत',
+                bodyEn: 'Some girvi accounts due this week',
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      context.goNamed('due-overdue');
+                    },
+                    icon: const Icon(Icons.arrow_forward, size: 16),
+                    label: const Text('देय व अतिदेय पहा / View Due & Overdue'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: _navy,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 14),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NotificationTile extends StatelessWidget {
+  const _NotificationTile({
+    required this.icon,
+    required this.color,
+    required this.titleMr,
+    required this.titleEn,
+    required this.bodyMr,
+    required this.bodyEn,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String titleMr, titleEn, bodyMr, bodyEn;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$titleMr / $titleEn',
+                  style: const TextStyle(
+                    color: _ink,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Text(
+                  '$bodyMr\n$bodyEn',
+                  style: const TextStyle(
+                    color: _muted,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

@@ -1,7 +1,10 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
@@ -44,8 +47,12 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
   final _stateController = TextEditingController();
   final _pincodeController = TextEditingController();
   final _panController = TextEditingController();
+  final _aadhaarController = TextEditingController();
   String _selectedGender = 'Male';
   DateTime? _selectedDob;
+  String? _photoPath;
+  String? _aadhaarImagePath;
+  final _imagePicker = ImagePicker();
 
   @override
   void dispose() {
@@ -57,7 +64,37 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
     _stateController.dispose();
     _pincodeController.dispose();
     _panController.dispose();
+    _aadhaarController.dispose();
     super.dispose();
+  }
+
+  Future<void> _pickPhoto() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (image != null && mounted) {
+      setState(() => _photoPath = image.path);
+    }
+  }
+
+  Future<void> _pickAadhaarImage() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 1200,
+      imageQuality: 90,
+    );
+    if (image != null && mounted) {
+      setState(() => _aadhaarImagePath = image.path);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+              'फोटो कॅप्चर झाला. आधार क्रमांक खाली टाका / Photo captured. Enter Aadhaar number below.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
   }
 
   Future<void> _pickDate() async {
@@ -283,7 +320,22 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
                             titleEn: 'KYC Information',
                           ),
                           const SizedBox(height: 12),
-                          const _AadhaarCaptureTile(),
+                          _AadhaarCaptureTile(
+                            imagePath: _aadhaarImagePath,
+                            onTap: _pickAadhaarImage,
+                          ),
+                          const SizedBox(height: 14),
+                          _AppTextField(
+                            controller: _aadhaarController,
+                            label: 'आधार क्रमांक / Aadhaar Number',
+                            hint: '12 अंकी आधार क्रमांक',
+                            prefixIcon: Icons.badge_outlined,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                            maxLength: 12,
+                          ),
                           const SizedBox(height: 14),
                           _AppTextField(
                             controller: _panController,
@@ -294,7 +346,10 @@ class _CreateCustomerViewState extends State<_CreateCustomerView> {
                             textCapitalization: TextCapitalization.characters,
                           ),
                           const SizedBox(height: 14),
-                          const _CustomerPhotoTile(),
+                          _CustomerPhotoTile(
+                            imagePath: _photoPath,
+                            onTap: _pickPhoto,
+                          ),
                           const SizedBox(height: 28),
                           SizedBox(
                             width: double.infinity,
@@ -629,74 +684,105 @@ class _GenderDropdown extends StatelessWidget {
 }
 
 class _AadhaarCaptureTile extends StatelessWidget {
-  const _AadhaarCaptureTile();
+  const _AadhaarCaptureTile({
+    required this.onTap,
+    this.imagePath,
+  });
+
+  final VoidCallback onTap;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
+    final captured = imagePath != null;
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: CustomerColors.cream,
+          color: captured
+              ? CustomerColors.green.withValues(alpha: 0.06)
+              : CustomerColors.cream,
           borderRadius: BorderRadius.circular(12),
-          border:
-              Border.all(color: CustomerColors.gold.withValues(alpha: 0.3)),
+          border: Border.all(
+            color: captured
+                ? CustomerColors.green.withValues(alpha: 0.4)
+                : CustomerColors.gold.withValues(alpha: 0.3),
+          ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: CustomerColors.navy,
+            if (captured)
+              ClipRRect(
                 borderRadius: BorderRadius.circular(10),
+                child: Image.file(
+                  File(imagePath!),
+                  width: 46,
+                  height: 46,
+                  fit: BoxFit.cover,
+                ),
+              )
+            else
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: CustomerColors.navy,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.document_scanner_outlined,
+                  color: CustomerColors.gold,
+                  size: 24,
+                ),
               ),
-              child: const Icon(
-                Icons.document_scanner_outlined,
-                color: CustomerColors.gold,
-                size: 24,
-              ),
-            ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'आधार OCR स्कॅन करा',
+                    captured
+                        ? 'आधार फोटो कॅप्चर झाला'
+                        : 'आधार कार्ड फोटो काढा',
                     style: TextStyle(
-                      color: CustomerColors.ink,
+                      color: captured
+                          ? CustomerColors.green
+                          : CustomerColors.ink,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Scan Aadhaar with OCR',
-                    style: TextStyle(
+                    captured
+                        ? 'Aadhaar photo captured · Tap to retake'
+                        : 'Capture Aadhaar card photo',
+                    style: const TextStyle(
                       color: CustomerColors.muted,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'माहिती आपोआप भरली जाईल / Details will auto-fill',
-                    style: TextStyle(
-                      color: CustomerColors.muted,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
+                  if (!captured) ...[
+                    const SizedBox(height: 4),
+                    const Text(
+                      'खाली Aadhaar नंबर टाका / Enter Aadhaar number below',
+                      style: TextStyle(
+                        color: CustomerColors.muted,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
-                  ),
+                  ],
                 ],
               ),
             ),
-            const Icon(
-              Icons.arrow_forward_ios,
-              color: CustomerColors.muted,
-              size: 16,
+            Icon(
+              captured ? Icons.check_circle : Icons.arrow_forward_ios,
+              color: captured ? CustomerColors.green : CustomerColors.muted,
+              size: captured ? 22 : 16,
             ),
           ],
         ),
@@ -706,52 +792,77 @@ class _AadhaarCaptureTile extends StatelessWidget {
 }
 
 class _CustomerPhotoTile extends StatelessWidget {
-  const _CustomerPhotoTile();
+  const _CustomerPhotoTile({
+    required this.onTap,
+    this.imagePath,
+  });
+
+  final VoidCallback onTap;
+  final String? imagePath;
 
   @override
   Widget build(BuildContext context) {
+    final captured = imagePath != null;
     return InkWell(
-      onTap: () {},
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: CustomerColors.line),
+          border: Border.all(
+            color: captured
+                ? CustomerColors.green.withValues(alpha: 0.4)
+                : CustomerColors.line,
+          ),
         ),
         child: Row(
           children: [
-            Container(
-              width: 46,
-              height: 46,
-              decoration: BoxDecoration(
-                color: CustomerColors.navy.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Icon(
-                Icons.camera_alt_outlined,
-                color: CustomerColors.navy,
-                size: 24,
-              ),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: captured
+                  ? Image.file(
+                      File(imagePath!),
+                      width: 56,
+                      height: 56,
+                      fit: BoxFit.cover,
+                    )
+                  : Container(
+                      width: 56,
+                      height: 56,
+                      decoration: BoxDecoration(
+                        color: CustomerColors.navy.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: const Icon(
+                        Icons.person_outline,
+                        color: CustomerColors.navy,
+                        size: 28,
+                      ),
+                    ),
             ),
             const SizedBox(width: 14),
-            const Expanded(
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'ग्राहकाचा फोटो काढा',
+                    captured ? 'फोटो कॅप्चर झाला' : 'ग्राहकाचा फोटो काढा',
                     style: TextStyle(
-                      color: CustomerColors.ink,
+                      color: captured
+                          ? CustomerColors.green
+                          : CustomerColors.ink,
                       fontSize: 14,
                       fontWeight: FontWeight.w900,
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
-                    'Capture Customer Photo',
-                    style: TextStyle(
+                    captured
+                        ? 'Capture Customer Photo · Tap to retake'
+                        : 'Capture Customer Photo',
+                    style: const TextStyle(
                       color: CustomerColors.muted,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -760,9 +871,9 @@ class _CustomerPhotoTile extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(
-              Icons.add_a_photo_outlined,
-              color: CustomerColors.muted,
+            Icon(
+              captured ? Icons.check_circle : Icons.add_a_photo_outlined,
+              color: captured ? CustomerColors.green : CustomerColors.muted,
               size: 22,
             ),
           ],

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
@@ -68,23 +69,40 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
     });
   }
 
+  void _onQrScanned(String value) {
+    _controller.text = value;
+    setState(() => _modeIndex = 2); // switch to ID mode after scan
+    context.read<CustomerListBloc>().add(SearchCustomerList(value));
+  }
+
   @override
   Widget build(BuildContext context) {
+    final isQrMode = _modeIndex == 3;
     return Scaffold(
       backgroundColor: CustomerColors.screenBg,
       body: SafeArea(
         child: Column(
           children: [
             const _SearchHeader(),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: _SearchField(
-                controller: _controller,
-                hint: _modes[_modeIndex].hint,
-                keyboardType: _modes[_modeIndex].kb,
-                onChanged: _onTextChanged,
+            if (!isQrMode)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                child: _SearchField(
+                  controller: _controller,
+                  hint: _modes[_modeIndex].hint,
+                  keyboardType: _modes[_modeIndex].kb,
+                  onChanged: _onTextChanged,
+                  onMicTap: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'आवाज शोध लवकरच येणार / Voice search coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                ),
               ),
-            ),
             _SearchModeTabs(
               modes: _modes.map((m) => m.label).toList(),
               selectedIndex: _modeIndex,
@@ -98,52 +116,58 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: BlocBuilder<CustomerListBloc, CustomerListState>(
-                builder: (context, state) {
-                  if (state is CustomerListInitial) {
-                    return _SearchHint(mode: _modes[_modeIndex].label);
-                  }
-                  if (state is CustomerListLoading) {
-                    return const Center(
-                      child: CircularProgressIndicator(
-                        color: CustomerColors.navy,
-                        strokeWidth: 2.5,
-                      ),
-                    );
-                  }
-                  if (state is CustomerListError) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(32),
-                        child: Text(
-                          state.message,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            color: CustomerColors.muted,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    );
-                  }
-                  if (state is CustomerListLoaded) {
-                    if (state.searchQuery.isEmpty) {
-                      return _SearchHint(mode: _modes[_modeIndex].label);
-                    }
-                    if (state.displayList.isEmpty) {
-                      return _NoResults(query: state.searchQuery);
-                    }
-                    return ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                      itemCount: state.displayList.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
-                      itemBuilder: (context, index) =>
-                          _SearchResultCard(customer: state.displayList[index]),
-                    );
-                  }
-                  return const SizedBox.shrink();
-                },
-              ),
+              child: isQrMode
+                  ? _QrScannerView(onScanned: _onQrScanned)
+                  : BlocBuilder<CustomerListBloc, CustomerListState>(
+                      builder: (context, state) {
+                        if (state is CustomerListInitial) {
+                          return _SearchHint(mode: _modes[_modeIndex].label);
+                        }
+                        if (state is CustomerListLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(
+                              color: CustomerColors.navy,
+                              strokeWidth: 2.5,
+                            ),
+                          );
+                        }
+                        if (state is CustomerListError) {
+                          return Center(
+                            child: Padding(
+                              padding: const EdgeInsets.all(32),
+                              child: Text(
+                                state.message,
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(
+                                  color: CustomerColors.muted,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ),
+                          );
+                        }
+                        if (state is CustomerListLoaded) {
+                          if (state.searchQuery.isEmpty) {
+                            return _SearchHint(
+                                mode: _modes[_modeIndex].label);
+                          }
+                          if (state.displayList.isEmpty) {
+                            return _NoResults(query: state.searchQuery);
+                          }
+                          return ListView.separated(
+                            padding:
+                                const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                            itemCount: state.displayList.length,
+                            separatorBuilder: (_, __) =>
+                                const SizedBox(height: 12),
+                            itemBuilder: (context, index) =>
+                                _SearchResultCard(
+                                    customer: state.displayList[index]),
+                          );
+                        }
+                        return const SizedBox.shrink();
+                      },
+                    ),
             ),
           ],
         ),
@@ -193,12 +217,14 @@ class _SearchField extends StatelessWidget {
     required this.hint,
     required this.onChanged,
     this.keyboardType,
+    this.onMicTap,
   });
 
   final TextEditingController controller;
   final String hint;
   final ValueChanged<String> onChanged;
   final TextInputType? keyboardType;
+  final VoidCallback? onMicTap;
 
   @override
   Widget build(BuildContext context) {
@@ -227,7 +253,11 @@ class _SearchField extends StatelessWidget {
                     onChanged('');
                   },
                 )
-              : const Icon(Icons.mic, color: CustomerColors.muted),
+              : IconButton(
+                  icon: const Icon(Icons.mic, color: CustomerColors.muted),
+                  onPressed: onMicTap,
+                  tooltip: 'Voice search',
+                ),
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -243,6 +273,111 @@ class _SearchField extends StatelessWidget {
         ),
         contentPadding: const EdgeInsets.symmetric(vertical: 16),
       ),
+    );
+  }
+}
+
+class _QrScannerView extends StatefulWidget {
+  const _QrScannerView({required this.onScanned});
+
+  final ValueChanged<String> onScanned;
+
+  @override
+  State<_QrScannerView> createState() => _QrScannerViewState();
+}
+
+class _QrScannerViewState extends State<_QrScannerView> {
+  late final MobileScannerController _controller;
+  bool _scanned = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = MobileScannerController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: MobileScanner(
+            controller: _controller,
+            onDetect: (capture) {
+              if (_scanned) return;
+              final value = capture.barcodes.firstOrNull?.rawValue;
+              if (value != null && value.isNotEmpty) {
+                _scanned = true;
+                widget.onScanned(value);
+              }
+            },
+          ),
+        ),
+        Center(
+          child: Container(
+            width: 220,
+            height: 220,
+            decoration: BoxDecoration(
+              border: Border.all(color: CustomerColors.gold, width: 3),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 24,
+          left: 0,
+          right: 0,
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                decoration: BoxDecoration(
+                  color: Colors.black54,
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Text(
+                  'QR कोड फ्रेममध्ये धरा / Hold QR code in frame',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () => _controller.toggleTorch(),
+                    icon: const Icon(Icons.flash_on, color: Colors.white),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black38,
+                    ),
+                    tooltip: 'Flash',
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    onPressed: () => _controller.switchCamera(),
+                    icon: const Icon(Icons.flip_camera_ios, color: Colors.white),
+                    style: IconButton.styleFrom(
+                      backgroundColor: Colors.black38,
+                    ),
+                    tooltip: 'Switch Camera',
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

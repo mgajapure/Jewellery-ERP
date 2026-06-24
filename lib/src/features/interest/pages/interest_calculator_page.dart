@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
@@ -197,7 +198,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
                           _ResultCard(result: state.result!),
                         ],
                         const SizedBox(height: 24),
-                        const _FormulaInfoBox(interestType: null),
+                        _FormulaInfoBox(interestType: state.interestType),
                       ],
                     ),
                   ),
@@ -208,9 +209,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
                     children: [
                       Expanded(
                         child: OutlinedButton.icon(
-                          onPressed: () {
-                            // Navigate to ledger page
-                          },
+                          onPressed: () => context.goNamed('interest-ledger'),
                           icon:
                               const Icon(Icons.receipt_long_outlined, size: 18),
                           label: const Text('Ledger'),

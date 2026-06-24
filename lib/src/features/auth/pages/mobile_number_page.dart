@@ -157,22 +157,69 @@ class _MobileViewState extends State<_MobileView> {
 class _NeedHelp extends StatelessWidget {
   const _NeedHelp();
 
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'मदत / Help',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'लॉगिनमध्ये समस्या येत आहे?',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            ),
+            Text(
+              'Having trouble logging in?',
+              style: TextStyle(color: Color(0xFF5E6880), fontSize: 12),
+            ),
+            SizedBox(height: 12),
+            Text(
+              '• नोंदणी केलेला मोबाईल नंबर वापरा\n'
+              '  Use your registered mobile number\n\n'
+              '• OTP येण्यासाठी काही मिनिटे थांबा\n'
+              '  Wait a few minutes for OTP\n\n'
+              '• मालकाशी संपर्क साधा\n'
+              '  Contact the shop owner',
+              style: TextStyle(fontSize: 12, height: 1.5),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('ठीक आहे / OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.info_outline, color: AuthColors.ink, size: 18),
-        SizedBox(width: 8),
-        Text(
-          'समस्या आहे? मदत घ्या / Need Help?',
-          style: TextStyle(
-            color: AuthColors.ink,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+    return GestureDetector(
+      onTap: () => _showHelpDialog(context),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, color: AuthColors.ink, size: 18),
+          SizedBox(width: 8),
+          Text(
+            'समस्या आहे? मदत घ्या / Need Help?',
+            style: TextStyle(
+              color: AuthColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

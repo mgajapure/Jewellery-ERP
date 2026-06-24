@@ -48,6 +48,25 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
   String _selectedGender = 'Male';
   DateTime? _selectedDob;
 
+  // Parses "Street, City, State - Pincode" stored format back into parts.
+  static ({String street, String city, String state, String pincode})
+      _parseAddress(String address) {
+    try {
+      final dashIdx = address.lastIndexOf(' - ');
+      final pincode = dashIdx >= 0 ? address.substring(dashIdx + 3).trim() : '';
+      final withoutPin = dashIdx >= 0 ? address.substring(0, dashIdx).trim() : address;
+      final lastComma = withoutPin.lastIndexOf(', ');
+      final state = lastComma >= 0 ? withoutPin.substring(lastComma + 2).trim() : '';
+      final withoutState = lastComma >= 0 ? withoutPin.substring(0, lastComma).trim() : withoutPin;
+      final secondLast = withoutState.lastIndexOf(', ');
+      final city = secondLast >= 0 ? withoutState.substring(secondLast + 2).trim() : '';
+      final street = secondLast >= 0 ? withoutState.substring(0, secondLast).trim() : withoutState;
+      return (street: street, city: city, state: state, pincode: pincode);
+    } catch (_) {
+      return (street: address, city: '', state: '', pincode: '');
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -55,12 +74,11 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
     _nameController = TextEditingController(text: c.nameEn);
     _altMobileController =
         TextEditingController(text: c.alternateMobile ?? '');
-    // Parse "Street, City, State - Pincode" back if possible; otherwise put
-    // the full address in the street field and leave city/state/pincode blank.
-    _addressController = TextEditingController(text: c.address);
-    _cityController = TextEditingController();
-    _stateController = TextEditingController(text: 'Maharashtra');
-    _pincodeController = TextEditingController();
+    final parsed = _parseAddress(c.address);
+    _addressController = TextEditingController(text: parsed.street);
+    _cityController = TextEditingController(text: parsed.city);
+    _stateController = TextEditingController(text: parsed.state);
+    _pincodeController = TextEditingController(text: parsed.pincode);
     _panController = TextEditingController(text: c.panNumber ?? '');
     _selectedDob = c.dateOfBirth;
   }
@@ -108,15 +126,9 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
           ? null
           : _altMobileController.text.trim(),
       address: _addressController.text.trim(),
-      city: _cityController.text.trim().isEmpty
-          ? 'Pune'
-          : _cityController.text.trim(),
-      state: _stateController.text.trim().isEmpty
-          ? 'Maharashtra'
-          : _stateController.text.trim(),
-      pincode: _pincodeController.text.trim().isEmpty
-          ? '411001'
-          : _pincodeController.text.trim(),
+      city: _cityController.text.trim(),
+      state: _stateController.text.trim(),
+      pincode: _pincodeController.text.trim(),
       gender: _selectedGender,
       dateOfBirth: _selectedDob?.toIso8601String().substring(0, 10),
       panNumber: _panController.text.trim().isEmpty
@@ -245,6 +257,10 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                                   label: 'शहर / City',
                                   hint: 'शहर',
                                   prefixIcon: Icons.location_city_outlined,
+                                  validator: (v) =>
+                                      (v == null || v.trim().isEmpty)
+                                          ? 'शहर आवश्यक / City required'
+                                          : null,
                                 ),
                               ),
                               const SizedBox(width: 12),
@@ -259,6 +275,15 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                                     FilteringTextInputFormatter.digitsOnly,
                                   ],
                                   maxLength: 6,
+                                  validator: (v) {
+                                    if (v == null || v.trim().isEmpty) {
+                                      return 'पिनकोड आवश्यक';
+                                    }
+                                    if (v.trim().length != 6) {
+                                      return '6 अंक टाका';
+                                    }
+                                    return null;
+                                  },
                                 ),
                               ),
                             ],
@@ -269,6 +294,9 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                             label: 'राज्य / State',
                             hint: 'राज्य',
                             prefixIcon: Icons.map_outlined,
+                            validator: (v) => (v == null || v.trim().isEmpty)
+                                ? 'राज्य आवश्यक / State required'
+                                : null,
                           ),
                           const SizedBox(height: 22),
                           const _SectionTitle(

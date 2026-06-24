@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
@@ -14,6 +17,39 @@ import '../presentation/bloc/customer_detail_state.dart';
 import '../theme/customer_colors.dart';
 import 'customer_list_page.dart';
 import 'edit_customer_page.dart';
+
+Future<void> _launchCall(BuildContext context, String mobile) async {
+  final uri = Uri(scheme: 'tel', path: '+91$mobile');
+  if (!await launchUrl(uri) && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('डायलर उघडता आला नाही / Could not open dialer'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+Future<void> _launchWhatsApp(BuildContext context, String mobile) async {
+  final uri = Uri.parse('https://wa.me/91$mobile');
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+      context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('WhatsApp उघडता आला नाही / Could not open WhatsApp'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+void _shareCustomer(Customer customer) {
+  final text = '${customer.name} / ${customer.nameEn}\n'
+      'Mobile: ${customer.mobile}\n'
+      'ID: ${customer.digitalCustomerId}\n'
+      'Address: ${customer.address}';
+  Share.share(text, subject: 'Customer: ${customer.nameEn}');
+}
 
 /// SCR-011 Customer Profile View
 /// Displays the master customer profile with tabs for Profile, Loans,
@@ -135,7 +171,7 @@ class _CustomerBody extends StatelessWidget {
             ],
           ),
         ),
-        bottomNavigationBar: _BottomActionBar(mobile: customer.mobile),
+        bottomNavigationBar: _BottomActionBar(customer: customer),
       ),
     );
   }
@@ -179,10 +215,61 @@ class _ProfileAppBar extends StatelessWidget {
             icon: const Icon(Icons.edit_outlined, color: CustomerColors.ink),
             tooltip: 'Edit',
           ),
-          IconButton(
-            onPressed: () {},
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: CustomerColors.ink),
             tooltip: 'More',
+            onSelected: (value) {
+              switch (value) {
+                case 'copy':
+                  Clipboard.setData(
+                      ClipboardData(text: customer.mobile));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'मोबाईल नंबर कॉपी झाला / Mobile number copied'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                case 'girvi':
+                  context.goNamed('girvi-list');
+                case 'savings':
+                  context.goNamed('savings-dashboard');
+              }
+            },
+            itemBuilder: (context) => const [
+              PopupMenuItem(
+                value: 'copy',
+                child: Row(
+                  children: [
+                    Icon(Icons.copy, size: 18, color: CustomerColors.ink),
+                    SizedBox(width: 10),
+                    Text('मोबाईल कॉपी करा / Copy Mobile'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'girvi',
+                child: Row(
+                  children: [
+                    Icon(Icons.account_balance_wallet_outlined,
+                        size: 18, color: CustomerColors.ink),
+                    SizedBox(width: 10),
+                    Text('गिरवी पहा / View Girvi'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'savings',
+                child: Row(
+                  children: [
+                    Icon(Icons.savings_outlined,
+                        size: 18, color: CustomerColors.ink),
+                    SizedBox(width: 10),
+                    Text('बचत योजना / Savings Schemes'),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -709,15 +796,15 @@ class _LoansTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        _EmptyState(
-          icon: Icons.account_balance_wallet_outlined,
-          titleMr: 'गिरवी इतिहास लवकरच',
-          titleEn: 'Loan history coming soon',
-        ),
-      ],
+    return _TabComingSoon(
+      icon: Icons.account_balance_wallet_outlined,
+      titleMr: 'गिरवी इतिहास',
+      titleEn: 'Loan History',
+      bodyMr: 'या ग्राहकाचे सर्व गिरवी व्यवहार येथे दिसतील.',
+      bodyEn: 'All girvi transactions for this customer will appear here.',
+      actionMr: 'गिरवी यादी पहा',
+      actionEn: 'View All Girvi',
+      onAction: () => context.goNamed('girvi-list'),
     );
   }
 }
@@ -727,15 +814,15 @@ class _SchemesTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: [
-        _EmptyState(
-          icon: Icons.savings_outlined,
-          titleMr: 'कोणतीही योजना नाही',
-          titleEn: 'No schemes found',
-        ),
-      ],
+    return _TabComingSoon(
+      icon: Icons.savings_outlined,
+      titleMr: 'बचत योजना',
+      titleEn: 'Savings Schemes',
+      bodyMr: 'ग्राहकाच्या बचत योजना येथे दाखवल्या जातील.',
+      bodyEn: 'Customer savings schemes will be displayed here.',
+      actionMr: 'बचत डॅशबोर्ड',
+      actionEn: 'Savings Dashboard',
+      onAction: () => context.goNamed('savings-dashboard'),
     );
   }
 }
@@ -745,70 +832,117 @@ class _HistoryTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return _TabComingSoon(
+      icon: Icons.history_outlined,
+      titleMr: 'व्यवहार इतिहास',
+      titleEn: 'Transaction History',
+      bodyMr: 'देयके, नूतनीकरण आणि इतर सर्व व्यवहार येथे दिसतील.',
+      bodyEn: 'Payments, renewals and all transactions will appear here.',
+      actionMr: 'अहवाल पहा',
+      actionEn: 'View Reports',
+      onAction: () => context.goNamed('reports-dashboard'),
+    );
+  }
+}
+
+class _TabComingSoon extends StatelessWidget {
+  const _TabComingSoon({
+    required this.icon,
+    required this.titleMr,
+    required this.titleEn,
+    required this.bodyMr,
+    required this.bodyEn,
+    required this.actionMr,
+    required this.actionEn,
+    required this.onAction,
+  });
+
+  final IconData icon;
+  final String titleMr, titleEn;
+  final String bodyMr, bodyEn;
+  final String actionMr, actionEn;
+  final VoidCallback onAction;
+
+  @override
+  Widget build(BuildContext context) {
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [
-        _EmptyState(
-          icon: Icons.history,
-          titleMr: 'इतिहास उपलब्ध नाही',
-          titleEn: 'No history available',
+        Container(
+          padding: const EdgeInsets.all(28),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: CustomerColors.line),
+          ),
+          child: Column(
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: CustomerColors.navy.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(36),
+                ),
+                child: Icon(icon, size: 36, color: CustomerColors.muted),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                titleMr,
+                style: const TextStyle(
+                  color: CustomerColors.ink,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                titleEn,
+                style: const TextStyle(
+                  color: CustomerColors.muted,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '$bodyMr\n$bodyEn',
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  color: CustomerColors.muted,
+                  fontSize: 12,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              OutlinedButton.icon(
+                onPressed: onAction,
+                icon: const Icon(Icons.arrow_forward, size: 16),
+                label: Text('$actionMr / $actionEn'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: CustomerColors.navy,
+                  side: const BorderSide(color: CustomerColors.navy),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 12,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 }
 
-class _EmptyState extends StatelessWidget {
-  const _EmptyState({
-    required this.icon,
-    required this.titleMr,
-    required this.titleEn,
-  });
-
-  final IconData icon;
-  final String titleMr;
-  final String titleEn;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: CustomerColors.line),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, size: 40, color: CustomerColors.muted),
-          const SizedBox(height: 12),
-          Text(
-            titleMr,
-            style: const TextStyle(
-              color: CustomerColors.ink,
-              fontSize: 14,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            titleEn,
-            style: const TextStyle(
-              color: CustomerColors.muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _BottomActionBar extends StatelessWidget {
-  const _BottomActionBar({required this.mobile});
+  const _BottomActionBar({required this.customer});
 
-  final String mobile;
+  final Customer customer;
 
   @override
   Widget build(BuildContext context) {
@@ -834,7 +968,7 @@ class _BottomActionBar extends StatelessWidget {
                   icon: Icons.call,
                   labelMr: 'कॉल करा',
                   labelEn: 'Call',
-                  onTap: () {},
+                  onTap: () => _launchCall(context, customer.mobile),
                 ),
               ),
               Container(width: 1, height: 36, color: CustomerColors.line),
@@ -843,7 +977,7 @@ class _BottomActionBar extends StatelessWidget {
                   icon: Icons.chat_bubble_outline,
                   labelMr: 'WhatsApp',
                   labelEn: 'WhatsApp',
-                  onTap: () {},
+                  onTap: () => _launchWhatsApp(context, customer.mobile),
                 ),
               ),
               Container(width: 1, height: 36, color: CustomerColors.line),
@@ -852,7 +986,7 @@ class _BottomActionBar extends StatelessWidget {
                   icon: Icons.share_outlined,
                   labelMr: 'शेअर करा',
                   labelEn: 'Share',
-                  onTap: () {},
+                  onTap: () => _shareCustomer(customer),
                 ),
               ),
             ],

@@ -185,6 +185,45 @@ class GirviRepositoryImpl implements GirviRepository {
     }
   }
 
+  @override
+  Future<Result<Girvi>> createGirvi(CreateGirviRequest request) async {
+    try {
+      final response = await _apiClient.post(
+        ApiEndpoints.girvi,
+        data: {
+          'customerId': request.customerId,
+          'loanAmount': request.loanAmount,
+          'interestRate': request.interestRate,
+          'interestType': request.interestType.name,
+          'startDate': request.startDate.toIso8601String(),
+          'dueDate': request.dueDate.toIso8601String(),
+          'penaltyRate': request.penaltyRate,
+          if (request.vaultLocation != null) 'vaultLocation': request.vaultLocation,
+          'items': request.items.map((item) => {
+            'itemType': item.itemType,
+            'description': item.description,
+            'quantity': item.quantity,
+            'grossWeightG': item.grossWeightG,
+            'stoneWeightG': item.stoneWeightG,
+            'netWeightG': item.netWeightG,
+            'purity': item.purity,
+            'metalType': item.metalType.name,
+            'photoPaths': item.photoPaths,
+          }).toList(),
+        },
+      );
+      final data = response.data as Map<String, dynamic>;
+      final girvi = GirviModel.fromJson(
+        data['data'] as Map<String, dynamic>,
+      ).toEntity();
+      return Result.success(girvi);
+    } on DioException catch (e) {
+      return Result.failure(_mapDioError(e));
+    } catch (e) {
+      return Result.failure(ServerException(message: e.toString()));
+    }
+  }
+
   AppException _mapDioError(DioException error) {
     switch (error.type) {
       case DioExceptionType.connectionTimeout:

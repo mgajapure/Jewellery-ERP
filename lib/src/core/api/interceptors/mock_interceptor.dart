@@ -264,6 +264,67 @@ class MockInterceptor extends Interceptor {
         return {'success': true, 'data': newItem};
       }
 
+      // Girvi — create new girvi
+      if (path == ApiEndpoints.girvi) {
+        final body = _extractBody(options) ?? {};
+        final now = DateTime.now();
+        final newId = 'grv-${now.millisecondsSinceEpoch}';
+        final serialNo = (_girviList.length + 522).toString().padLeft(6, '0');
+        final items = (body['items'] as List<dynamic>?)?.map((item) {
+          final m = item as Map<String, dynamic>;
+          final gross = (m['grossWeightG'] as num?)?.toDouble() ?? 0.0;
+          final stone = (m['stoneWeightG'] as num?)?.toDouble() ?? 0.0;
+          final net = (m['netWeightG'] as num?)?.toDouble() ?? (gross - stone);
+          final purity = m['purity'] as String? ?? '22K';
+          final purityFactor = purity == '24K' ? 1.0 : purity == '22K' ? 22/24 : purity == '20K' ? 20/24 : 18/24;
+          final valuation = net * purityFactor * 7185.0;
+          return {
+            'id': 'item-${now.millisecondsSinceEpoch}-${_girviList.length}',
+            'description': m['description'] ?? '',
+            'itemType': m['itemType'] ?? 'Ring',
+            'quantity': m['quantity'] ?? 1,
+            'grossWeightG': gross,
+            'stoneWeightG': stone,
+            'netWeightG': net,
+            'purity': purity,
+            'metalType': m['metalType'] ?? 'gold',
+            'valuationAmount': valuation,
+            'photoUrls': [],
+          };
+        }).toList() ?? [];
+        final dueDate = body['dueDate'] as String? ?? now.add(const Duration(days: 30)).toIso8601String();
+        final loanAmount = (body['loanAmount'] as num?)?.toDouble() ?? 0.0;
+        final newGirvi = {
+          'id': newId,
+          'serialId': 'GRV-${now.year}-$serialNo',
+          'tenantId': 'tenant-001',
+          'customerId': body['customerId'] ?? 'cust-001',
+          'customerName': 'सुरेश पाटील',
+          'customerNameEn': 'Suresh Patil',
+          'customerMobile': '+91 98765 43210',
+          'status': 'active',
+          'loanAmount': loanAmount,
+          'outstandingAmount': loanAmount,
+          'accruedInterest': 0.0,
+          'penaltyAmount': 0.0,
+          'interestRate': (body['interestRate'] as num?)?.toDouble() ?? 18.0,
+          'interestType': body['interestType'] ?? 'simple',
+          'penaltyRate': (body['penaltyRate'] as num?)?.toDouble() ?? 2.0,
+          'startDate': body['startDate'] ?? now.toIso8601String(),
+          'dueDate': dueDate,
+          'daysLeft': 30,
+          'vaultLocation': body['vaultLocation'] ?? 'VA-A/SF-02/TR-05/SL-18',
+          'kfsDocUrl': null,
+          'createdAt': now.toIso8601String(),
+          'updatedAt': now.toIso8601String(),
+          'version': 1,
+          'items': items,
+          'payments': [],
+        };
+        _girviList.add(newGirvi);
+        return {'success': true, 'data': newGirvi};
+      }
+
       final postPaths = [
         RegExp(r'^/girvi/[^/]+/payment$'),
         RegExp(r'^/girvi/[^/]+/redemption$'),

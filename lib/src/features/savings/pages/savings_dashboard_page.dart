@@ -282,78 +282,95 @@ class _PlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: SavingsColors.line),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 52,
-            height: 52,
-            decoration: BoxDecoration(
-              color: SavingsColors.gold.withAlpha(20),
-              borderRadius: BorderRadius.circular(14),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: InkWell(
+        onTap: () {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                  'योजना तपशील लवकरच येणार / Plan details coming soon'),
+              behavior: SnackBarBehavior.floating,
             ),
-            child: const Icon(Icons.savings_outlined,
-                color: SavingsColors.gold, size: 26),
+          );
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: SavingsColors.line),
           ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  plan.nameMr,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: SavingsColors.ink,
-                  ),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                decoration: BoxDecoration(
+                  color: SavingsColors.gold.withAlpha(20),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                Text(
-                  plan.nameEn,
-                  style: const TextStyle(
-                      fontSize: 11, color: SavingsColors.muted),
-                ),
-                const SizedBox(height: 6),
-                Row(
+                child: const Icon(Icons.savings_outlined,
+                    color: SavingsColors.gold, size: 26),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _PlanChip(
-                        label:
-                            '${currency(plan.monthlyAmount)}/month'),
-                    const SizedBox(width: 8),
-                    _PlanChip(
-                        label:
-                            '${plan.durationMonths}+${plan.bonusMonths} months'),
+                    Text(
+                      plan.nameMr,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: SavingsColors.ink,
+                      ),
+                    ),
+                    Text(
+                      plan.nameEn,
+                      style: const TextStyle(
+                          fontSize: 11, color: SavingsColors.muted),
+                    ),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        _PlanChip(
+                            label:
+                                '${currency(plan.monthlyAmount)}/month'),
+                        const SizedBox(width: 8),
+                        _PlanChip(
+                            label:
+                                '${plan.durationMonths}+${plan.bonusMonths} months'),
+                      ],
+                    ),
                   ],
                 ),
-              ],
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '${plan.activeSubscribers}',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: SavingsColors.navy,
-                ),
               ),
-              const Text(
-                'members',
-                style: TextStyle(
-                    fontSize: 10, color: SavingsColors.muted),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    '${plan.activeSubscribers}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: SavingsColors.navy,
+                    ),
+                  ),
+                  const Text(
+                    'members',
+                    style:
+                        TextStyle(fontSize: 10, color: SavingsColors.muted),
+                  ),
+                ],
               ),
+              const SizedBox(width: 4),
+              const Icon(Icons.chevron_right,
+                  color: SavingsColors.muted, size: 20),
             ],
           ),
-        ],
+        ),
       ),
     );
   }

@@ -135,9 +135,11 @@ class _DashboardView extends StatelessWidget {
                   context.goNamed(SalesDashboardPage.routeName),
             ),
             const SizedBox(height: 22),
-            const _SectionHeader(
+            _SectionHeader(
               title: 'अलीकडील व्यवहार / Recent Transactions',
               trailing: 'सर्व पहा / View All',
+              onTrailingTap: () =>
+                  context.goNamed(GirviListPage.routeName),
             ),
             const SizedBox(height: 12),
             _RecentPaymentsList(payments: state.summary.recentPayments),
@@ -352,10 +354,12 @@ class _GoldRateCard extends StatelessWidget {
 // ─── Section Header ────────────────────────────────────────────────────────────
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
+  const _SectionHeader(
+      {required this.title, this.trailing, this.onTrailingTap});
 
   final String title;
   final String? trailing;
+  final VoidCallback? onTrailingTap;
 
   @override
   Widget build(BuildContext context) {
@@ -375,12 +379,19 @@ class _SectionHeader extends StatelessWidget {
         ),
         if (trailing != null) ...[
           const SizedBox(width: 12),
-          Text(
-            trailing!,
-            style: const TextStyle(
-              color: _muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+          GestureDetector(
+            onTap: onTrailingTap,
+            child: Text(
+              trailing!,
+              style: TextStyle(
+                color: onTrailingTap != null ? _navy : _muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                decoration: onTrailingTap != null
+                    ? TextDecoration.underline
+                    : TextDecoration.none,
+                decorationColor: _navy,
+              ),
             ),
           ),
         ],

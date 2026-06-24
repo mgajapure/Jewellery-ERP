@@ -92,15 +92,7 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
                   hint: _modes[_modeIndex].hint,
                   keyboardType: _modes[_modeIndex].kb,
                   onChanged: _onTextChanged,
-                  onMicTap: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                            'आवाज शोध लवकरच येणार / Voice search coming soon'),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
+                  onMicTap: null,
                 ),
               ),
             _SearchModeTabs(

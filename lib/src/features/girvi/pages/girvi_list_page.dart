@@ -158,11 +158,24 @@ class _GirviListHeader extends StatelessWidget {
   }
 }
 
-class _GirviSearchBar extends StatelessWidget {
+class _GirviSearchBar extends StatefulWidget {
+  @override
+  State<_GirviSearchBar> createState() => _GirviSearchBarState();
+}
+
+class _GirviSearchBarState extends State<_GirviSearchBar> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -176,20 +189,46 @@ class _GirviSearchBar extends StatelessWidget {
         ],
       ),
       child: Row(
-        children: const [
-          Icon(Icons.search, color: GirviColors.muted, size: 22),
-          SizedBox(width: 12),
+        children: [
+          const Icon(Icons.search, color: GirviColors.muted, size: 22),
+          const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              'ग्राहक / सिरीयल आयडी / QR शोधा',
-              style: TextStyle(
-                color: GirviColors.muted,
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+            child: TextField(
+              controller: _controller,
+              onChanged: (q) =>
+                  context.read<GirviListBloc>().add(SearchGirviList(q)),
+              decoration: const InputDecoration(
+                hintText: 'ग्राहक / सिरीयल आयडी शोधा',
+                hintStyle: TextStyle(
+                  color: GirviColors.muted,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 10),
               ),
             ),
           ),
-          Icon(Icons.qr_code_scanner, color: GirviColors.muted, size: 22),
+          ValueListenableBuilder<TextEditingValue>(
+            valueListenable: _controller,
+            builder: (context, value, _) {
+              if (value.text.isNotEmpty) {
+                return GestureDetector(
+                  onTap: () {
+                    _controller.clear();
+                    context
+                        .read<GirviListBloc>()
+                        .add(const SearchGirviList(''));
+                  },
+                  child: const Icon(Icons.clear,
+                      color: GirviColors.muted, size: 20),
+                );
+              }
+              return const Icon(Icons.qr_code_scanner,
+                  color: GirviColors.muted, size: 22);
+            },
+          ),
         ],
       ),
     );

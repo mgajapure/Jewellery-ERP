@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/widgets/app_header.dart';
@@ -13,6 +14,32 @@ import '../presentation/bloc/girvi_list_event.dart';
 import '../presentation/bloc/girvi_list_state.dart';
 import '../theme/girvi_colors.dart';
 import 'girvi_details_page.dart';
+
+Future<void> _dialCall(BuildContext context, String mobile) async {
+  final uri = Uri(scheme: 'tel', path: '+91$mobile');
+  if (!await launchUrl(uri) && context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('डायलर उघडता आला नाही / Could not open dialer'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
+
+Future<void> _openWhatsApp(BuildContext context, String mobile) async {
+  final uri = Uri.parse('https://wa.me/91$mobile');
+  if (!await launchUrl(uri, mode: LaunchMode.externalApplication) &&
+      context.mounted) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+            'WhatsApp उघडता आला नाही / Could not open WhatsApp'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+}
 
 class DueOverduePage extends StatelessWidget {
   const DueOverduePage({super.key});
@@ -299,20 +326,27 @@ class _DueCard extends StatelessWidget {
               children: [
                 _ActionChip(
                   icon: Icons.phone,
-                  label: 'Call',
-                  onTap: () {},
+                  label: 'कॉल / Call',
+                  onTap: () => _dialCall(context, girvi.customerMobile),
                 ),
                 const SizedBox(width: 8),
                 _ActionChip(
                   icon: Icons.message_outlined,
-                  label: 'WhatsApp',
-                  onTap: () {},
+                  label: 'व्हाट्सअँप / WA',
+                  onTap: () =>
+                      _openWhatsApp(context, girvi.customerMobile),
                 ),
                 const SizedBox(width: 8),
                 _ActionChip(
                   icon: Icons.alarm_outlined,
-                  label: 'Reminder',
-                  onTap: () {},
+                  label: 'सूचना / Reminder',
+                  onTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'स्मरणपत्र लवकरच येणार / Reminder coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  ),
                 ),
               ],
             ),

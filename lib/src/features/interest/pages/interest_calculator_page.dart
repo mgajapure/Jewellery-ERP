@@ -230,9 +230,29 @@ class _CalculatorViewState extends State<_CalculatorView> {
                         child: SizedBox(
                           height: 48,
                           child: ElevatedButton.icon(
-                            onPressed: () => context
-                                .read<CalculatorBloc>()
-                                .add(const CalculatorRecalculate()),
+                            onPressed: () {
+                              final principal = double.tryParse(
+                                      _principalCtrl.text.trim()) ??
+                                  0;
+                              final rate =
+                                  double.tryParse(_rateCtrl.text.trim()) ??
+                                      0;
+                              final days =
+                                  int.tryParse(_daysCtrl.text.trim()) ?? 0;
+                              if (principal <= 0 || rate <= 0 || days <= 0) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'सर्व माहिती भरा / Fill all fields with valid values'),
+                                    behavior: SnackBarBehavior.floating,
+                                  ),
+                                );
+                                return;
+                              }
+                              context
+                                  .read<CalculatorBloc>()
+                                  .add(const CalculatorRecalculate());
+                            },
                             icon: const Icon(Icons.calculate_outlined,
                                 size: 20),
                             label: const Text(

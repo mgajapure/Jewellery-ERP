@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/widgets/app_header.dart';
 import '../domain/entities/interest_calculation.dart';
@@ -52,13 +53,35 @@ class _LedgerView extends StatelessWidget {
                   icon: const Icon(Icons.print_outlined,
                       color: InterestColors.ink),
                   tooltip: 'प्रिंट / Print',
-                  onPressed: () {},
+                  onPressed: () {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                            'PDF प्रिंट लवकरच येणार / Print to PDF coming soon'),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
                 ),
                 IconButton(
                   icon: const Icon(Icons.share_outlined,
                       color: InterestColors.ink),
                   tooltip: 'शेअर / Share',
-                  onPressed: () {},
+                  onPressed: () {
+                    final state = context.read<LedgerBloc>().state;
+                    if (state is! LedgerLoaded) return;
+                    final l = state.ledger;
+                    final fmt = NumberFormat('#,##,##0.00', 'en_IN');
+                    final text =
+                        'व्याज खाते / Interest Ledger\n'
+                        '${l.girviId} — ${l.customerNameEn}\n'
+                        'मूळ रक्कम / Principal: ₹ ${fmt.format(l.principal)}\n'
+                        'व्याज / Interest: ₹ ${fmt.format(l.totalInterest)}\n'
+                        'दंड / Penalty: ₹ ${fmt.format(l.totalPenalty)}\n'
+                        'बाकी / Outstanding: ₹ ${fmt.format(l.outstanding)}';
+                    Share.share(text,
+                        subject: 'Interest Ledger: ${l.girviId}');
+                  },
                 ),
               ],
             ),

@@ -168,7 +168,7 @@ class _ModuleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final color = Color(module['color'] as int);
     return InkWell(
-      onTap: () => context.goNamed(module['route'] as String),
+      onTap: () => context.pushNamed(module['route'] as String),
       borderRadius: BorderRadius.circular(16),
       child: Container(
         padding: const EdgeInsets.all(16),

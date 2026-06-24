@@ -243,7 +243,7 @@ class _ProfileAppBar extends StatelessWidget {
                 case 'girvi':
                   context.goNamed('girvi-list');
                 case 'savings':
-                  context.goNamed('savings-dashboard');
+                  context.pushNamed('savings-dashboard');
               }
             },
             itemBuilder: (context) => const [
@@ -864,7 +864,7 @@ class _LoansTabView extends StatelessWidget {
                 outstanding: outstanding,
                 formatAmt: _formatAmt,
                 onNewGirvi: () =>
-                    context.goNamed(CreateGirviWizardPage.routeName),
+                    context.pushNamed(CreateGirviWizardPage.routeName),
               ),
               const SizedBox(height: 16),
               if (active.isNotEmpty) ...[
@@ -890,7 +890,7 @@ class _LoansTabView extends StatelessWidget {
                 const SizedBox(height: 20),
                 _NoLoansBanner(
                   onNewGirvi: () =>
-                      context.goNamed(CreateGirviWizardPage.routeName),
+                      context.pushNamed(CreateGirviWizardPage.routeName),
                 ),
               ],
             ],
@@ -1072,7 +1072,7 @@ class _MiniLoanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.goNamed(
+      onTap: () => context.pushNamed(
         GirviDetailsPage.routeName,
         pathParameters: {'id': girvi.id},
       ),
@@ -1151,7 +1151,7 @@ class _MiniLoanCard extends StatelessWidget {
                   _MiniActionChip(
                     icon: Icons.payments_outlined,
                     label: 'Pay',
-                    onTap: () => context.goNamed(
+                    onTap: () => context.pushNamed(
                       PartialPaymentPage.routeName,
                       pathParameters: {'id': girvi.id},
                     ),
@@ -1160,7 +1160,7 @@ class _MiniLoanCard extends StatelessWidget {
                   _MiniActionChip(
                     icon: Icons.refresh_outlined,
                     label: 'Renew',
-                    onTap: () => context.goNamed(
+                    onTap: () => context.pushNamed(
                       RenewalPage.routeName,
                       pathParameters: {'id': girvi.id},
                     ),

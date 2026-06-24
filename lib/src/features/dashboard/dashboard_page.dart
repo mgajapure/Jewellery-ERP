@@ -120,21 +120,21 @@ class _DashboardView extends StatelessWidget {
             const SizedBox(height: 12),
             _QuickActions(
               onNewGirviTap: () =>
-                  context.goNamed(CreateGirviWizardPage.routeName),
+                  context.pushNamed(CreateGirviWizardPage.routeName),
               onSearchCustomerTap: () =>
-                  context.goNamed(CustomerSearchPage.routeName),
+                  context.pushNamed(CustomerSearchPage.routeName),
               onDueAlertsTap: () =>
-                  context.goNamed('due-overdue'),
+                  context.pushNamed('due-overdue'),
               onVaultSearchTap: () =>
-                  context.goNamed(VaultSearchPage.routeName),
+                  context.pushNamed(VaultSearchPage.routeName),
               onInterestCalcTap: () =>
-                  context.goNamed(InterestCalculatorPage.routeName),
+                  context.pushNamed(InterestCalculatorPage.routeName),
               onComplianceTap: () =>
-                  context.goNamed(ComplianceDashboardPage.routeName),
+                  context.pushNamed(ComplianceDashboardPage.routeName),
               onPurchaseTap: () =>
-                  context.goNamed(PurchaseDashboardPage.routeName),
+                  context.pushNamed(PurchaseDashboardPage.routeName),
               onSalesTap: () =>
-                  context.goNamed(SalesDashboardPage.routeName),
+                  context.pushNamed(SalesDashboardPage.routeName),
             ),
             const SizedBox(height: 22),
             _SectionHeader(
@@ -1071,7 +1071,7 @@ class _MenuSheet extends StatelessWidget {
                 return InkWell(
                   onTap: () {
                     Navigator.of(context).pop();
-                    context.goNamed(item.route);
+                    context.pushNamed(item.route);
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Column(
@@ -1223,7 +1223,7 @@ class _NotificationsSheet extends StatelessWidget {
                   child: ElevatedButton.icon(
                     onPressed: () {
                       Navigator.of(context).pop();
-                      context.goNamed('due-overdue');
+                      context.pushNamed('due-overdue');
                     },
                     icon: const Icon(Icons.arrow_forward, size: 16),
                     label: const Text('देय व अतिदेय पहा / View Due & Overdue'),

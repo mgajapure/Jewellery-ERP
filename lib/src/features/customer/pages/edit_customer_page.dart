@@ -152,10 +152,14 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                   borderRadius: BorderRadius.circular(10)),
             ),
           );
-          context.goNamed(
-            CustomerDetailsPage.routeName,
-            pathParameters: {'id': state.customer.id},
-          );
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.goNamed(
+              CustomerDetailsPage.routeName,
+              pathParameters: {'id': state.customer.id},
+            );
+          }
         }
         if (state is CustomerOperationFailure) {
           ScaffoldMessenger.of(context).showSnackBar(

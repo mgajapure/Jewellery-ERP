@@ -525,7 +525,7 @@ class _SearchResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: () => context.goNamed(
+      onTap: () => context.pushNamed(
         CustomerDetailsPage.routeName,
         pathParameters: {'id': customer.id},
       ),

@@ -150,7 +150,7 @@ class _CustomerListHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () => context.goNamed(CreateCustomerPage.routeName),
+            onPressed: () => context.pushNamed(CreateCustomerPage.routeName),
             icon: const Icon(Icons.add, color: CustomerColors.ink),
             tooltip: 'Add Customer',
           ),
@@ -347,7 +347,7 @@ class _CustomerTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = _colors;
     return InkWell(
-      onTap: () => context.goNamed(
+      onTap: () => context.pushNamed(
         CustomerDetailsPage.routeName,
         pathParameters: {'id': customer.id},
       ),

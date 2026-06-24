@@ -116,7 +116,7 @@ class _GirviListView extends StatelessWidget {
                             message:
                                 '$overdueCount गिरवी मुदतीपूर्व / $overdueCount overdue',
                             color: GirviColors.red,
-                            onTap: () => context.goNamed('due-overdue'),
+                            onTap: () => context.pushNamed('due-overdue'),
                           )
                         else if (dueSoonCount > 0)
                           _AlertBanner(
@@ -124,7 +124,7 @@ class _GirviListView extends StatelessWidget {
                             message:
                                 '$dueSoonCount गिरवी लवकरच देय / $dueSoonCount due soon',
                             color: GirviColors.orange,
-                            onTap: () => context.goNamed('due-overdue'),
+                            onTap: () => context.pushNamed('due-overdue'),
                           ),
                         Expanded(
                           child: RefreshIndicator(
@@ -146,12 +146,12 @@ class _GirviListView extends StatelessWidget {
                                     girvi.status == GirviStatus.overdue;
                                 return GirviCard(
                                   girvi: girvi,
-                                  onTap: () => context.goNamed(
+                                  onTap: () => context.pushNamed(
                                     GirviDetailsPage.routeName,
                                     pathParameters: {'id': girvi.id},
                                   ),
                                   onPayTap: isActionable
-                                      ? () => context.goNamed(
+                                      ? () => context.pushNamed(
                                             PartialPaymentPage.routeName,
                                             pathParameters: {
                                               'id': girvi.id
@@ -159,7 +159,7 @@ class _GirviListView extends StatelessWidget {
                                           )
                                       : null,
                                   onRenewTap: isActionable
-                                      ? () => context.goNamed(
+                                      ? () => context.pushNamed(
                                             RenewalPage.routeName,
                                             pathParameters: {
                                               'id': girvi.id
@@ -167,7 +167,7 @@ class _GirviListView extends StatelessWidget {
                                           )
                                       : null,
                                   onRedeemTap: isActionable
-                                      ? () => context.goNamed(
+                                      ? () => context.pushNamed(
                                             RedemptionPage.routeName,
                                             pathParameters: {
                                               'id': girvi.id
@@ -269,7 +269,7 @@ class _GirviListHeader extends StatelessWidget {
           ),
           IconButton(
             onPressed: () =>
-                context.goNamed(CreateGirviWizardPage.routeName),
+                context.pushNamed(CreateGirviWizardPage.routeName),
             icon:
                 const Icon(Icons.add_circle, color: GirviColors.ink),
             tooltip: 'नवीन गिरवी / New Girvi',

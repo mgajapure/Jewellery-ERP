@@ -172,12 +172,12 @@ class _GirviDetailsView extends StatelessWidget {
               if (girvi == null) return;
               switch (value) {
                 case 'partial-payment':
-                  context.goNamed(
+                  context.pushNamed(
                     PartialPaymentPage.routeName,
                     pathParameters: {'id': girvi.id},
                   );
                 case 'renewal':
-                  context.goNamed(
+                  context.pushNamed(
                     RenewalPage.routeName,
                     pathParameters: {'id': girvi.id},
                   );
@@ -1131,7 +1131,7 @@ class _BottomActionBar extends StatelessWidget {
                   icon: const Icon(Icons.currency_rupee, size: 18),
                   label: const Text('पेमेंट घ्या / Take Payment'),
                   onPressed: canShowActions
-                      ? () => context.goNamed(
+                      ? () => context.pushNamed(
                             PartialPaymentPage.routeName,
                             pathParameters: {'id': girvi.id},
                           )
@@ -1159,7 +1159,7 @@ class _BottomActionBar extends StatelessWidget {
                   icon: const Icon(Icons.autorenew, size: 18),
                   label: const Text('नूतनीकरण / Renew'),
                   onPressed: canShowActions
-                      ? () => context.goNamed(
+                      ? () => context.pushNamed(
                             RenewalPage.routeName,
                             pathParameters: {'id': girvi.id},
                           )

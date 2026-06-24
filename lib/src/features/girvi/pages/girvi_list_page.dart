@@ -43,6 +43,21 @@ class _GirviListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: GirviColors.screenBg,
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: 1,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.goNamed(DashboardPage.routeName);
+            case 1:
+              break;
+            case 2:
+              context.goNamed(CustomerListPage.routeName);
+            case 3:
+              context.goNamed(MorePage.routeName);
+          }
+        },
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -170,21 +185,6 @@ class _GirviListView extends StatelessWidget {
                   return const SizedBox.shrink();
                 },
               ),
-            ),
-            AppBottomNav(
-              currentIndex: 1,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    context.goNamed(DashboardPage.routeName);
-                  case 1:
-                    break;
-                  case 2:
-                    context.goNamed(CustomerListPage.routeName);
-                  case 3:
-                    context.goNamed(MorePage.routeName);
-                }
-              },
             ),
           ],
         ),

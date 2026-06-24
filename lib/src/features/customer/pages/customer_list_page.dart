@@ -42,6 +42,24 @@ class _CustomerListView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: CustomerColors.screenBg,
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: 2,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              context.goNamed(DashboardPage.routeName);
+              break;
+            case 1:
+              context.goNamed(GirviListPage.routeName);
+              break;
+            case 2:
+              break;
+            case 3:
+              context.goNamed(MorePage.routeName);
+              break;
+          }
+        },
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -103,24 +121,6 @@ class _CustomerListView extends StatelessWidget {
               ),
             ),
             const _PaginationFooter(),
-            AppBottomNav(
-              currentIndex: 2,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    context.goNamed(DashboardPage.routeName);
-                    break;
-                  case 1:
-                    context.goNamed(GirviListPage.routeName);
-                    break;
-                  case 2:
-                    break;
-                  case 3:
-                    context.goNamed(MorePage.routeName);
-                    break;
-                }
-              },
-            ),
           ],
         ),
       ),

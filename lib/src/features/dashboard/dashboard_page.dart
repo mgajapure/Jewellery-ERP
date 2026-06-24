@@ -57,29 +57,29 @@ class _DashboardView extends StatelessWidget {
 
         return Scaffold(
           backgroundColor: _screenBg,
+          bottomNavigationBar: AppBottomNav(
+            currentIndex: 0,
+            onTap: (index) {
+              switch (index) {
+                case 0:
+                  break;
+                case 1:
+                  context.goNamed(GirviListPage.routeName);
+                  break;
+                case 2:
+                  context.goNamed(CustomerListPage.routeName);
+                  break;
+                case 3:
+                  context.goNamed(MorePage.routeName);
+                  break;
+              }
+            },
+          ),
           body: SafeArea(
             child: Column(
               children: [
                 _DashboardHeader(alertCount: alertCount),
                 Expanded(child: _buildBody(context, state)),
-                AppBottomNav(
-                  currentIndex: 0,
-                  onTap: (index) {
-                    switch (index) {
-                      case 0:
-                        break;
-                      case 1:
-                        context.goNamed(GirviListPage.routeName);
-                        break;
-                      case 2:
-                        context.goNamed(CustomerListPage.routeName);
-                        break;
-                      case 3:
-                        context.goNamed(MorePage.routeName);
-                        break;
-                    }
-                  },
-                ),
               ],
             ),
           ),

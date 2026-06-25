@@ -6,6 +6,8 @@ import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_empty_state.dart';
 import '../../../shared/widgets/app_error_state.dart';
@@ -225,18 +227,16 @@ class _AlertBanner extends StatelessWidget {
             Expanded(
               child: Text(
                 message,
-                style: TextStyle(
+                style: AppTextStyles.bodySmall.copyWith(
                   color: color,
-                  fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
               ),
             ),
             Text(
               'पहा / View →',
-              style: TextStyle(
+              style: AppTextStyles.labelLarge.copyWith(
                 color: color,
-                fontSize: 11,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -260,11 +260,7 @@ class _GirviListHeader extends StatelessWidget {
             child: Text(
               'गिरवी यादी / Girvi List',
               textAlign: TextAlign.left,
-              style: TextStyle(
-                color: GirviColors.ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.screenTitle,
             ),
           ),
           IconButton(
@@ -319,16 +315,14 @@ class _GirviSearchBarState extends State<_GirviSearchBar> {
               controller: _controller,
               onChanged: (q) =>
                   context.read<GirviListBloc>().add(SearchGirviList(q)),
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'ग्राहक / सिरीयल आयडी शोधा',
-                hintStyle: TextStyle(
-                  color: GirviColors.muted,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
+                hintStyle: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.muted,
                 ),
                 border: InputBorder.none,
                 isDense: true,
-                contentPadding: EdgeInsets.symmetric(vertical: 10),
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
               ),
             ),
           ),
@@ -399,9 +393,8 @@ class _FilterChipsState extends State<_FilterChips> {
           return ChoiceChip(
             label: Text(
               _labels[index],
-              style: TextStyle(
-                color: selected ? GirviColors.gold : GirviColors.ink,
-                fontSize: 11,
+              style: AppTextStyles.labelLarge.copyWith(
+                color: selected ? GirviColors.gold : AppColors.ink,
                 fontWeight: FontWeight.w700,
               ),
             ),

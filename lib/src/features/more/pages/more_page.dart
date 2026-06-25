@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../compliance/compliance.dart';
 import '../../inventory/inventory.dart';
@@ -98,7 +100,7 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FC),
+      backgroundColor: AppColors.screenBg,
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -107,11 +109,7 @@ class MorePage extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
               child: const Text(
                 'अधिक / More',
-                style: TextStyle(
-                  color: Color(0xFF071A49),
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                ),
+                style: AppTextStyles.screenTitle,
               ),
             ),
             Expanded(
@@ -119,14 +117,14 @@ class MorePage extends StatelessWidget {
                 decoration: const BoxDecoration(
                   color: Colors.white,
                   border: Border(
-                    top: BorderSide(color: Color(0xFFE5E8EF)),
+                    top: BorderSide(color: AppColors.line),
                   ),
                 ),
                 child: ListView.separated(
                   padding: EdgeInsets.zero,
                   itemCount: _modules.length,
                   separatorBuilder: (context, i) =>
-                      const Divider(height: 1, color: Color(0xFFE5E8EF)),
+                      const Divider(height: 1, color: AppColors.line),
                   itemBuilder: (context, i) => _ModuleTile(
                     module: _modules[i],
                     onTap: () =>
@@ -192,18 +190,14 @@ class _ModuleTile extends StatelessWidget {
                   children: [
                     Text(
                       module['titleMr'] as String,
-                      style: const TextStyle(
-                        color: Color(0xFF071A49),
-                        fontSize: 14,
+                      style: AppTextStyles.bodyLarge.copyWith(
                         fontWeight: FontWeight.w700,
                       ),
                     ),
                     const SizedBox(height: 1),
                     Text(
                       module['titleEn'] as String,
-                      style: const TextStyle(
-                        color: Color(0xFF5E6880),
-                        fontSize: 12,
+                      style: AppTextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -211,7 +205,7 @@ class _ModuleTile extends StatelessWidget {
                 ),
               ),
               const Icon(Icons.chevron_right,
-                  color: Color(0xFF5E6880), size: 20),
+                  color: AppColors.muted, size: 20),
             ],
           ),
         ),

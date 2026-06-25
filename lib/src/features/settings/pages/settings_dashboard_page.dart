@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_header.dart';
 import '../theme/settings_colors.dart';
 
@@ -75,14 +77,14 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                     icon: Icons.monetization_on_rounded,
                     titleMr: 'आजचे भाव',
                     titleEn: 'Today\'s Rates',
-                    color: const Color(0xFFE7A726),
+                    color: AppColors.gold,
                     children: [
                       _RateTile(
                         labelMr: 'सोने (24K)',
                         labelEn: 'Gold (24K)',
                         value: '₹7,250',
                         unit: 'प्रति ग्राम / per gram',
-                        color: const Color(0xFFE7A726),
+                        color: AppColors.gold,
                         onTap: () => _editRate(context, 'Gold (24K) Rate'),
                       ),
                       _RateTile(
@@ -90,7 +92,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         labelEn: 'Gold (22K)',
                         value: '₹6,645',
                         unit: 'प्रति ग्राम / per gram',
-                        color: const Color(0xFFE7A726),
+                        color: AppColors.gold,
                         onTap: () => _editRate(context, 'Gold (22K) Rate'),
                       ),
                       _RateTile(
@@ -98,7 +100,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         labelEn: 'Silver',
                         value: '₹85',
                         unit: 'प्रति ग्राम / per gram',
-                        color: const Color(0xFF5E6880),
+                        color: AppColors.muted,
                         onTap: () => _editRate(context, 'Silver Rate'),
                         isLast: true,
                       ),
@@ -109,14 +111,14 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                     icon: Icons.percent_rounded,
                     titleMr: 'व्याजदर',
                     titleEn: 'Interest Rates',
-                    color: const Color(0xFF07934A),
+                    color: AppColors.green,
                     children: [
                       _RateTile(
                         labelMr: 'गिर्‍वी व्याज (मासिक)',
                         labelEn: 'Girvi Interest (monthly)',
                         value: '1.5%',
                         unit: 'प्रति महिना / per month',
-                        color: const Color(0xFF07934A),
+                        color: AppColors.green,
                         onTap: () => _editRate(context, 'Girvi Interest Rate'),
                       ),
                       _RateTile(
@@ -124,7 +126,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                         labelEn: 'Penal Interest',
                         value: '2.0%',
                         unit: 'प्रति महिना / per month',
-                        color: const Color(0xFFE21B2D),
+                        color: AppColors.red,
                         onTap: () => _editRate(context, 'Penal Interest Rate'),
                         isLast: true,
                       ),
@@ -198,7 +200,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                     icon: Icons.security_rounded,
                     titleMr: 'सुरक्षा',
                     titleEn: 'Security',
-                    color: const Color(0xFFE21B2D),
+                    color: AppColors.red,
                     children: [
                       _ToggleTile(
                         labelMr: 'बायोमेट्रिक लॉक',
@@ -319,8 +321,7 @@ class _Section extends StatelessWidget {
               const SizedBox(width: 8),
               Text(
                 '$titleMr / $titleEn',
-                style: TextStyle(
-                  fontSize: 13,
+                style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: color,
                 ),
@@ -373,14 +374,12 @@ class _InfoTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(label,
-                          style: const TextStyle(
-                              fontSize: 11, color: SettingsColors.muted)),
+                          style: AppTextStyles.labelLarge),
                       const SizedBox(height: 2),
                       Text(value,
-                          style: const TextStyle(
-                              fontSize: 13,
+                          style: AppTextStyles.bodyMedium.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: SettingsColors.navy)),
+                              color: AppColors.navy)),
                     ],
                   ),
                 ),
@@ -429,22 +428,17 @@ class _RateTile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text('$labelMr / $labelEn',
-                          style: const TextStyle(
-                              fontSize: 12,
+                          style: AppTextStyles.bodySmall.copyWith(
                               fontWeight: FontWeight.w600,
-                              color: SettingsColors.navy)),
+                              color: AppColors.navy)),
                       const SizedBox(height: 2),
                       Text(unit,
-                          style: const TextStyle(
-                              fontSize: 11, color: SettingsColors.muted)),
+                          style: AppTextStyles.labelLarge),
                     ],
                   ),
                 ),
                 Text(value,
-                    style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w800,
-                        color: color)),
+                    style: AppTextStyles.statMedium.copyWith(color: color)),
                 const SizedBox(width: 8),
                 const Icon(Icons.edit_outlined,
                     size: 16, color: SettingsColors.muted),
@@ -487,10 +481,9 @@ class _ToggleTile extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: Text('$labelMr\n$labelEn',
-                    style: const TextStyle(
-                        fontSize: 12,
+                    style: AppTextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: SettingsColors.navy,
+                        color: AppColors.navy,
                         height: 1.4)),
               ),
               Switch.adaptive(
@@ -536,10 +529,9 @@ class _ActionTile extends StatelessWidget {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text('$labelMr / $labelEn',
-                      style: const TextStyle(
-                          fontSize: 13,
+                      style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
-                          color: SettingsColors.navy)),
+                          color: AppColors.navy)),
                 ),
                 const Icon(Icons.chevron_right,
                     size: 18, color: SettingsColors.muted),
@@ -586,16 +578,12 @@ class _LangOption extends StatelessWidget {
           child: Column(
             children: [
               Text(label,
-                  style: TextStyle(
-                      fontSize: 15,
+                  style: AppTextStyles.sectionTitle.copyWith(
                       fontWeight: FontWeight.w800,
-                      color: selected ? Colors.white : SettingsColors.navy)),
+                      color: selected ? Colors.white : AppColors.navy)),
               Text(sublabel,
-                  style: TextStyle(
-                      fontSize: 11,
-                      color: selected
-                          ? Colors.white70
-                          : SettingsColors.muted)),
+                  style: AppTextStyles.labelLarge.copyWith(
+                      color: selected ? Colors.white70 : AppColors.muted)),
             ],
           ),
         ),
@@ -612,12 +600,12 @@ class _LogoutButton extends StatelessWidget {
       height: 46,
       child: OutlinedButton.icon(
         icon: const Icon(Icons.logout_rounded,
-            color: Color(0xFFE21B2D), size: 18),
+            color: AppColors.red, size: 18),
         label: const Text('लॉग आउट / Log Out',
             style: TextStyle(
-                color: Color(0xFFE21B2D), fontWeight: FontWeight.w700)),
+                color: AppColors.red, fontWeight: FontWeight.w700)),
         style: OutlinedButton.styleFrom(
-          side: const BorderSide(color: Color(0xFFE21B2D)),
+          side: const BorderSide(color: AppColors.red),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
@@ -643,10 +631,7 @@ class _EditFieldSheet extends StatelessWidget {
           Row(
             children: [
               Text('Edit $field',
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: SettingsColors.navy)),
+                  style: AppTextStyles.sectionTitle),
               const Spacer(),
               IconButton(
                 onPressed: () => context.pop(),
@@ -711,10 +696,7 @@ class _EditRateSheet extends StatelessWidget {
           Row(
             children: [
               Text('Update $label',
-                  style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: SettingsColors.navy)),
+                  style: AppTextStyles.sectionTitle),
               const Spacer(),
               IconButton(
                 onPressed: () => context.pop(),

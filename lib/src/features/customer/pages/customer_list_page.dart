@@ -6,6 +6,8 @@ import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../shared/widgets/app_empty_state.dart';
 import '../../../shared/widgets/app_error_state.dart';
@@ -142,11 +144,7 @@ class _CustomerListHeader extends StatelessWidget {
             child: Text(
               'ग्राहक सूची / Customers',
               textAlign: TextAlign.center,
-              style: TextStyle(
-                color: CustomerColors.ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.screenTitle,
             ),
           ),
           IconButton(
@@ -205,15 +203,14 @@ class _InlineSearchBarState extends State<_InlineSearchBar> {
                 setState(() {});
                 widget.onChanged(v);
               },
-              decoration: const InputDecoration(
+              decoration: InputDecoration(
                 hintText: 'नाव, मोबाईल, ID शोधा / Search name, mobile, ID',
-                hintStyle: TextStyle(
-                  color: CustomerColors.muted,
-                  fontSize: 13,
+                hintStyle: AppTextStyles.bodyMedium.copyWith(
+                  color: AppColors.muted,
                   fontWeight: FontWeight.w500,
                 ),
                 border: InputBorder.none,
-                contentPadding: EdgeInsets.symmetric(vertical: 14),
+                contentPadding: const EdgeInsets.symmetric(vertical: 14),
               ),
             ),
           ),
@@ -282,9 +279,8 @@ class _FilterChips extends StatelessWidget {
                   total > 0
                       ? '${chip.mr} / ${chip.en} (${chip.count})'
                       : '${chip.mr} / ${chip.en}',
-                  style: TextStyle(
-                    color: selected ? Colors.white : CustomerColors.ink,
-                    fontSize: 12,
+                  style: AppTextStyles.bodySmall.copyWith(
+                    color: selected ? Colors.white : AppColors.ink,
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -382,9 +378,7 @@ class _CustomerTile extends StatelessWidget {
                     customer.name,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: CustomerColors.ink,
-                      fontSize: 15,
+                    style: AppTextStyles.sectionTitle.copyWith(
                       fontWeight: FontWeight.w900,
                     ),
                   ),
@@ -393,18 +387,14 @@ class _CustomerTile extends StatelessWidget {
                     customer.nameEn,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: CustomerColors.muted,
-                      fontSize: 12,
+                    style: AppTextStyles.bodySmall.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     '${customer.mobile} • ${customer.digitalCustomerId}',
-                    style: const TextStyle(
-                      color: CustomerColors.muted,
-                      fontSize: 11,
+                    style: AppTextStyles.labelLarge.copyWith(
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -425,11 +415,10 @@ class _CustomerTile extends StatelessWidget {
                       customer.isActive
                           ? 'सक्रिय / Active'
                           : 'निष्क्रिय / Inactive',
-                      style: TextStyle(
+                      style: AppTextStyles.labelSmall.copyWith(
                         color: customer.isActive
                             ? CustomerColors.green
                             : CustomerColors.red,
-                        fontSize: 10,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -442,18 +431,14 @@ class _CustomerTile extends StatelessWidget {
               children: [
                 Text(
                   _formatAmount(customer.outstanding),
-                  style: const TextStyle(
-                    color: CustomerColors.ink,
-                    fontSize: 14,
+                  style: AppTextStyles.bodyLarge.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   '${customer.activeGirvi} गिरवी',
-                  style: const TextStyle(
-                    color: CustomerColors.muted,
-                    fontSize: 11,
+                  style: AppTextStyles.labelLarge.copyWith(
                     fontWeight: FontWeight.w700,
                   ),
                 ),
@@ -544,20 +529,15 @@ class _PaginationFooter extends StatelessWidget {
             children: [
               Text(
                 '$count / $total ग्राहक दाखवत आहे',
-                style: const TextStyle(
-                  color: CustomerColors.ink,
-                  fontSize: 12,
+                style: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.ink,
                   fontWeight: FontWeight.w700,
                 ),
               ),
               const SizedBox(width: 6),
               const Text(
                 '• Showing customers',
-                style: TextStyle(
-                  color: CustomerColors.muted,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: AppTextStyles.bodySmall,
               ),
             ],
           ),

@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../core/di/injection.dart';
+import '../../core/theme/app_colors.dart';
+import '../../core/theme/app_text_styles.dart';
 import '../../core/widgets/app_bottom_nav.dart';
 import '../../shared/widgets/app_error_state.dart';
 import '../../shared/widgets/app_loader.dart';
@@ -20,14 +22,14 @@ import 'presentation/bloc/dashboard_bloc.dart';
 import 'presentation/bloc/dashboard_event.dart';
 import 'presentation/bloc/dashboard_state.dart';
 
-const _navy = Color(0xFF061C49);
-const _gold = Color(0xFFE7A726);
-const _ink = Color(0xFF071A49);
-const _muted = Color(0xFF5E6880);
-const _green = Color(0xFF07934A);
-const _red = Color(0xFFE21B2D);
-const _screenBg = Color(0xFFF8F9FC);
-const _line = Color(0xFFE5E8EF);
+const _navy = AppColors.navy;
+const _gold = AppColors.gold;
+const _ink = AppColors.ink;
+const _muted = AppColors.muted;
+const _green = AppColors.green;
+const _red = AppColors.red;
+const _screenBg = AppColors.screenBg;
+const _line = AppColors.line;
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -193,11 +195,7 @@ class _DashboardHeader extends StatelessWidget {
           const Expanded(
             child: Text(
               'डॅशबोर्ड / Dashboard',
-              style: TextStyle(
-                color: _ink,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.screenTitle,
             ),
           ),
           Stack(
@@ -373,9 +371,7 @@ class _SectionHeader extends StatelessWidget {
             title,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: _ink,
-              fontSize: 14,
+            style: AppTextStyles.bodyLarge.copyWith(
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -386,9 +382,8 @@ class _SectionHeader extends StatelessWidget {
             onTap: onTrailingTap,
             child: Text(
               trailing!,
-              style: TextStyle(
+              style: AppTextStyles.bodySmall.copyWith(
                 color: onTrailingTap != null ? _navy : _muted,
-                fontSize: 12,
                 fontWeight: FontWeight.w700,
                 decoration: onTrailingTap != null
                     ? TextDecoration.underline
@@ -532,9 +527,8 @@ class _MetricTile extends StatelessWidget {
                       titleMr,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: AppTextStyles.bodySmall.copyWith(
                         color: _ink,
-                        fontSize: 12,
                         fontWeight: FontWeight.w800,
                       ),
                     ),
@@ -543,9 +537,7 @@ class _MetricTile extends StatelessWidget {
                       titleEn,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: _muted,
-                        fontSize: 11,
+                      style: AppTextStyles.labelLarge.copyWith(
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -568,9 +560,8 @@ class _MetricTile extends StatelessWidget {
             value,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTextStyles.statLarge.copyWith(
               color: valueColor,
-              fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
           ),
@@ -579,9 +570,8 @@ class _MetricTile extends StatelessWidget {
             delta,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
+            style: AppTextStyles.labelLarge.copyWith(
               color: deltaColor,
-              fontSize: 11,
               fontWeight: FontWeight.w700,
             ),
           ),
@@ -745,9 +735,8 @@ class _QuickAction extends StatelessWidget {
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
+            style: AppTextStyles.labelSmall.copyWith(
               color: _ink,
-              fontSize: 10,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -757,10 +746,7 @@ class _QuickAction extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: _muted,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
+            style: AppTextStyles.labelSmall.copyWith(
               height: 1.1,
             ),
           ),
@@ -787,11 +773,11 @@ class _RecentPaymentsList extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           border: Border.all(color: _line),
         ),
-        child: const Center(
+        child: Center(
           child: Text(
             'आज कोणतेही व्यवहार नाहीत\nNo transactions today',
             textAlign: TextAlign.center,
-            style: TextStyle(color: _muted, fontSize: 13),
+            style: AppTextStyles.bodyMedium.copyWith(color: _muted),
           ),
         ),
       );
@@ -878,9 +864,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                   payment.customerName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: _ink,
-                    fontSize: 13,
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -889,9 +873,7 @@ class _PaymentTransactionTile extends StatelessWidget {
                   payment.customerNameEn,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: _muted,
-                    fontSize: 11,
+                  style: AppTextStyles.labelLarge.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -900,9 +882,8 @@ class _PaymentTransactionTile extends StatelessWidget {
                   _typeLabels[payment.paymentType] ?? '',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: AppTextStyles.labelLarge.copyWith(
                     color: _ink,
-                    fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -915,27 +896,22 @@ class _PaymentTransactionTile extends StatelessWidget {
             children: [
               Text(
                 _formatAmount(payment.amount),
-                style: const TextStyle(
-                  color: _ink,
-                  fontSize: 15,
+                style: AppTextStyles.sectionTitle.copyWith(
                   fontWeight: FontWeight.w900,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 _formatTime(payment.paidAt),
-                style: const TextStyle(
-                  color: _muted,
-                  fontSize: 10,
+                style: AppTextStyles.labelSmall.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
               ),
               const SizedBox(height: 5),
-              const Text(
+              Text(
                 'पूर्ण / Paid',
-                style: TextStyle(
+                style: AppTextStyles.labelSmall.copyWith(
                   color: _green,
-                  fontSize: 10,
                   fontWeight: FontWeight.w800,
                 ),
               ),
@@ -1006,20 +982,18 @@ class _MenuSheet extends StatelessWidget {
                     child: const Icon(Icons.diamond_outlined, color: _gold, size: 22),
                   ),
                   const SizedBox(width: 14),
-                  const Column(
+                  Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'प्रकाश ज्वेलर्स',
-                        style: TextStyle(
-                          color: _ink,
-                          fontSize: 16,
+                        style: AppTextStyles.sectionTitle.copyWith(
                           fontWeight: FontWeight.w900,
                         ),
                       ),
-                      Text(
+                      const Text(
                         'Prakash Jewellers · ERP v0.1',
-                        style: TextStyle(color: _muted, fontSize: 12),
+                        style: AppTextStyles.bodySmall,
                       ),
                     ],
                   ),
@@ -1062,9 +1036,8 @@ class _MenuSheet extends StatelessWidget {
                       const SizedBox(height: 6),
                       Text(
                         item.labelMr,
-                        style: const TextStyle(
+                        style: AppTextStyles.labelSmall.copyWith(
                           color: _ink,
-                          fontSize: 10,
                           fontWeight: FontWeight.w800,
                         ),
                         textAlign: TextAlign.center,
@@ -1074,8 +1047,7 @@ class _MenuSheet extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         item.labelEn,
-                        style: const TextStyle(
-                          color: _muted,
+                        style: AppTextStyles.labelSmall.copyWith(
                           fontSize: 9,
                           fontWeight: FontWeight.w600,
                         ),
@@ -1129,11 +1101,7 @@ class _NotificationsSheet extends StatelessWidget {
                 children: [
                   const Text(
                     'सूचना / Notifications',
-                    style: TextStyle(
-                      color: _ink,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                    ),
+                    style: AppTextStyles.sectionTitle,
                   ),
                   const Spacer(),
                   if (alertCount > 0)
@@ -1145,9 +1113,8 @@ class _NotificationsSheet extends StatelessWidget {
                       ),
                       child: Text(
                         '$alertCount अलर्ट / alerts',
-                        style: const TextStyle(
+                        style: AppTextStyles.bodySmall.copyWith(
                           color: _red,
-                          fontSize: 12,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -1157,16 +1124,16 @@ class _NotificationsSheet extends StatelessWidget {
             ),
             const Divider(height: 1, color: _line),
             if (alertCount == 0)
-              const Padding(
-                padding: EdgeInsets.all(32),
+              Padding(
+                padding: const EdgeInsets.all(32),
                 child: Column(
                   children: [
-                    Icon(Icons.notifications_none, size: 48, color: _muted),
-                    SizedBox(height: 12),
+                    const Icon(Icons.notifications_none, size: 48, color: _muted),
+                    const SizedBox(height: 12),
                     Text(
                       'कोणत्याही सूचना नाहीत\nNo notifications',
                       textAlign: TextAlign.center,
-                      style: TextStyle(color: _muted, fontSize: 13),
+                      style: AppTextStyles.bodyMedium.copyWith(color: _muted),
                     ),
                   ],
                 ),
@@ -1256,18 +1223,14 @@ class _NotificationTile extends StatelessWidget {
               children: [
                 Text(
                   '$titleMr / $titleEn',
-                  style: const TextStyle(
-                    color: _ink,
-                    fontSize: 13,
+                  style: AppTextStyles.bodyMedium.copyWith(
                     fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 3),
                 Text(
                   '$bodyMr\n$bodyEn',
-                  style: const TextStyle(
-                    color: _muted,
-                    fontSize: 11,
+                  style: AppTextStyles.labelLarge.copyWith(
                     height: 1.4,
                   ),
                 ),

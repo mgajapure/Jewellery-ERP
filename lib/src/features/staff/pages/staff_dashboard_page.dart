@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_header.dart';
 import '../theme/staff_colors.dart';
 
@@ -168,10 +170,10 @@ class _SummaryBar extends StatelessWidget {
           _Stat(label: 'एकूण\nTotal', value: '$total', color: StaffColors.navy),
           _Divider(),
           _Stat(label: 'सक्रिय\nActive', value: '$active',
-              color: const Color(0xFF07934A)),
+              color: AppColors.green),
           _Divider(),
           _Stat(label: 'निष्क्रिय\nInactive', value: '$inactive',
-              color: const Color(0xFFE21B2D)),
+              color: AppColors.red),
         ],
       ),
     );
@@ -190,13 +192,11 @@ class _Stat extends StatelessWidget {
       child: Column(
         children: [
           Text(value,
-              style: TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.w800, color: color)),
+              style: AppTextStyles.statLarge.copyWith(color: color)),
           const SizedBox(height: 2),
           Text(label,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                  fontSize: 11, color: StaffColors.muted, height: 1.3)),
+              style: AppTextStyles.labelLarge.copyWith(height: 1.3)),
         ],
       ),
     );
@@ -222,7 +222,7 @@ class _SearchBar extends StatelessWidget {
         onChanged: onChanged,
         decoration: InputDecoration(
           hintText: 'कर्मचारी शोधा / Search staff...',
-          hintStyle: const TextStyle(fontSize: 13, color: StaffColors.muted),
+          hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
           prefixIcon:
               const Icon(Icons.search, color: StaffColors.muted, size: 20),
           filled: true,
@@ -293,10 +293,9 @@ class _StaffCard extends StatelessWidget {
                     Expanded(
                       child: Text(
                         member.nameMr,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: AppTextStyles.bodyLarge.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: StaffColors.navy,
+                          color: AppColors.navy,
                         ),
                       ),
                     ),
@@ -306,8 +305,7 @@ class _StaffCard extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   member.name,
-                  style: const TextStyle(
-                      fontSize: 12, color: StaffColors.muted),
+                  style: AppTextStyles.bodySmall,
                 ),
                 const SizedBox(height: 6),
                 Row(
@@ -316,15 +314,13 @@ class _StaffCard extends StatelessWidget {
                         size: 13, color: StaffColors.muted),
                     const SizedBox(width: 4),
                     Text(member.phone,
-                        style: const TextStyle(
-                            fontSize: 12, color: StaffColors.muted)),
+                        style: AppTextStyles.bodySmall),
                     const Spacer(),
                     const Icon(Icons.calendar_today_outlined,
                         size: 11, color: StaffColors.muted),
                     const SizedBox(width: 4),
                     Text(member.joinDate,
-                        style: const TextStyle(
-                            fontSize: 11, color: StaffColors.muted)),
+                        style: AppTextStyles.labelLarge),
                   ],
                 ),
               ],
@@ -375,9 +371,7 @@ class _Avatar extends StatelessWidget {
             width: 12,
             height: 12,
             decoration: BoxDecoration(
-              color: isActive
-                  ? const Color(0xFF07934A)
-                  : const Color(0xFFE21B2D),
+              color: isActive ? AppColors.green : AppColors.red,
               shape: BoxShape.circle,
               border: Border.all(color: Colors.white, width: 2),
             ),
@@ -425,18 +419,14 @@ class _StatusDot extends StatelessWidget {
         Icon(
           isActive ? Icons.circle : Icons.circle_outlined,
           size: 10,
-          color: isActive
-              ? const Color(0xFF07934A)
-              : const Color(0xFFE21B2D),
+          color: isActive ? AppColors.green : AppColors.red,
         ),
         const SizedBox(height: 2),
         Text(
           isActive ? 'Active' : 'Inactive',
           style: TextStyle(
             fontSize: 9,
-            color: isActive
-                ? const Color(0xFF07934A)
-                : const Color(0xFFE21B2D),
+            color: isActive ? AppColors.green : AppColors.red,
           ),
         ),
       ],
@@ -449,17 +439,17 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.people_outline,
+          const Icon(Icons.people_outline,
               size: 48, color: StaffColors.muted),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           Text('कोणताही कर्मचारी सापडला नाही',
-              style: TextStyle(color: StaffColors.muted, fontSize: 14)),
-          Text('No staff member found',
-              style: TextStyle(color: StaffColors.muted, fontSize: 12)),
+              style: AppTextStyles.bodyLarge.copyWith(color: AppColors.muted)),
+          const Text('No staff member found',
+              style: AppTextStyles.bodySmall),
         ],
       ),
     );
@@ -481,10 +471,7 @@ class _AddStaffSheet extends StatelessWidget {
           Row(
             children: [
               const Text('नवीन कर्मचारी / Add Staff',
-                  style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      color: StaffColors.navy)),
+                  style: AppTextStyles.sectionTitle),
               const Spacer(),
               IconButton(
                 onPressed: () => context.pop(),
@@ -500,11 +487,9 @@ class _AddStaffSheet extends StatelessWidget {
               hint: '10-digit number',
               keyboardType: TextInputType.phone),
           const SizedBox(height: 12),
-          const Text('भूमिका / Role',
-              style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: StaffColors.navy)),
+          Text('भूमिका / Role',
+              style: AppTextStyles.bodySmall.copyWith(
+                  fontWeight: FontWeight.w600, color: AppColors.navy)),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -549,17 +534,14 @@ class _SheetField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(label,
-            style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: StaffColors.navy)),
+            style: AppTextStyles.bodySmall.copyWith(
+                fontWeight: FontWeight.w600, color: AppColors.navy)),
         const SizedBox(height: 6),
         TextField(
           keyboardType: keyboardType,
           decoration: InputDecoration(
             hintText: hint,
-            hintStyle:
-                const TextStyle(fontSize: 13, color: StaffColors.muted),
+            hintStyle: AppTextStyles.bodyMedium.copyWith(color: AppColors.muted),
             filled: true,
             fillColor: StaffColors.screenBg,
             contentPadding:
@@ -605,10 +587,10 @@ enum _Role {
       };
 
   Color get color => switch (this) {
-        _Role.owner => const Color(0xFF061C49),
-        _Role.manager => const Color(0xFFE7A726),
-        _Role.accountant => const Color(0xFF07934A),
-        _Role.staff => const Color(0xFF5E6880),
+        _Role.owner => AppColors.navy,
+        _Role.manager => AppColors.gold,
+        _Role.accountant => AppColors.green,
+        _Role.staff => AppColors.muted,
       };
 }
 

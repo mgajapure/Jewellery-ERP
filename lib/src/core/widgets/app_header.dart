@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../navigation/app_navigation.dart';
+import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 /// Shared screen header used across the app.
 ///
@@ -57,7 +59,7 @@ class AppHeader extends StatelessWidget {
                   }
                 }
               },
-              icon: const Icon(Icons.arrow_back, color: Color(0xFF071A49)),
+              icon: const Icon(Icons.arrow_back, color: AppColors.ink),
               tooltip: 'Back',
             )
           else if (leading != null)
@@ -69,11 +71,7 @@ class AppHeader extends StatelessWidget {
               '$titleMr / $titleEn',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xFF071A49),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.screenTitle,
             ),
           ),
           if (actions.isNotEmpty)
@@ -121,17 +119,13 @@ class AppListHeader extends StatelessWidget {
               '$titleMr / $titleEn',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Color(0xFF071A49),
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
+              style: AppTextStyles.screenTitle,
             ),
           ),
           if (actionIcon != null)
             IconButton(
               onPressed: onAction,
-              icon: Icon(actionIcon, color: const Color(0xFF071A49)),
+              icon: Icon(actionIcon, color: AppColors.ink),
               tooltip: actionTooltip,
             )
           else

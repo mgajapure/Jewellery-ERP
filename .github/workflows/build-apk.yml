@@ -2,7 +2,7 @@ name: Build APK
 
 on:
   push:
-    branches: [main, master, claude/**]
+    branches: [main, master]
   workflow_dispatch:        # lets you trigger manually from GitHub UI
 
 jobs:

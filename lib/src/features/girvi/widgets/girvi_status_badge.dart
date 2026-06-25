@@ -23,24 +23,24 @@ class GirviStatusBadge extends StatelessWidget {
     }
   }
 
-  (String, String) get _label {
+  ({String mr, String en, String hi}) get _label {
     switch (status) {
       case GirviStatus.active:
-        return ('सक्रिय', 'Active');
+        return (mr: 'सक्रिय', en: 'Active', hi: 'सक्रिय');
       case GirviStatus.partialPaid:
-        return ('आंशिक पेड', 'Partial');
+        return (mr: 'आंशिक पेड', en: 'Partial', hi: 'आंशिक भुगतान');
       case GirviStatus.renewed:
-        return ('नवीनीकृत', 'Renewed');
+        return (mr: 'नवीनीकृत', en: 'Renewed', hi: 'नवीनीकृत');
       case GirviStatus.redeemed:
-        return ('मुद्दलपरत', 'Redeemed');
+        return (mr: 'मुद्दलपरत', en: 'Redeemed', hi: 'मुक्त');
       case GirviStatus.overdue:
-        return ('ओव्हरड्यू', 'Overdue');
+        return (mr: 'ओव्हरड्यू', en: 'Overdue', hi: 'अतिदेय');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final (mr, en) = _label;
+    final (:mr, :en, :hi) = _label;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
@@ -50,6 +50,7 @@ class GirviStatusBadge extends StatelessWidget {
       child: BilingualText(
         en: en,
         mr: mr,
+        hi: hi,
         style: TextStyle(
           color: _color,
           fontSize: 8,

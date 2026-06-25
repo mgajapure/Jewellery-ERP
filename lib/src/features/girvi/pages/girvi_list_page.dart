@@ -299,20 +299,20 @@ class _GirviCard extends StatelessWidget {
     }
   }
 
-  String get _statusText {
+  ({String mr, String en, String hi}) get _statusLabel {
     switch (status) {
       case 'ACTIVE':
-        return 'सक्रिय / Active';
+        return (mr: 'सक्रिय', en: 'Active', hi: 'सक्रिय');
       case 'PARTIAL_PAID':
-        return 'आंशिक पेड / Partial';
+        return (mr: 'आंशिक पेड', en: 'Partial', hi: 'आंशिक भुगतान');
       case 'RENEWED':
-        return 'नवीनीकृत / Renewed';
+        return (mr: 'नवीनीकृत', en: 'Renewed', hi: 'नवीनीकृत');
       case 'REDEEMED':
-        return 'मुद्दलपरत / Redeemed';
+        return (mr: 'मुद्दलपरत', en: 'Redeemed', hi: 'मुक्त');
       case 'OVERDUE':
-        return 'ओव्हरड्यू / Overdue';
+        return (mr: 'ओव्हरड्यू', en: 'Overdue', hi: 'अतिदेय');
       default:
-        return status;
+        return (mr: status, en: status, hi: status);
     }
   }
 
@@ -375,24 +375,31 @@ class _GirviCard extends StatelessWidget {
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 5,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _statusColor.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Text(
-                              _statusText,
-                              style: TextStyle(
-                                color: _statusColor,
-                                fontSize: 8,
-                                fontWeight: FontWeight.w800,
+                          Builder(builder: (context) {
+                            final (:mr, :en, :hi) = _statusLabel;
+                            return Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
                               ),
-                            ),
-                          ),
+                              decoration: BoxDecoration(
+                                color: _statusColor.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: BilingualText(
+                                en: en,
+                                mr: mr,
+                                hi: hi,
+                                style: TextStyle(
+                                  color: _statusColor,
+                                  fontSize: 8,
+                                  fontWeight: FontWeight.w800,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            );
+                          }),
                         ],
                       ),
                       const SizedBox(height: 3),

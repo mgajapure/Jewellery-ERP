@@ -2107,18 +2107,17 @@ class _SuccessStep extends StatelessWidget {
 // ─── Shared helper widgets ────────────────────────────────────────────────────
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.titleMr, required this.titleEn, this.titleHi});
+  const _SectionTitle({required this.titleMr, required this.titleEn});
 
   final String titleMr;
   final String titleEn;
-  final String? titleHi;
 
   @override
   Widget build(BuildContext context) {
     return BilingualText(
       en: titleEn,
       mr: titleMr,
-      hi: titleHi ?? titleMr,
+      hi: titleMr,
       style: const TextStyle(color: GirviColors.ink, fontSize: 15, fontWeight: FontWeight.w900),
     );
   }

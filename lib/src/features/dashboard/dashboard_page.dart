@@ -30,6 +30,24 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _screenBg,
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: 0,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              break;
+            case 1:
+              context.goNamed(GirviListPage.routeName);
+              break;
+            case 2:
+              context.goNamed(CustomerListPage.routeName);
+              break;
+            case 3:
+              context.goNamed(MorePage.routeName);
+              break;
+          }
+        },
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -82,24 +100,6 @@ class DashboardPage extends StatelessWidget {
                   const _RecentPaymentsList(),
                 ],
               ),
-            ),
-            AppBottomNav(
-              currentIndex: 0,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    break;
-                  case 1:
-                    context.goNamed(GirviListPage.routeName);
-                    break;
-                  case 2:
-                    context.goNamed(CustomerListPage.routeName);
-                    break;
-                  case 3:
-                    context.goNamed(MorePage.routeName);
-                    break;
-                }
-              },
             ),
           ],
         ),
@@ -471,89 +471,23 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.add,
-              titleMr: 'नवीन गिरवी',
-              titleEn: 'New Girvi',
-              titleHi: 'नई गिरवी',
-              filled: true,
-              onTap: onNewGirviTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.search,
-              titleMr: 'ग्राहक शोधा',
-              titleEn: 'Search Customer',
-              titleHi: 'खोजें',
-              onTap: onSearchCustomerTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.account_balance,
-              titleMr: 'तिजोरी शोध',
-              titleEn: 'Vault Search',
-              titleHi: 'तिजोरी',
-              onTap: onVaultSearchTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.calculate_outlined,
-              titleMr: 'व्याज गणना',
-              titleEn: 'Interest Calc',
-              titleHi: 'ब्याज',
-              onTap: onInterestCalcTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.verified_user_outlined,
-              titleMr: 'अनुपालन',
-              titleEn: 'Compliance',
-              titleHi: 'अनुपालन',
-              onTap: onComplianceTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.shopping_bag_outlined,
-              titleMr: 'खरेदी',
-              titleEn: 'Purchase',
-              titleHi: 'खरीद',
-              onTap: onPurchaseTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.point_of_sale_outlined,
-              titleMr: 'विक्री',
-              titleEn: 'Sales',
-              titleHi: 'बिक्री',
-              onTap: onSalesTap,
-            ),
-          ),
-        ],
-      ),
+    final actions = [
+      _QuickAction(icon: Icons.add, titleMr: 'नवीन गिरवी', titleEn: 'New Girvi', titleHi: 'नई गिरवी', filled: true, onTap: onNewGirviTap),
+      _QuickAction(icon: Icons.search, titleMr: 'ग्राहक शोधा', titleEn: 'Customer', titleHi: 'ग्राहक', onTap: onSearchCustomerTap),
+      _QuickAction(icon: Icons.account_balance, titleMr: 'तिजोरी', titleEn: 'Vault', titleHi: 'तिजोरी', onTap: onVaultSearchTap),
+      _QuickAction(icon: Icons.calculate_outlined, titleMr: 'व्याज', titleEn: 'Interest', titleHi: 'ब्याज', onTap: onInterestCalcTap),
+      _QuickAction(icon: Icons.verified_user_outlined, titleMr: 'अनुपालन', titleEn: 'Compliance', titleHi: 'अनुपालन', onTap: onComplianceTap),
+      _QuickAction(icon: Icons.shopping_bag_outlined, titleMr: 'खरेदी', titleEn: 'Purchase', titleHi: 'खरीद', onTap: onPurchaseTap),
+      _QuickAction(icon: Icons.point_of_sale_outlined, titleMr: 'विक्री', titleEn: 'Sales', titleHi: 'बिक्री', onTap: onSalesTap),
+    ];
+    return GridView.count(
+      crossAxisCount: 4,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 14,
+      childAspectRatio: 0.82,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: actions,
     );
   }
 }

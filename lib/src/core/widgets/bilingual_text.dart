@@ -23,6 +23,7 @@ class BilingualText extends StatelessWidget {
     this.maxLines,
     this.overflow,
     this.textAlign,
+    this.compact = false,
   });
 
   /// English text (always required; also the fallback).
@@ -40,6 +41,10 @@ class BilingualText extends StatelessWidget {
   final int? maxLines;
   final TextOverflow? overflow;
   final TextAlign? textAlign;
+
+  /// When true, bilingual mode shows only the native text at base size
+  /// (no secondary English line). Use for badges, chips, and tight spaces.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -63,12 +68,14 @@ class BilingualText extends StatelessWidget {
         if (native == null) {
           return Text(en, style: base, maxLines: maxLines, overflow: overflow, textAlign: textAlign);
         }
+        if (compact) return Text(native, style: base, maxLines: maxLines, overflow: overflow, textAlign: textAlign);
         return _bilingual(native, en, base, baseFontSize);
       case AppLanguage.hi:
         final native = hi ?? mr;
         if (native == null) {
           return Text(en, style: base, maxLines: maxLines, overflow: overflow, textAlign: textAlign);
         }
+        if (compact) return Text(native, style: base, maxLines: maxLines, overflow: overflow, textAlign: textAlign);
         return _bilingual(native, en, base, baseFontSize);
     }
   }

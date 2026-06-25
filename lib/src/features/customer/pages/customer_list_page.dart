@@ -4,7 +4,6 @@ import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
-import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../core/widgets/bilingual_text.dart';
 import '../theme/customer_colors.dart';
@@ -126,15 +125,9 @@ class _CustomerListHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
+      padding: const EdgeInsets.fromLTRB(20, 14, 16, 8),
       child: Row(
         children: [
-          IconButton(
-            onPressed: () =>
-                AppNavigation.popOrGoNamed(context, DashboardPage.routeName),
-            icon: const Icon(Icons.arrow_back, color: CustomerColors.ink),
-            tooltip: 'Back',
-          ),
           const Expanded(
             child: BilingualText(
               en: 'Customers',
@@ -142,18 +135,41 @@ class _CustomerListHeader extends StatelessWidget {
               hi: 'ग्राहक',
               style: TextStyle(
                 color: CustomerColors.ink,
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: FontWeight.w800,
               ),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
             ),
           ),
-          IconButton(
-            onPressed: () => context.goNamed(CreateCustomerPage.routeName),
-            icon: const Icon(Icons.add, color: CustomerColors.ink),
-            tooltip: 'Add Customer',
+          InkWell(
+            onTap: () => context.goNamed(CreateCustomerPage.routeName),
+            borderRadius: BorderRadius.circular(8),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+              decoration: BoxDecoration(
+                color: CustomerColors.navy,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.add, color: Colors.white, size: 16),
+                  SizedBox(width: 4),
+                  BilingualText(
+                    en: 'New',
+                    mr: 'नवीन',
+                    hi: 'नया',
+                    compact: true,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -242,7 +258,9 @@ class _FilterChipsState extends State<_FilterChips> {
           return ChoiceChip(
             label: BilingualText(
               en: '${filter.en} (${filter.count})',
-              mr: filter.mr,
+              mr: '${filter.mr} (${filter.count})',
+              hi: '${filter.mr} (${filter.count})',
+              compact: true,
               style: TextStyle(
                 color: selected ? Colors.white : CustomerColors.ink,
                 fontSize: 12,
@@ -361,6 +379,8 @@ class _CustomerTile extends StatelessWidget {
                         child: BilingualText(
                           en: active ? 'Active' : 'Inactive',
                           mr: active ? 'सक्रिय' : 'निष्क्रिय',
+                          hi: active ? 'सक्रिय' : 'निष्क्रिय',
+                          compact: true,
                           style: TextStyle(
                             color: active
                                 ? CustomerColors.green

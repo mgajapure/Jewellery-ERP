@@ -6,7 +6,10 @@ import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/l10n/app_language.dart';
+import '../../../core/l10n/app_l10n_provider.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/customer.dart';
 import '../presentation/bloc/customer_list_bloc.dart';
 import '../presentation/bloc/customer_list_event.dart';
@@ -42,14 +45,10 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
   int _modeIndex = 0;
 
   static const _modes = [
-    (label: 'नाव / Name', hint: 'ग्राहकाचे नाव टाका', kb: TextInputType.name),
-    (
-      label: 'मोबाईल / Mobile',
-      hint: 'मोबाईल नंबर टाका',
-      kb: TextInputType.phone,
-    ),
-    (label: 'आयडी / ID', hint: 'ग्राहक ID टाका', kb: TextInputType.text),
-    (label: 'QR स्कॅन / QR Scan', hint: 'QR कोड स्कॅन करा', kb: TextInputType.none),
+    (en: 'Name', mr: 'नाव', hi: 'नाम', hint: 'Enter customer name', kb: TextInputType.name),
+    (en: 'Mobile', mr: 'मोबाईल', hi: 'मोबाइल', hint: 'Enter mobile number', kb: TextInputType.phone),
+    (en: 'ID', mr: 'आयडी', hi: 'आईडी', hint: 'Enter customer ID', kb: TextInputType.text),
+    (en: 'QR Scan', mr: 'QR स्कॅन', hi: 'QR स्कैन', hint: 'Scan QR code', kb: TextInputType.none),
   ];
 
   @override
@@ -96,7 +95,7 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
                 ),
               ),
             _SearchModeTabs(
-              modes: _modes.map((m) => m.label).toList(),
+              modes: _modes.map((m) => (en: m.en, mr: m.mr, hi: m.hi)).toList(),
               selectedIndex: _modeIndex,
               onChanged: (index) {
                 setState(() => _modeIndex = index);
@@ -113,7 +112,7 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
                   : BlocBuilder<CustomerListBloc, CustomerListState>(
                       builder: (context, state) {
                         if (state is CustomerListInitial) {
-                          return _SearchHint(mode: _modes[_modeIndex].label);
+                          return _SearchHint(modeEn: _modes[_modeIndex].en, modeMr: _modes[_modeIndex].mr, modeHi: _modes[_modeIndex].hi);
                         }
                         if (state is CustomerListLoading) {
                           return const Center(
@@ -140,8 +139,7 @@ class _CustomerSearchViewState extends State<_CustomerSearchView> {
                         }
                         if (state is CustomerListLoaded) {
                           if (state.searchQuery.isEmpty) {
-                            return _SearchHint(
-                                mode: _modes[_modeIndex].label);
+                            return _SearchHint(modeEn: _modes[_modeIndex].en, modeMr: _modes[_modeIndex].mr, modeHi: _modes[_modeIndex].hi);
                           }
                           if (state.displayList.isEmpty) {
                             return _NoResults(query: state.searchQuery);
@@ -186,8 +184,11 @@ class _SearchHeader extends StatelessWidget {
             tooltip: 'Back',
           ),
           const Expanded(
-            child: Text(
-              'ग्राहक शोध / Customer Search',
+            child: BilingualText(
+              en: 'Customer Search',
+              mr: 'ग्राहक शोध',
+              hi: 'ग्राहक खोज',
+              compact: true,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: CustomerColors.ink,
@@ -381,7 +382,7 @@ class _SearchModeTabs extends StatelessWidget {
     required this.onChanged,
   });
 
-  final List<String> modes;
+  final List<({String en, String mr, String hi})> modes;
   final int selectedIndex;
   final ValueChanged<int> onChanged;
 
@@ -396,9 +397,13 @@ class _SearchModeTabs extends StatelessWidget {
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
           final selected = index == selectedIndex;
+          final m = modes[index];
           return ChoiceChip(
-            label: Text(
-              modes[index],
+            label: BilingualText(
+              en: m.en,
+              mr: m.mr,
+              hi: m.hi,
+              compact: true,
               style: TextStyle(
                 color: selected ? CustomerColors.gold : CustomerColors.ink,
                 fontSize: 12,
@@ -423,12 +428,17 @@ class _SearchModeTabs extends StatelessWidget {
 }
 
 class _SearchHint extends StatelessWidget {
-  const _SearchHint({required this.mode});
+  const _SearchHint({required this.modeEn, required this.modeMr, required this.modeHi});
 
-  final String mode;
+  final String modeEn;
+  final String modeMr;
+  final String modeHi;
 
   @override
   Widget build(BuildContext context) {
+    final provider = context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+    final modeLabel = lang == AppLanguage.hi ? modeHi : lang == AppLanguage.mr ? modeMr : modeEn;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
@@ -441,8 +451,10 @@ class _SearchHint extends StatelessWidget {
               color: CustomerColors.muted.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'शोध सुरू करा / Start Searching',
+            const BilingualText(
+              en: 'Start Searching',
+              mr: 'शोध सुरू करा',
+              hi: 'खोज शुरू करें',
               style: TextStyle(
                 color: CustomerColors.ink,
                 fontSize: 15,
@@ -451,7 +463,7 @@ class _SearchHint extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              'वर $mode वापरून शोधा',
+              lang == AppLanguage.en ? 'Type to search by $modeLabel' : '$modeLabel वापरून शोधा',
               style: const TextStyle(
                 color: CustomerColors.muted,
                 fontSize: 13,
@@ -485,8 +497,10 @@ class _NoResults extends StatelessWidget {
               color: CustomerColors.muted.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'ग्राहक सापडला नाही',
+            const BilingualText(
+              en: 'No Customer Found',
+              mr: 'ग्राहक सापडला नाही',
+              hi: 'कोई ग्राहक नहीं मिला',
               style: TextStyle(
                 color: CustomerColors.ink,
                 fontSize: 15,
@@ -494,8 +508,10 @@ class _NoResults extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 4),
-            Text(
-              '"$query" साठी कोणताही ग्राहक नाही\nNo customer found for "$query"',
+            BilingualText(
+              en: 'No customer found for "$query"',
+              mr: '"$query" साठी कोणताही ग्राहक नाही',
+              hi: '"$query" के लिए कोई ग्राहक नहीं',
               style: const TextStyle(
                 color: CustomerColors.muted,
                 fontSize: 13,
@@ -628,8 +644,11 @@ class _SearchResultCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  '${customer.activeGirvi} गिरवी / Girvi',
+                BilingualText(
+                  en: '${customer.activeGirvi} Girvi',
+                  mr: '${customer.activeGirvi} गिरवी',
+                  hi: '${customer.activeGirvi} गिरवी',
+                  compact: true,
                   style: const TextStyle(
                     color: CustomerColors.muted,
                     fontSize: 10,
@@ -649,8 +668,11 @@ class _SearchResultCard extends StatelessWidget {
                         .withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(
-                    customer.isActive ? 'Active' : 'Inactive',
+                  child: BilingualText(
+                    en: customer.isActive ? 'Active' : 'Inactive',
+                    mr: customer.isActive ? 'सक्रिय' : 'निष्क्रिय',
+                    hi: customer.isActive ? 'सक्रिय' : 'निष्क्रिय',
+                    compact: true,
                     style: TextStyle(
                       color: customer.isActive
                           ? CustomerColors.green

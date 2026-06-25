@@ -51,6 +51,7 @@ class GirviStatusBadge extends StatelessWidget {
         en: en,
         mr: mr,
         hi: hi,
+        compact: true,
         style: TextStyle(
           color: _color,
           fontSize: 8,

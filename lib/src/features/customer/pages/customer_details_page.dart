@@ -8,6 +8,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../../../shared/widgets/app_error_state.dart';
 import '../../../shared/widgets/app_loader.dart';
 import '../../girvi/domain/entities/girvi.dart';
@@ -152,22 +153,67 @@ class _CustomerBody extends StatelessWidget {
                 ),
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10),
-                  child: const TabBar(
+                  child: TabBar(
                     isScrollable: false,
-                    indicator: BoxDecoration(color: CustomerColors.navy),
+                    indicator: const BoxDecoration(color: CustomerColors.navy),
                     indicatorSize: TabBarIndicatorSize.tab,
                     labelColor: Colors.white,
                     unselectedLabelColor: CustomerColors.muted,
-                    labelStyle: TextStyle(
+                    labelStyle: const TextStyle(
                         fontSize: 10, fontWeight: FontWeight.w800),
-                    unselectedLabelStyle: TextStyle(
+                    unselectedLabelStyle: const TextStyle(
                         fontSize: 10, fontWeight: FontWeight.w600),
                     tabs: [
-                      Tab(text: 'Profile'),
-                      Tab(text: 'Loans'),
-                      Tab(text: 'Payment'),
-                      Tab(text: 'Schemes'),
-                      Tab(text: 'History'),
+                      Tab(
+                        child: BilingualText(
+                          en: 'Profile',
+                          mr: 'प्रोफाइल',
+                          hi: 'प्रोफ़ाइल',
+                          compact: true,
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Tab(
+                        child: BilingualText(
+                          en: 'Loans',
+                          mr: 'गिरवी',
+                          hi: 'ऋण',
+                          compact: true,
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Tab(
+                        child: BilingualText(
+                          en: 'Payment',
+                          mr: 'पेमेंट',
+                          hi: 'भुगतान',
+                          compact: true,
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Tab(
+                        child: BilingualText(
+                          en: 'Schemes',
+                          mr: 'योजना',
+                          hi: 'योजनाएं',
+                          compact: true,
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w800),
+                        ),
+                      ),
+                      Tab(
+                        child: BilingualText(
+                          en: 'History',
+                          mr: 'इतिहास',
+                          hi: 'इतिहास',
+                          compact: true,
+                          style: const TextStyle(
+                              fontSize: 10, fontWeight: FontWeight.w800),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -212,8 +258,10 @@ class _ProfileAppBar extends StatelessWidget {
             tooltip: 'Back',
           ),
           const Expanded(
-            child: Text(
-              'ग्राहक प्रोफाइल / Customer Profile',
+            child: BilingualText(
+              en: 'Customer Profile',
+              mr: 'ग्राहक प्रोफाइल',
+              hi: 'ग्राहक प्रोफ़ाइल',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: CustomerColors.ink,
@@ -251,37 +299,55 @@ class _ProfileAppBar extends StatelessWidget {
                   context.pushNamed('savings-dashboard');
               }
             },
-            itemBuilder: (context) => const [
+            itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'copy',
                 child: Row(
-                  children: [
+                  children: const [
                     Icon(Icons.copy, size: 18, color: CustomerColors.ink),
                     SizedBox(width: 10),
-                    Text('मोबाईल कॉपी करा / Copy Mobile'),
-                  ],
+                  ] +
+                      [
+                        const BilingualText(
+                          en: 'Copy Mobile',
+                          mr: 'मोबाईल कॉपी करा',
+                          hi: 'मोबाइल कॉपी करें',
+                        ),
+                      ],
                 ),
               ),
               PopupMenuItem(
                 value: 'girvi',
                 child: Row(
-                  children: [
+                  children: const [
                     Icon(Icons.account_balance_wallet_outlined,
                         size: 18, color: CustomerColors.ink),
                     SizedBox(width: 10),
-                    Text('गिरवी पहा / View Girvi'),
-                  ],
+                  ] +
+                      [
+                        const BilingualText(
+                          en: 'View Girvi',
+                          mr: 'गिरवी पहा',
+                          hi: 'गिरवी देखें',
+                        ),
+                      ],
                 ),
               ),
               PopupMenuItem(
                 value: 'savings',
                 child: Row(
-                  children: [
+                  children: const [
                     Icon(Icons.savings_outlined,
                         size: 18, color: CustomerColors.ink),
                     SizedBox(width: 10),
-                    Text('बचत योजना / Savings Schemes'),
-                  ],
+                  ] +
+                      [
+                        const BilingualText(
+                          en: 'Savings Schemes',
+                          mr: 'बचत योजना',
+                          hi: 'बचत योजनाएं',
+                        ),
+                      ],
                 ),
               ),
             ],
@@ -371,8 +437,11 @@ class _ProfileHeaderCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 6),
-                        const Text(
-                          '• ग्राहक ID',
+                        const BilingualText(
+                          en: '• Customer ID',
+                          mr: '• ग्राहक ID',
+                          hi: '• ग्राहक ID',
+                          compact: true,
                           style: TextStyle(
                             color: Colors.white54,
                             fontSize: 12,
@@ -399,10 +468,11 @@ class _ProfileHeaderCard extends StatelessWidget {
                           .withValues(alpha: 0.15),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
-                      customer.isActive
-                          ? 'सक्रिय / Active'
-                          : 'निष्क्रिय / Inactive',
+                    child: BilingualText(
+                      en: customer.isActive ? 'Active' : 'Inactive',
+                      mr: customer.isActive ? 'सक्रिय' : 'निष्क्रिय',
+                      hi: customer.isActive ? 'सक्रिय' : 'निष्क्रिय',
+                      compact: true,
                       style: TextStyle(
                         color: customer.isActive
                             ? CustomerColors.green
@@ -427,6 +497,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: _HeaderStat(
                   labelMr: 'एकूण गिरवी',
                   labelEn: 'Total Loans',
+                  labelHi: 'कुल ऋण',
                   value: customer.activeGirvi.toString(),
                 ),
               ),
@@ -434,6 +505,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: _HeaderStat(
                   labelMr: 'एकूण बकाया',
                   labelEn: 'Total Outstanding',
+                  labelHi: 'कुल बकाया',
                   value: _formatAmount(customer.outstanding),
                   valueColor: CustomerColors.gold,
                 ),
@@ -442,6 +514,7 @@ class _ProfileHeaderCard extends StatelessWidget {
                 child: _HeaderStat(
                   labelMr: 'सदस्यता',
                   labelEn: 'Since',
+                  labelHi: 'सदस्यता से',
                   value: _formatDate(customer.createdAt),
                 ),
               ),
@@ -501,10 +574,10 @@ class _RiskBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (label, color) = switch (category) {
-      RiskCategory.low => ('कमी जोखीम / Low', CustomerColors.green),
-      RiskCategory.medium => ('मध्यम जोखीम / Med', Colors.orange),
-      RiskCategory.high => ('उच्च जोखीम / High', CustomerColors.red),
+    final (labelEn, labelMr, labelHi, color) = switch (category) {
+      RiskCategory.low => ('Low Risk', 'कमी जोखीम', 'कम जोखिम', CustomerColors.green),
+      RiskCategory.medium => ('Med Risk', 'मध्यम जोखीम', 'मध्यम जोखिम', Colors.orange),
+      RiskCategory.high => ('High Risk', 'उच्च जोखीम', 'उच्च जोखिम', CustomerColors.red),
     };
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -512,8 +585,11 @@ class _RiskBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.15),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Text(
-        label,
+      child: BilingualText(
+        en: labelEn,
+        mr: labelMr,
+        hi: labelHi,
+        compact: true,
         style: TextStyle(
           color: color,
           fontSize: 10,
@@ -528,12 +604,14 @@ class _HeaderStat extends StatelessWidget {
   const _HeaderStat({
     required this.labelMr,
     required this.labelEn,
+    required this.labelHi,
     required this.value,
     this.valueColor = Colors.white,
   });
 
   final String labelMr;
   final String labelEn;
+  final String labelHi;
   final String value;
   final Color valueColor;
 
@@ -541,21 +619,15 @@ class _HeaderStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          labelMr,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          hi: labelHi,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 11,
             fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          labelEn,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
@@ -591,6 +663,7 @@ class _ProfileTab extends StatelessWidget {
         const _SectionTitle(
           titleMr: 'वैयक्तिक माहिती',
           titleEn: 'Personal Information',
+          titleHi: 'व्यक्तिगत जानकारी',
         ),
         const SizedBox(height: 12),
         Container(
@@ -610,40 +683,52 @@ class _ProfileTab extends StatelessWidget {
             children: [
               _InfoRow(
                 icon: Icons.person_outline,
-                label: 'नाव / Name',
+                labelEn: 'Name',
+                labelMr: 'नाव',
+                labelHi: 'नाम',
                 value: '${customer.name} / ${customer.nameEn}',
               ),
               const _InfoDivider(),
               _InfoRow(
                 icon: Icons.phone_outlined,
-                label: 'मोबाईल / Mobile',
+                labelEn: 'Mobile',
+                labelMr: 'मोबाईल',
+                labelHi: 'मोबाइल',
                 value: customer.mobile,
               ),
               if (customer.alternateMobile != null) ...[
                 const _InfoDivider(),
                 _InfoRow(
                   icon: Icons.phone_android_outlined,
-                  label: 'पर्यायी मोबाईल / Alternate Mobile',
+                  labelEn: 'Alternate Mobile',
+                  labelMr: 'पर्यायी मोबाईल',
+                  labelHi: 'वैकल्पिक मोबाइल',
                   value: customer.alternateMobile!,
                 ),
               ],
               const _InfoDivider(),
               _InfoRow(
                 icon: Icons.location_on_outlined,
-                label: 'पत्ता / Address',
+                labelEn: 'Address',
+                labelMr: 'पत्ता',
+                labelHi: 'पता',
                 value: customer.address.isNotEmpty ? customer.address : '—',
               ),
               const _InfoDivider(),
               _InfoRow(
                 icon: Icons.calendar_today_outlined,
-                label: 'जन्मतारीख / DOB',
+                labelEn: 'Date of Birth',
+                labelMr: 'जन्मतारीख',
+                labelHi: 'जन्म तिथि',
                 value: _formatDob(customer.dateOfBirth),
               ),
               if (customer.aadhaarMasked != null) ...[
                 const _InfoDivider(),
                 _InfoRow(
                   icon: Icons.badge_outlined,
-                  label: 'आधार क्रमांक / Aadhaar No.',
+                  labelEn: 'Aadhaar No.',
+                  labelMr: 'आधार क्रमांक',
+                  labelHi: 'आधार संख्या',
                   value: customer.aadhaarMasked!,
                   verified: true,
                 ),
@@ -652,7 +737,9 @@ class _ProfileTab extends StatelessWidget {
                 const _InfoDivider(),
                 _InfoRow(
                   icon: Icons.credit_card_outlined,
-                  label: 'पॅन क्रमांक / PAN',
+                  labelEn: 'PAN',
+                  labelMr: 'पॅन क्रमांक',
+                  labelHi: 'पैन नंबर',
                   value: customer.panNumber!,
                   verified: true,
                 ),
@@ -668,13 +755,17 @@ class _ProfileTab extends StatelessWidget {
 class _InfoRow extends StatelessWidget {
   const _InfoRow({
     required this.icon,
-    required this.label,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
     required this.value,
     this.verified = false,
   });
 
   final IconData icon;
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final String value;
   final bool verified;
 
@@ -691,8 +782,10 @@ class _InfoRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
+                BilingualText(
+                  en: labelEn,
+                  mr: labelMr,
+                  hi: labelHi,
                   style: const TextStyle(
                     color: CustomerColors.muted,
                     fontSize: 11,
@@ -722,8 +815,11 @@ class _InfoRow extends StatelessWidget {
                             size: 16,
                           ),
                           SizedBox(width: 4),
-                          Text(
-                            'सत्यापित / Verified',
+                          BilingualText(
+                            en: 'Verified',
+                            mr: 'सत्यापित',
+                            hi: 'सत्यापित',
+                            compact: true,
                             style: TextStyle(
                               color: CustomerColors.green,
                               fontSize: 10,
@@ -752,34 +848,27 @@ class _InfoDivider extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.titleMr, required this.titleEn});
+  const _SectionTitle({
+    required this.titleMr,
+    required this.titleEn,
+    required this.titleHi,
+  });
 
   final String titleMr;
   final String titleEn;
+  final String titleHi;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titleMr,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          titleEn,
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    return BilingualText(
+      en: titleEn,
+      mr: titleMr,
+      hi: titleHi,
+      style: const TextStyle(
+        color: CustomerColors.ink,
+        fontSize: 15,
+        fontWeight: FontWeight.w900,
+      ),
     );
   }
 }
@@ -852,7 +941,9 @@ class _LoansTabView extends StatelessWidget {
               const SizedBox(height: 16),
               if (active.isNotEmpty) ...[
                 _LoansSectionHeader(
-                    titleMr: 'सक्रिय गिरवी', titleEn: 'Active Loans'),
+                    titleMr: 'सक्रिय गिरवी',
+                    titleEn: 'Active Loans',
+                    titleHi: 'सक्रिय ऋण'),
                 const SizedBox(height: 10),
                 ...active.map((g) => _MiniLoanCard(
                       girvi: g,
@@ -862,7 +953,9 @@ class _LoansTabView extends StatelessWidget {
               ],
               if (closed.isNotEmpty) ...[
                 _LoansSectionHeader(
-                    titleMr: 'बंद गिरवी', titleEn: 'Closed Loans'),
+                    titleMr: 'बंद गिरवी',
+                    titleEn: 'Closed Loans',
+                    titleHi: 'बंद ऋण'),
                 const SizedBox(height: 10),
                 ...closed.map((g) => _MiniLoanCard(
                       girvi: g,
@@ -921,16 +1014,14 @@ class _LoansSummaryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'एकूण बकाया रक्कम',
+                    const BilingualText(
+                      en: 'Total Outstanding',
+                      mr: 'एकूण बकाया रक्कम',
+                      hi: 'कुल बकाया राशि',
                       style: TextStyle(
                           color: Colors.white70,
                           fontSize: 11,
                           fontWeight: FontWeight.w700),
-                    ),
-                    const Text(
-                      'Total Outstanding',
-                      style: TextStyle(color: Colors.white54, fontSize: 10),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -955,7 +1046,7 @@ class _LoansSummaryCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '$activeCount सक्रिय / Active',
+                      '$activeCount',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 12,
@@ -973,7 +1064,16 @@ class _LoansSummaryCard extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: onNewGirvi,
               icon: const Icon(Icons.add_circle_outline, size: 16),
-              label: const Text('नवीन गिरवी तयार करा / New Girvi'),
+              label: const BilingualText(
+                en: 'New Girvi',
+                mr: 'नवीन गिरवी तयार करा',
+                hi: 'नई गिरवी बनाएं',
+                compact: true,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: CustomerColors.gold,
                 side: const BorderSide(color: CustomerColors.gold, width: 1.5),
@@ -995,34 +1095,27 @@ class _LoansSummaryCard extends StatelessWidget {
 }
 
 class _LoansSectionHeader extends StatelessWidget {
-  const _LoansSectionHeader(
-      {required this.titleMr, required this.titleEn});
+  const _LoansSectionHeader({
+    required this.titleMr,
+    required this.titleEn,
+    required this.titleHi,
+  });
 
   final String titleMr;
   final String titleEn;
+  final String titleHi;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Text(
-          titleMr,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 13,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(width: 6),
-        Text(
-          '/ $titleEn',
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 11,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    return BilingualText(
+      en: titleEn,
+      mr: titleMr,
+      hi: titleHi,
+      style: const TextStyle(
+        color: CustomerColors.ink,
+        fontSize: 13,
+        fontWeight: FontWeight.w900,
+      ),
     );
   }
 }
@@ -1042,18 +1135,19 @@ class _MiniLoanCard extends StatelessWidget {
     };
   }
 
-  String get _statusLabel {
+  (String, String, String) get _statusLabels {
     return switch (girvi.status) {
-      GirviStatus.active => 'सक्रिय / Active',
-      GirviStatus.partialPaid => 'आंशिक / Partial',
-      GirviStatus.overdue => 'मुदतीपूर्व / Overdue',
-      GirviStatus.redeemed => 'परत / Redeemed',
-      GirviStatus.renewed => 'नूतन / Renewed',
+      GirviStatus.active => ('Active', 'सक्रिय', 'सक्रिय'),
+      GirviStatus.partialPaid => ('Partial', 'आंशिक', 'आंशिक भुगतान'),
+      GirviStatus.overdue => ('Overdue', 'मुदतीपूर्व', 'अतिदेय'),
+      GirviStatus.redeemed => ('Redeemed', 'परत', 'वापस लिया'),
+      GirviStatus.renewed => ('Renewed', 'नूतन', 'नवीनीकृत'),
     };
   }
 
   @override
   Widget build(BuildContext context) {
+    final (labelEn, labelMr, labelHi) = _statusLabels;
     return InkWell(
       onTap: () => context.pushNamed(
         GirviDetailsPage.routeName,
@@ -1095,8 +1189,11 @@ class _MiniLoanCard extends StatelessWidget {
                     color: _statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: Text(
-                    _statusLabel,
+                  child: BilingualText(
+                    en: labelEn,
+                    mr: labelMr,
+                    hi: labelHi,
+                    compact: true,
                     style: TextStyle(
                       color: _statusColor,
                       fontSize: 10,
@@ -1110,16 +1207,22 @@ class _MiniLoanCard extends StatelessWidget {
             Row(
               children: [
                 _MiniStat(
-                  label: 'कर्ज / Loan',
+                  labelEn: 'Loan',
+                  labelMr: 'कर्ज',
+                  labelHi: 'ऋण',
                   value: formatAmt(girvi.loanAmount),
                 ),
                 _MiniStat(
-                  label: 'बाकी / Outstanding',
+                  labelEn: 'Outstanding',
+                  labelMr: 'बाकी',
+                  labelHi: 'बकाया',
                   value: formatAmt(girvi.outstandingAmount),
                   valueColor: CustomerColors.gold,
                 ),
                 _MiniStat(
-                  label: 'वस्तू / Items',
+                  labelEn: 'Items',
+                  labelMr: 'वस्तू',
+                  labelHi: 'वस्तुएं',
                   value: '${girvi.items.length}',
                 ),
               ],
@@ -1133,7 +1236,9 @@ class _MiniLoanCard extends StatelessWidget {
                 children: [
                   _MiniActionChip(
                     icon: Icons.payments_outlined,
-                    label: 'Pay',
+                    labelEn: 'Pay',
+                    labelMr: 'भरा',
+                    labelHi: 'भुगतान',
                     onTap: () => context.pushNamed(
                       PartialPaymentPage.routeName,
                       pathParameters: {'id': girvi.id},
@@ -1142,7 +1247,9 @@ class _MiniLoanCard extends StatelessWidget {
                   const SizedBox(width: 8),
                   _MiniActionChip(
                     icon: Icons.refresh_outlined,
-                    label: 'Renew',
+                    labelEn: 'Renew',
+                    labelMr: 'नूतन करा',
+                    labelHi: 'नवीनीकरण',
                     onTap: () => context.pushNamed(
                       RenewalPage.routeName,
                       pathParameters: {'id': girvi.id},
@@ -1158,12 +1265,17 @@ class _MiniLoanCard extends StatelessWidget {
 }
 
 class _MiniStat extends StatelessWidget {
-  const _MiniStat(
-      {required this.label,
-      required this.value,
-      this.valueColor = CustomerColors.ink});
+  const _MiniStat({
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
+    required this.value,
+    this.valueColor = CustomerColors.ink,
+  });
 
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final String value;
   final Color valueColor;
 
@@ -1173,11 +1285,16 @@ class _MiniStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label,
-              style: const TextStyle(
-                  color: CustomerColors.muted,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w600)),
+          BilingualText(
+            en: labelEn,
+            mr: labelMr,
+            hi: labelHi,
+            compact: true,
+            style: const TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 10,
+                fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 2),
           Text(value,
               style: TextStyle(
@@ -1191,11 +1308,18 @@ class _MiniStat extends StatelessWidget {
 }
 
 class _MiniActionChip extends StatelessWidget {
-  const _MiniActionChip(
-      {required this.icon, required this.label, required this.onTap});
+  const _MiniActionChip({
+    required this.icon,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
+    required this.onTap,
+  });
 
   final IconData icon;
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final VoidCallback onTap;
 
   @override
@@ -1214,8 +1338,11 @@ class _MiniActionChip extends StatelessWidget {
           children: [
             Icon(icon, size: 13, color: CustomerColors.navy),
             const SizedBox(width: 4),
-            Text(
-              label,
+            BilingualText(
+              en: labelEn,
+              mr: labelMr,
+              hi: labelHi,
+              compact: true,
               style: const TextStyle(
                 color: CustomerColors.navy,
                 fontSize: 11,
@@ -1251,8 +1378,11 @@ class _NoLoansBanner extends StatelessWidget {
             color: CustomerColors.muted,
           ),
           const SizedBox(height: 12),
-          const Text(
-            'कोणतेही गिरवी नाही',
+          const BilingualText(
+            en: 'No Loans Found',
+            mr: 'कोणतेही गिरवी नाही',
+            hi: 'कोई ऋण नहीं मिला',
+            textAlign: TextAlign.center,
             style: TextStyle(
               color: CustomerColors.ink,
               fontSize: 15,
@@ -1260,8 +1390,10 @@ class _NoLoansBanner extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          const Text(
-            'No active or past loans found for this customer.',
+          const BilingualText(
+            en: 'No active or past loans found for this customer.',
+            mr: 'या ग्राहकासाठी कोणतेही सक्रिय किंवा जुने गिरवी आढळले नाही.',
+            hi: 'इस ग्राहक के लिए कोई सक्रिय या पुराना ऋण नहीं मिला।',
             textAlign: TextAlign.center,
             style: TextStyle(color: CustomerColors.muted, fontSize: 12),
           ),
@@ -1269,7 +1401,12 @@ class _NoLoansBanner extends StatelessWidget {
           ElevatedButton.icon(
             onPressed: onNewGirvi,
             icon: const Icon(Icons.add, size: 16),
-            label: const Text('नवीन गिरवी तयार करा / New Girvi'),
+            label: const BilingualText(
+              en: 'New Girvi',
+              mr: 'नवीन गिरवी तयार करा',
+              hi: 'नई गिरवी बनाएं',
+              compact: true,
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: CustomerColors.navy,
               foregroundColor: CustomerColors.gold,
@@ -1295,8 +1432,10 @@ class _PaymentTab extends StatelessWidget {
       icon: Icons.payments_outlined,
       titleMr: 'पेमेंट इतिहास',
       titleEn: 'Payment History',
+      titleHi: 'भुगतान इतिहास',
       bodyMr: 'ग्राहकाची सर्व देयके आणि व्यवहार येथे दिसतील.',
       bodyEn: 'All customer payments and transactions will appear here.',
+      bodyHi: 'ग्राहक के सभी भुगतान और लेनदेन यहाँ दिखाई देंगे।',
     );
   }
 }
@@ -1310,8 +1449,10 @@ class _SchemesTab extends StatelessWidget {
       icon: Icons.savings_outlined,
       titleMr: 'बचत योजना',
       titleEn: 'Savings Schemes',
+      titleHi: 'बचत योजनाएं',
       bodyMr: 'ग्राहकाच्या बचत योजना येथे दाखवल्या जातील.',
       bodyEn: 'Customer savings schemes will be displayed here.',
+      bodyHi: 'ग्राहक की बचत योजनाएं यहाँ दिखाई जाएंगी।',
     );
   }
 }
@@ -1325,8 +1466,10 @@ class _HistoryTab extends StatelessWidget {
       icon: Icons.history_outlined,
       titleMr: 'व्यवहार इतिहास',
       titleEn: 'Transaction History',
+      titleHi: 'लेनदेन इतिहास',
       bodyMr: 'देयके, नूतनीकरण आणि इतर सर्व व्यवहार येथे दिसतील.',
       bodyEn: 'Payments, renewals and all transactions will appear here.',
+      bodyHi: 'भुगतान, नवीनीकरण और सभी लेनदेन यहाँ दिखाई देंगे।',
     );
   }
 }
@@ -1336,13 +1479,15 @@ class _DataPlaceholder extends StatelessWidget {
     required this.icon,
     required this.titleMr,
     required this.titleEn,
+    required this.titleHi,
     required this.bodyMr,
     required this.bodyEn,
+    required this.bodyHi,
   });
 
   final IconData icon;
-  final String titleMr, titleEn;
-  final String bodyMr, bodyEn;
+  final String titleMr, titleEn, titleHi;
+  final String bodyMr, bodyEn, bodyHi;
 
   @override
   Widget build(BuildContext context) {
@@ -1368,26 +1513,22 @@ class _DataPlaceholder extends StatelessWidget {
                 child: Icon(icon, size: 36, color: CustomerColors.muted),
               ),
               const SizedBox(height: 16),
-              Text(
-                titleMr,
+              BilingualText(
+                en: titleEn,
+                mr: titleMr,
+                hi: titleHi,
+                textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: CustomerColors.ink,
                   fontSize: 15,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-              const SizedBox(height: 2),
-              Text(
-                titleEn,
-                style: const TextStyle(
-                  color: CustomerColors.muted,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
               const SizedBox(height: 12),
-              Text(
-                '$bodyMr\n$bodyEn',
+              BilingualText(
+                en: bodyEn,
+                mr: bodyMr,
+                hi: bodyHi,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
                   color: CustomerColors.muted,
@@ -1423,19 +1564,25 @@ class _BottomActionBar extends StatelessWidget {
             children: [
               _CompactAction(
                 icon: Icons.call_outlined,
-                label: 'कॉल',
+                labelEn: 'Call',
+                labelMr: 'कॉल',
+                labelHi: 'कॉल',
                 onTap: () => _launchCall(context, customer.mobile),
               ),
               const SizedBox(width: 8),
               _CompactAction(
                 icon: Icons.chat_bubble_outline,
-                label: 'WhatsApp',
+                labelEn: 'WhatsApp',
+                labelMr: 'WhatsApp',
+                labelHi: 'WhatsApp',
                 onTap: () => _launchWhatsApp(context, customer.mobile),
               ),
               const SizedBox(width: 8),
               _CompactAction(
                 icon: Icons.share_outlined,
-                label: 'Share',
+                labelEn: 'Share',
+                labelMr: 'शेअर',
+                labelHi: 'शेयर',
                 onTap: () => _shareCustomer(customer),
               ),
               const Spacer(),
@@ -1443,7 +1590,13 @@ class _BottomActionBar extends StatelessWidget {
                 height: 36,
                 child: ElevatedButton.icon(
                   icon: const Icon(Icons.add, size: 14),
-                  label: const Text('New Girvi'),
+                  label: const BilingualText(
+                    en: 'New Girvi',
+                    mr: 'नवीन गिरवी',
+                    hi: 'नई गिरवी',
+                    compact: true,
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+                  ),
                   onPressed: () =>
                       context.pushNamed(CreateGirviWizardPage.routeName),
                   style: ElevatedButton.styleFrom(
@@ -1467,10 +1620,17 @@ class _BottomActionBar extends StatelessWidget {
 }
 
 class _CompactAction extends StatelessWidget {
-  const _CompactAction(
-      {required this.icon, required this.label, required this.onTap});
+  const _CompactAction({
+    required this.icon,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
+    required this.onTap,
+  });
   final IconData icon;
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final VoidCallback onTap;
 
   @override
@@ -1485,8 +1645,11 @@ class _CompactAction extends StatelessWidget {
           children: [
             Icon(icon, size: 18, color: CustomerColors.ink),
             const SizedBox(height: 2),
-            Text(
-              label,
+            BilingualText(
+              en: labelEn,
+              mr: labelMr,
+              hi: labelHi,
+              compact: true,
               style: const TextStyle(
                 color: CustomerColors.ink,
                 fontSize: 9,

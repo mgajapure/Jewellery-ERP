@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
+import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../../compliance/compliance.dart';
 import '../../inventory/inventory.dart';
 import '../../interest/interest.dart';
@@ -28,6 +28,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'स्टॉक',
       'titleEn': 'Inventory',
+      'titleHi': 'स्टॉक',
       'icon': Icons.inventory_2_outlined,
       'route': InventoryListPage.routeName,
       'color': 0xFF061C49,
@@ -35,6 +36,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'तिजोरी',
       'titleEn': 'Vault',
+      'titleHi': 'तिजोरी',
       'icon': Icons.account_balance_outlined,
       'route': VaultSearchPage.routeName,
       'color': 0xFF2563EB,
@@ -42,6 +44,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'व्याज',
       'titleEn': 'Interest',
+      'titleHi': 'ब्याज',
       'icon': Icons.calculate_outlined,
       'route': InterestCalculatorPage.routeName,
       'color': 0xFF07934A,
@@ -49,6 +52,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'अनुपालन',
       'titleEn': 'Compliance',
+      'titleHi': 'अनुपालन',
       'icon': Icons.verified_user_outlined,
       'route': ComplianceDashboardPage.routeName,
       'color': 0xFFE7A726,
@@ -56,6 +60,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'खरेदी',
       'titleEn': 'Purchase',
+      'titleHi': 'खरीद',
       'icon': Icons.shopping_bag_outlined,
       'route': PurchaseDashboardPage.routeName,
       'color': 0xFF061C49,
@@ -63,6 +68,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'विक्री',
       'titleEn': 'Sales',
+      'titleHi': 'बिक्री',
       'icon': Icons.point_of_sale_outlined,
       'route': SalesDashboardPage.routeName,
       'color': 0xFF061C49,
@@ -70,6 +76,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'बचत योजना',
       'titleEn': 'Savings',
+      'titleHi': 'बचत योजना',
       'icon': Icons.savings_outlined,
       'route': SavingsDashboardPage.routeName,
       'color': 0xFF07934A,
@@ -77,6 +84,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'अहवाल',
       'titleEn': 'Reports',
+      'titleHi': 'रिपोर्ट',
       'icon': Icons.bar_chart_outlined,
       'route': ReportsDashboardPage.routeName,
       'color': 0xFF2563EB,
@@ -84,6 +92,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'कर्मचारी',
       'titleEn': 'Staff',
+      'titleHi': 'कर्मचारी',
       'icon': Icons.badge_outlined,
       'route': StaffDashboardPage.routeName,
       'color': 0xFFF59E0B,
@@ -91,6 +100,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'सेटिंग्ज',
       'titleEn': 'Settings',
+      'titleHi': 'सेटिंग्स',
       'icon': Icons.settings_outlined,
       'route': SettingsDashboardPage.routeName,
       'color': 0xFF5E6880,
@@ -100,43 +110,47 @@ class MorePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.screenBg,
+      backgroundColor: const Color(0xFFF8F9FC),
       body: SafeArea(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 10),
-              child: const Text(
-                'अधिक / More',
-                style: AppTextStyles.screenTitle,
-              ),
+            const AppListHeader(
+              titleMr: 'सर्व मॉड्यूल्स',
+              titleEn: 'All Modules',
             ),
             Expanded(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(
-                    top: BorderSide(color: AppColors.line),
-                  ),
-                ),
-                child: ListView.separated(
-                  padding: EdgeInsets.zero,
-                  itemCount: _modules.length,
-                  separatorBuilder: (context, i) =>
-                      const Divider(height: 1, color: AppColors.line),
-                  itemBuilder: (context, i) => _ModuleTile(
-                    module: _modules[i],
-                    onTap: () =>
-                        context.pushNamed(_modules[i]['route'] as String),
-                  ),
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const BilingualText(
+                en: 'More Modules',
+                mr: 'अधिक मॉड्यूल्स',
+                hi: 'और अधिक',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF071A49),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 16),
+              GridView.count(
+                crossAxisCount: 2,
+                crossAxisSpacing: 12,
+                mainAxisSpacing: 12,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                children: _modules.map((module) => _ModuleCard(module: module)).toList(),
+              ),
+            ],
+          ),
         ),
       ),
-      bottomNavigationBar: AppBottomNav(
+    ],
+  ),
+),
+bottomNavigationBar: AppBottomNav(
         currentIndex: 3,
         onTap: (index) {
           switch (index) {
@@ -158,56 +172,59 @@ class MorePage extends StatelessWidget {
   }
 }
 
-class _ModuleTile extends StatelessWidget {
-  const _ModuleTile({required this.module, required this.onTap});
+class _ModuleCard extends StatelessWidget {
+  const _ModuleCard({required this.module});
+
   final Map<String, dynamic> module;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final color = Color(module['color'] as int);
-    return Material(
-      color: Colors.white,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-          child: Row(
-            children: [
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(module['icon'] as IconData, color: color, size: 20),
+    return InkWell(
+      onTap: () => context.goNamed(module['route'] as String),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE5E8EF)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x10000000),
+              blurRadius: 10,
+              offset: Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withAlpha(15),
+                borderRadius: BorderRadius.circular(12),
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      module['titleMr'] as String,
-                      style: AppTextStyles.bodyLarge.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      module['titleEn'] as String,
-                      style: AppTextStyles.bodySmall.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
+              child: Icon(
+                module['icon'] as IconData,
+                color: color,
+                size: 24,
               ),
-              const Icon(Icons.chevron_right,
-                  color: AppColors.muted, size: 20),
-            ],
-          ),
+            ),
+            BilingualText(
+              en: module['titleEn'] as String,
+              mr: module['titleMr'] as String,
+              hi: module['titleHi'] as String?,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF071A49),
+              ),
+            ),
+          ],
         ),
       ),
     );

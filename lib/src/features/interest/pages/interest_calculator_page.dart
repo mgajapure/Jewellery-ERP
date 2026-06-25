@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/interest_calculation.dart';
 import '../presentation/bloc/calculator_bloc.dart';
 import '../presentation/bloc/calculator_event.dart';
@@ -255,8 +256,10 @@ class _CalculatorViewState extends State<_CalculatorView> {
                             },
                             icon: const Icon(Icons.calculate_outlined,
                                 size: 20),
-                            label: const Text(
-                              'गणना करा / Calculate',
+                            label: const BilingualText(
+                              en: 'Calculate',
+                              mr: 'गणना करा',
+                              hi: 'गणना करें',
                               style: TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w600,
@@ -295,26 +298,14 @@ class _SectionTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titleMr,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w900,
-            color: InterestColors.ink,
-          ),
-        ),
-        Text(
-          titleEn,
-          style: const TextStyle(
-            fontSize: 12,
-            color: InterestColors.muted,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    return BilingualText(
+      en: titleEn,
+      mr: titleMr,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w900,
+        color: InterestColors.ink,
+      ),
     );
   }
 }
@@ -355,13 +346,16 @@ class _InputField extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$labelMr / $labelEn',
+          BilingualText(
+            en: labelEn,
+            mr: labelMr,
             style: const TextStyle(
               fontSize: 11,
               color: InterestColors.muted,
               fontWeight: FontWeight.w700,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           TextField(
             controller: controller,
@@ -424,13 +418,16 @@ class _DatePickerField extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              '$labelMr / $labelEn',
+            BilingualText(
+              en: labelEn,
+              mr: labelMr,
               style: const TextStyle(
                 fontSize: 11,
                 color: InterestColors.muted,
                 fontWeight: FontWeight.w700,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: 4),
             Row(
@@ -486,8 +483,10 @@ class _InterestTypeSelector extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'व्याज प्रकार / Interest Type',
+          const BilingualText(
+            en: 'Interest Type',
+            mr: 'व्याज प्रकार',
+            hi: 'ब्याज प्रकार',
             style: TextStyle(
               fontSize: 11,
               color: InterestColors.muted,
@@ -502,30 +501,17 @@ class _InterestTypeSelector extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.only(right: 6),
                   child: ChoiceChip(
-                    label: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          type.labelMr,
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: isSelected
-                                ? Colors.white
-                                : InterestColors.ink,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                        Text(
-                          type.labelEn,
-                          style: TextStyle(
-                            fontSize: 9,
-                            color: isSelected
-                                ? Colors.white70
-                                : InterestColors.muted,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+                    label: BilingualText(
+                      en: type.labelEn,
+                      mr: type.labelMr,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color: isSelected ? Colors.white : InterestColors.ink,
+                        fontWeight: FontWeight.w700,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
                     ),
                     selected: isSelected,
                     onSelected: (_) => onSelected(type),
@@ -577,8 +563,10 @@ class _ResultCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'गणना निकाल / Calculation Result',
+              const BilingualText(
+                en: 'Calculation Result',
+                mr: 'गणना निकाल',
+                hi: 'गणना परिणाम',
                 style: TextStyle(
                   fontSize: 12,
                   color: Colors.white70,
@@ -676,26 +664,16 @@ class _ResultRow extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                labelMr,
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                labelEn,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.white70,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
+          child: BilingualText(
+            en: labelEn,
+            mr: labelMr,
+            style: const TextStyle(
+              fontSize: 13,
+              color: Colors.white,
+              fontWeight: FontWeight.w700,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
         Text(
@@ -761,26 +739,20 @@ class _FormulaInfoBox extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  _formulaMr,
+                BilingualText(
+                  en: _formulaEn,
+                  mr: _formulaMr,
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                     color: InterestColors.ink,
                   ),
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _formulaEn,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: InterestColors.muted,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
                 const SizedBox(height: 6),
-                const Text(
-                  'दंड: 180 दिवसांनंतर 2% p.a. अतिरिक्त · Penalty: 2% p.a. after 180 days',
+                const BilingualText(
+                  en: 'Penalty: 2% p.a. after 180 days',
+                  mr: 'दंड: 180 दिवसांनंतर 2% p.a. अतिरिक्त',
+                  hi: 'दंड: 180 दिनों के बाद 2% p.a. अतिरिक्त',
                   style: TextStyle(
                     fontSize: 10,
                     color: InterestColors.red,

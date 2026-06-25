@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/savings_entities.dart';
 import '../presentation/bloc/savings_dashboard_bloc.dart';
 import '../theme/savings_colors.dart';
@@ -76,8 +77,12 @@ class _SavingsScaffold extends StatelessWidget {
                                 .add(SavingsDashboardRefreshed()),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: SavingsColors.navy),
-                            child: const Text('पुन्हा प्रयत्न / Retry',
-                                style: TextStyle(color: Colors.white)),
+                            child: const BilingualText(
+                              en: 'Retry',
+                              mr: 'पुन्हा प्रयत्न',
+                              hi: 'पुनः प्रयास',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -115,8 +120,10 @@ class _LoadedView extends StatelessWidget {
         children: [
           _SummaryBanner(stats: stats, currency: _currency),
           const SizedBox(height: 24),
-          const Text(
-            'उपलब्ध योजना / Available Plans',
+          const BilingualText(
+            en: 'Available Plans',
+            mr: 'उपलब्ध योजना',
+            hi: 'उपलब्ध योजनाएं',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -126,8 +133,10 @@ class _LoadedView extends StatelessWidget {
           const SizedBox(height: 12),
           ...stats.plans.map((p) => _PlanCard(plan: p, currency: _currency)),
           const SizedBox(height: 24),
-          const Text(
-            'अलीकडील नोंदणी / Recent Subscriptions',
+          const BilingualText(
+            en: 'Recent Subscriptions',
+            mr: 'अलीकडील नोंदणी',
+            hi: 'हाल की सदस्यताएं',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -162,8 +171,10 @@ class _SummaryBanner extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'बचत योजना सारांश / Savings Overview',
+          const BilingualText(
+            en: 'Savings Overview',
+            mr: 'बचत योजना सारांश',
+            hi: 'बचत योजना सारांश',
             style: TextStyle(fontSize: 13, color: Colors.white70),
           ),
           const SizedBox(height: 16),
@@ -213,10 +224,11 @@ class _SummaryBanner extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'एकूण संकलन / Total Collected',
-                      style: TextStyle(
-                          fontSize: 11, color: Colors.white70),
+                    const BilingualText(
+                      en: 'Total Collected',
+                      mr: 'एकूण संकलन',
+                      hi: 'कुल संग्रह',
+                      style: TextStyle(fontSize: 11, color: Colors.white70),
                     ),
                     Text(
                       currency(stats.totalCollected),
@@ -261,13 +273,11 @@ class _BannerStat extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 4),
-        Text(
-          labelMr,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
           style: const TextStyle(fontSize: 11, color: Colors.white70),
-        ),
-        Text(
-          labelEn,
-          style: const TextStyle(fontSize: 10, color: Colors.white54),
+          textAlign: TextAlign.center,
         ),
       ],
     );
@@ -465,13 +475,16 @@ class _SubscriptionCard extends StatelessWidget {
                   color: _statusColor.withAlpha(18),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
-                  sub.status.labelEn,
+                child: BilingualText(
+                  en: sub.status.labelEn,
+                  mr: sub.status.labelMr,
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: _statusColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],
@@ -511,10 +524,11 @@ class _SubscriptionCard extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
-            '${(progress * 100).toStringAsFixed(0)}% पूर्ण / complete',
-            style: const TextStyle(
-                fontSize: 10, color: SavingsColors.muted),
+          BilingualText(
+            en: '${(progress * 100).toStringAsFixed(0)}% complete',
+            mr: '${(progress * 100).toStringAsFixed(0)}% पूर्ण',
+            hi: '${(progress * 100).toStringAsFixed(0)}% पूर्ण',
+            style: const TextStyle(fontSize: 10, color: SavingsColors.muted),
           ),
         ],
       ),

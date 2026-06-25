@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/compliance_entities.dart';
 import '../presentation/bloc/compliance_dashboard_bloc.dart';
 import '../theme/compliance_colors.dart';
@@ -76,8 +77,12 @@ class _ComplianceDashboardScaffold extends StatelessWidget {
                                 .add(ComplianceDashboardRefreshed()),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: ComplianceColors.navy),
-                            child: const Text('पुन्हा प्रयत्न / Retry',
-                                style: TextStyle(color: Colors.white)),
+                            child: const BilingualText(
+                              en: 'Retry',
+                              mr: 'पुन्हा प्रयत्न',
+                              hi: 'पुनः प्रयास',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -111,8 +116,10 @@ class _LoadedView extends StatelessWidget {
         children: [
           _HealthScoreCard(score: stats.healthScore),
           const SizedBox(height: 20),
-          const Text(
-            'मेट्रिक्स / Metrics',
+          const BilingualText(
+            en: 'Metrics',
+            mr: 'मेट्रिक्स',
+            hi: 'मेट्रिक्स',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -129,8 +136,10 @@ class _LoadedView extends StatelessWidget {
             children: stats.metrics.map((m) => _MetricCard(metric: m)).toList(),
           ),
           const SizedBox(height: 24),
-          const Text(
-            'अलर्ट आणि उल्लंघने / Alerts & Violations',
+          const BilingualText(
+            en: 'Alerts & Violations',
+            mr: 'अलर्ट आणि उल्लंघने',
+            hi: 'अलर्ट और उल्लंघन',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -140,8 +149,10 @@ class _LoadedView extends StatelessWidget {
           const SizedBox(height: 12),
           ...stats.alerts.map((a) => _AlertCard(alert: a)),
           const SizedBox(height: 24),
-          const Text(
-            'फॉर्म / Forms',
+          const BilingualText(
+            en: 'Forms',
+            mr: 'फॉर्म',
+            hi: 'फॉर्म',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -197,10 +208,10 @@ class _HealthScoreCard extends StatelessWidget {
     return ComplianceColors.red;
   }
 
-  String get _statusText {
-    if (score >= 95) return 'उत्कृष्ट / Excellent';
-    if (score >= 80) return 'सुधारणा आवश्यक / Needs Improvement';
-    return 'गंभीर / Critical';
+  (String, String) get _statusLabel {
+    if (score >= 95) return ('उत्कृष्ट', 'Excellent');
+    if (score >= 80) return ('सुधारणा आवश्यक', 'Needs Improvement');
+    return ('गंभीर', 'Critical');
   }
 
   @override
@@ -215,8 +226,10 @@ class _HealthScoreCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'अनुपालन आरोग्य स्कोर / Compliance Health Score',
+          const BilingualText(
+            en: 'Compliance Health Score',
+            mr: 'अनुपालन आरोग्य स्कोर',
+            hi: 'अनुपालन स्वास्थ्य स्कोर',
             style: TextStyle(fontSize: 13, color: Colors.white70),
           ),
           const SizedBox(height: 12),
@@ -246,8 +259,9 @@ class _HealthScoreCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      _statusText,
+                    BilingualText(
+                      en: _statusLabel.$2,
+                      mr: _statusLabel.$1,
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -255,8 +269,10 @@ class _HealthScoreCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    const Text(
-                      'शेवटची स्कॅन: १ तासापूर्वी / Last scan: 1 hour ago',
+                    const BilingualText(
+                      en: 'Last scan: 1 hour ago',
+                      mr: 'शेवटची स्कॅन: १ तासापूर्वी',
+                      hi: 'अंतिम स्कैन: 1 घंटे पहले',
                       style: TextStyle(fontSize: 12, color: Colors.white70),
                     ),
                   ],
@@ -304,25 +320,16 @@ class _MetricCard extends StatelessWidget {
               ),
             ),
           ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                metric.labelMr,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: ComplianceColors.ink,
-                ),
-              ),
-              Text(
-                metric.labelEn,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: ComplianceColors.muted,
-                ),
-              ),
-            ],
+          BilingualText(
+            en: metric.labelEn,
+            mr: metric.labelMr,
+            style: const TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: ComplianceColors.ink,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
         ],
       ),
@@ -448,13 +455,16 @@ class _FormActionCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    '$titleMr / $titleEn',
+                  BilingualText(
+                    en: titleEn,
+                    mr: titleMr,
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                       color: ComplianceColors.ink,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 2),
                   Text(

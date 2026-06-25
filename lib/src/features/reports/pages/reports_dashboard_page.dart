@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/reports_entities.dart';
 import '../presentation/bloc/reports_dashboard_bloc.dart';
 import '../theme/reports_colors.dart';
@@ -67,8 +68,12 @@ class _ReportsScaffold extends StatelessWidget {
                                 .add(ReportsDashboardStarted()),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: ReportsColors.navy),
-                            child: const Text('पुन्हा प्रयत्न / Retry',
-                                style: TextStyle(color: Colors.white)),
+                            child: const BilingualText(
+                              en: 'Retry',
+                              mr: 'पुन्हा प्रयत्न',
+                              hi: 'पुनः प्रयास',
+                              style: TextStyle(color: Colors.white),
+                            ),
                           ),
                         ],
                       ),
@@ -107,10 +112,10 @@ class _LoadedView extends StatelessWidget {
   String _weight(double v) => '${_fmtDec.format(v)} g';
 
   static const _periods = [
-    ('today', 'आज / Today'),
-    ('week', 'आठवडा / Week'),
-    ('month', 'महिना / Month'),
-    ('year', 'वर्ष / Year'),
+    ('today', 'Today', 'आज'),
+    ('week', 'Week', 'आठवडा'),
+    ('month', 'Month', 'महिना'),
+    ('year', 'Year', 'वर्ष'),
   ];
 
   @override
@@ -124,8 +129,10 @@ class _LoadedView extends StatelessWidget {
           const SizedBox(height: 20),
           _PeriodLabel(period: data.period),
           const SizedBox(height: 16),
-          const Text(
-            'विक्री / Sales',
+          const BilingualText(
+            en: 'Sales',
+            mr: 'विक्री',
+            hi: 'बिक्री',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -135,8 +142,10 @@ class _LoadedView extends StatelessWidget {
           const SizedBox(height: 12),
           _SalesCard(sales: data.sales, currency: _currency),
           const SizedBox(height: 20),
-          const Text(
-            'गिरवी / Girvi (Loans)',
+          const BilingualText(
+            en: 'Girvi (Loans)',
+            mr: 'गिरवी',
+            hi: 'गिरवी (ऋण)',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -146,8 +155,10 @@ class _LoadedView extends StatelessWidget {
           const SizedBox(height: 12),
           _GirviCard(girvi: data.girvi, currency: _currency),
           const SizedBox(height: 20),
-          const Text(
-            'खरेदी / Purchase',
+          const BilingualText(
+            en: 'Purchase',
+            mr: 'खरेदी',
+            hi: 'खरीद',
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.w600,
@@ -164,7 +175,7 @@ class _LoadedView extends StatelessWidget {
     );
   }
 
-  static List<(String, String)> get periods => _periods;
+  static List<(String, String, String)> get periods => _periods;
 }
 
 class _PeriodFilter extends StatelessWidget {
@@ -178,8 +189,9 @@ class _PeriodFilter extends StatelessWidget {
       scrollDirection: Axis.horizontal,
       child: Row(
         children: _LoadedView.periods.map((entry) {
-          final (key, label) = entry;
+          final (key, en, mr) = entry;
           final isActive = key == activePeriod;
+          final labelColor = isActive ? Colors.white : ReportsColors.ink;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: GestureDetector(
@@ -199,14 +211,16 @@ class _PeriodFilter extends StatelessWidget {
                         : ReportsColors.line,
                   ),
                 ),
-                child: Text(
-                  label,
+                child: BilingualText(
+                  en: en,
+                  mr: mr,
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color:
-                        isActive ? Colors.white : ReportsColors.ink,
+                    color: labelColor,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ),
@@ -307,8 +321,10 @@ class _SalesCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Align(
             alignment: Alignment.centerLeft,
-            child: Text(
-              'श्रेणीनुसार / By Category',
+            child: BilingualText(
+              en: 'By Category',
+              mr: 'श्रेणीनुसार',
+              hi: 'श्रेणी अनुसार',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -348,10 +364,13 @@ class _CategoryBar extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  '${item.labelMr} / ${item.labelEn}',
+                child: BilingualText(
+                  en: item.labelEn,
+                  mr: item.labelMr,
                   style: const TextStyle(
                       fontSize: 12, color: ReportsColors.ink),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
@@ -542,10 +561,12 @@ class _StatTile extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$labelMr / $labelEn',
-          style: const TextStyle(
-              fontSize: 10, color: ReportsColors.muted),
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          style: const TextStyle(fontSize: 10, color: ReportsColors.muted),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
         const SizedBox(height: 4),
         Text(

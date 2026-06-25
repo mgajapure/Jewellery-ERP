@@ -191,24 +191,20 @@ class _SearchBar extends StatelessWidget {
             Icon(Icons.search, color: CustomerColors.muted, size: 22),
             SizedBox(width: 12),
             Expanded(
-              child: Text(
-                'नाव, मोबाईल, ग्राहक ID शोधा',
+              child: BilingualText(
+                en: 'Search name, mobile, customer ID',
+                mr: 'नाव, मोबाईल, ग्राहक ID शोधा',
+                hi: 'नाम, मोबाइल, ग्राहक ID खोजें',
                 style: TextStyle(
                   color: CustomerColors.muted,
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
-            Text(
-              'Search name, mobile, customer ID',
-              style: TextStyle(
-                color: CustomerColors.muted,
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            SizedBox(width: 10),
+            SizedBox(width: 8),
             Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
           ],
         ),

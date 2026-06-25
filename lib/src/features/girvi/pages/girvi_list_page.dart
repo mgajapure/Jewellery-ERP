@@ -175,15 +175,21 @@ class _SearchBar extends StatelessWidget {
         children: const [
           Icon(Icons.search, color: GirviColors.muted, size: 22),
           SizedBox(width: 12),
-          Text(
-            'ग्राहक / सिरीयल आयडी / QR शोधा',
-            style: TextStyle(
-              color: GirviColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          Expanded(
+            child: BilingualText(
+              en: 'Search customer / serial ID / QR',
+              mr: 'ग्राहक / सिरीयल आयडी / QR शोधा',
+              hi: 'ग्राहक / सीरियल ID / QR खोजें',
+              style: TextStyle(
+                color: GirviColors.muted,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
-          Spacer(),
+          SizedBox(width: 8),
           Icon(Icons.qr_code_scanner, color: GirviColors.muted, size: 22),
         ],
       ),
@@ -454,7 +460,8 @@ class _GirviCard extends StatelessWidget {
               children: [
                 _MetaChip(
                   icon: Icons.diamond_outlined,
-                  label: '$items वस्तू / Items',
+                  labelMr: '$items वस्तू',
+                  labelEn: '$items Items',
                 ),
                 const SizedBox(width: 12),
                 _DaysLeftChip(daysLeft: daysLeft),
@@ -512,10 +519,11 @@ class _SummaryItem extends StatelessWidget {
 }
 
 class _MetaChip extends StatelessWidget {
-  const _MetaChip({required this.icon, required this.label});
+  const _MetaChip({required this.icon, required this.labelMr, required this.labelEn});
 
   final IconData icon;
-  final String label;
+  final String labelMr;
+  final String labelEn;
 
   @override
   Widget build(BuildContext context) {
@@ -524,13 +532,16 @@ class _MetaChip extends StatelessWidget {
       children: [
         Icon(icon, size: 14, color: GirviColors.muted),
         const SizedBox(width: 5),
-        Text(
-          label,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
           style: const TextStyle(
             color: GirviColors.muted,
             fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
@@ -546,11 +557,11 @@ class _DaysLeftChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final isOverdue = daysLeft < 0;
     final color = isOverdue ? GirviColors.red : GirviColors.ink;
-    final text = isOverdue
-        ? '${-daysLeft} दिवस उशीर / Days Late'
+    final (mr, en) = isOverdue
+        ? ('${-daysLeft} दिवस उशीर', '${-daysLeft} Days Late')
         : daysLeft == 0
-        ? 'आज देय / Due Today'
-        : '$daysLeft दिवस शिल्लक / Days Left';
+        ? ('आज देय', 'Due Today')
+        : ('$daysLeft दिवस शिल्लक', '$daysLeft Days Left');
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -558,8 +569,9 @@ class _DaysLeftChip extends StatelessWidget {
         color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
-        text,
+      child: BilingualText(
+        en: en,
+        mr: mr,
         style: TextStyle(
           color: color,
           fontSize: 8,

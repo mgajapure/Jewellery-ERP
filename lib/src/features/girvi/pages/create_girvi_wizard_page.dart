@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/girvi.dart';
 import '../domain/repositories/girvi_repository.dart';
 import '../presentation/bloc/create_girvi_bloc.dart';
@@ -174,13 +175,16 @@ class _WizardHeader extends StatelessWidget {
           Expanded(
             child: Column(
               children: [
-                const Text(
-                  'नवीन गिरवी',
+                const BilingualText(
+                  en: 'New Girvi',
+                  mr: 'नवीन गिरवी',
+                  hi: 'नई गिरवी',
                   style: TextStyle(
                     color: GirviColors.ink,
                     fontSize: 15,
                     fontWeight: FontWeight.w900,
                   ),
+                  textAlign: TextAlign.center,
                 ),
                 Text(
                   stepLabel,
@@ -299,11 +303,40 @@ class _WizardFooter extends StatelessWidget {
   final VoidCallback onPrimary;
   final VoidCallback onSecondary;
 
-  String get _primaryLabel {
-    if (isSubmitting) return 'प्रक्रिया सुरू...';
-    if (currentStep == 6) return 'गिरवी तयार करा / Create';
-    if (currentStep == 7) return 'गिरवी यादी / Done';
-    return 'पुढे / Continue';
+  Widget get _primaryLabelWidget {
+    if (isSubmitting) {
+      return const BilingualText(
+        en: 'Processing...',
+        mr: 'प्रक्रिया सुरू...',
+        hi: 'प्रक्रिया जारी...',
+        style: TextStyle(fontWeight: FontWeight.w800),
+      );
+    }
+    if (currentStep == 6) {
+      return const BilingualText(
+        en: 'Create',
+        mr: 'गिरवी तयार करा',
+        hi: 'गिरवी बनाएं',
+        style: TextStyle(fontWeight: FontWeight.w800),
+        textAlign: TextAlign.center,
+      );
+    }
+    if (currentStep == 7) {
+      return const BilingualText(
+        en: 'Done',
+        mr: 'गिरवी यादी',
+        hi: 'गिरवी सूची',
+        style: TextStyle(fontWeight: FontWeight.w800),
+        textAlign: TextAlign.center,
+      );
+    }
+    return const BilingualText(
+      en: 'Continue',
+      mr: 'पुढे',
+      hi: 'आगे',
+      style: TextStyle(fontWeight: FontWeight.w800),
+      textAlign: TextAlign.center,
+    );
   }
 
   @override
@@ -326,7 +359,13 @@ class _WizardFooter extends StatelessWidget {
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 ),
-                child: const Text('मागे / Back', style: TextStyle(fontWeight: FontWeight.w800)),
+                child: const BilingualText(
+                  en: 'Back',
+                  mr: 'मागे',
+                  hi: 'पिछला',
+                  style: TextStyle(fontWeight: FontWeight.w800),
+                  textAlign: TextAlign.center,
+                ),
               ),
             ),
           if (currentStep > 0 && currentStep < 7) const SizedBox(width: 12),
@@ -348,7 +387,7 @@ class _WizardFooter extends StatelessWidget {
                       height: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: GirviColors.gold),
                     )
-                  : Text(_primaryLabel, style: const TextStyle(fontWeight: FontWeight.w800)),
+                  : _primaryLabelWidget,
             ),
           ),
         ],
@@ -394,8 +433,10 @@ class _CustomerSelectionStepState extends State<_CustomerSelectionStep> {
             children: [
               Icon(Icons.search, color: GirviColors.muted),
               SizedBox(width: 12),
-              Text(
-                'नाव / मोबाईल / आयडी शोधा',
+              BilingualText(
+                en: 'Name / Mobile / ID Search',
+                mr: 'नाव / मोबाईल / आयडी शोधा',
+                hi: 'नाम / मोबाइल / आईडी खोजें',
                 style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w600),
               ),
               Spacer(),
@@ -521,7 +562,12 @@ class _ItemsStep extends StatelessWidget {
             FilledButton.icon(
               onPressed: () => context.read<CreateGirviBloc>().add(const CreateGirviItemAdded()),
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('वस्तू', style: TextStyle(fontWeight: FontWeight.w800)),
+              label: const BilingualText(
+                en: 'Item',
+                mr: 'वस्तू',
+                hi: 'वस्तु',
+                style: TextStyle(fontWeight: FontWeight.w800),
+              ),
               style: FilledButton.styleFrom(
                 backgroundColor: GirviColors.navy,
                 foregroundColor: GirviColors.gold,
@@ -544,13 +590,21 @@ class _ItemsStep extends StatelessWidget {
               children: [
                 Icon(Icons.diamond_outlined, size: 48, color: GirviColors.muted.withValues(alpha: 0.5)),
                 const SizedBox(height: 12),
-                const Text('कोणतीही वस्तू नाही', style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w700)),
-                const Text('No items added yet', style: TextStyle(color: GirviColors.muted, fontSize: 12)),
+                const BilingualText(
+                  en: 'No items added yet',
+                  mr: 'कोणतीही वस्तू नाही',
+                  hi: 'कोई वस्तु नहीं जोड़ी गई',
+                  style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
                   onPressed: () => context.read<CreateGirviBloc>().add(const CreateGirviItemAdded()),
                   icon: const Icon(Icons.add),
-                  label: const Text('पहिली वस्तू जोडा / Add First Item'),
+                  label: const BilingualText(
+                    en: 'Add First Item',
+                    mr: 'पहिली वस्तू जोडा',
+                    hi: 'पहली वस्तु जोड़ें',
+                  ),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: GirviColors.navy,
                     side: const BorderSide(color: GirviColors.navy),
@@ -794,8 +848,10 @@ class _ItemCardState extends State<_ItemCard> {
                       children: [
                         const Icon(Icons.scale_outlined, color: GirviColors.navy, size: 18),
                         const SizedBox(width: 10),
-                        Text(
-                          'निव्वळ वजन / Net Weight: ${displayNet.toStringAsFixed(2)} g',
+                        BilingualText(
+                          en: 'Net Weight: ${displayNet.toStringAsFixed(2)} g',
+                          mr: 'निव्वळ वजन: ${displayNet.toStringAsFixed(2)} g',
+                          hi: 'निवल वजन: ${displayNet.toStringAsFixed(2)} g',
                           style: const TextStyle(
                               color: GirviColors.navy, fontWeight: FontWeight.w800, fontSize: 13),
                         ),
@@ -843,7 +899,10 @@ class _ItemCardState extends State<_ItemCard> {
                         CreateGirviItemRemoved(widget.item.id),
                       ),
                       icon: const Icon(Icons.delete_outline, size: 18, color: Colors.red),
-                      label: const Text('वस्तू काढा / Remove',
+                      label: const BilingualText(
+                          en: 'Remove',
+                          mr: 'वस्तू काढा',
+                          hi: 'हटाएं',
                           style: TextStyle(color: Colors.red, fontWeight: FontWeight.w700, fontSize: 12)),
                     ),
                   ),
@@ -875,8 +934,12 @@ class _PhotosStep extends StatelessWidget {
             children: [
               Icon(Icons.photo_library_outlined, size: 56, color: GirviColors.muted.withValues(alpha: 0.4)),
               const SizedBox(height: 16),
-              const Text('आधी दागिने जोडा', style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w700)),
-              const Text('Add items in the previous step first', style: TextStyle(color: GirviColors.muted, fontSize: 12)),
+              const BilingualText(
+                en: 'Add items in the previous step first',
+                mr: 'आधी दागिने जोडा',
+                hi: 'पहले पिछले चरण में वस्तुएं जोड़ें',
+                style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w700),
+              ),
             ],
           ),
         ),
@@ -888,8 +951,10 @@ class _PhotosStep extends StatelessWidget {
       children: [
         const _SectionTitle(titleMr: 'प्रत्येक वस्तूचे फोटो', titleEn: 'Photos Per Item'),
         const SizedBox(height: 4),
-        const Text(
-          'प्रत्येक वस्तूसाठी किमान 3 फोटो / Minimum 3 photos per item',
+        const BilingualText(
+          en: 'Minimum 3 photos per item',
+          mr: 'प्रत्येक वस्तूसाठी किमान 3 फोटो',
+          hi: 'प्रत्येक वस्तु के लिए न्यूनतम 3 फोटो',
           style: TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 16),
@@ -924,12 +989,22 @@ class _ItemPhotoSection extends StatelessWidget {
             const SizedBox(height: 16),
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined, color: GirviColors.navy),
-              title: const Text('कॅमेरा / Camera', style: TextStyle(fontWeight: FontWeight.w700)),
+              title: const BilingualText(
+                en: 'Camera',
+                mr: 'कॅमेरा',
+                hi: 'कैमरा',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
               onTap: () => Navigator.pop(sheetCtx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined, color: GirviColors.navy),
-              title: const Text('गॅलरी / Gallery', style: TextStyle(fontWeight: FontWeight.w700)),
+              title: const BilingualText(
+                en: 'Gallery',
+                mr: 'गॅलरी',
+                hi: 'गैलरी',
+                style: TextStyle(fontWeight: FontWeight.w700),
+              ),
               onTap: () => Navigator.pop(sheetCtx, ImageSource.gallery),
             ),
           ],
@@ -1068,8 +1143,12 @@ class _ItemPhotoSection extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: () => _pickPhoto(context, item.id),
                     icon: const Icon(Icons.add_a_photo_outlined, size: 18),
-                    label: const Text('फोटो जोडा / Add Photo',
-                        style: TextStyle(fontWeight: FontWeight.w700)),
+                    label: const BilingualText(
+                      en: 'Add Photo',
+                      mr: 'फोटो जोडा',
+                      hi: 'फोटो जोड़ें',
+                      style: TextStyle(fontWeight: FontWeight.w700),
+                    ),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: GirviColors.navy,
                       side: const BorderSide(color: GirviColors.navy),

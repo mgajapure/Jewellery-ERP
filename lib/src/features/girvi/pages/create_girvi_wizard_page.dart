@@ -1919,8 +1919,12 @@ class _VaultAssignmentStepState extends State<_VaultAssignmentStep> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('सूचित वॉल्ट / Suggested',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700)),
+                  const BilingualText(
+                    en: 'Suggested',
+                    mr: 'सूचित वॉल्ट',
+                    hi: 'सुझाया गया वॉल्ट',
+                    style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
+                  ),
                   Text(
                     '$_vault/$_safe/$_tray/$_slot',
                     style: const TextStyle(color: GirviColors.gold, fontSize: 14, fontWeight: FontWeight.w900),
@@ -2065,11 +2069,13 @@ class _SuccessStep extends StatelessWidget {
             child: const Icon(Icons.check_circle, color: GirviColors.green, size: 56),
           ),
           const SizedBox(height: 24),
-          const Text('गिरवी तयार झाली!',
-              style: TextStyle(color: GirviColors.ink, fontSize: 22, fontWeight: FontWeight.w900)),
-          const SizedBox(height: 4),
-          const Text('Girvi Created Successfully',
-              style: TextStyle(color: GirviColors.muted, fontSize: 14, fontWeight: FontWeight.w700)),
+          const BilingualText(
+            en: 'Girvi Created Successfully!',
+            mr: 'गिरवी तयार झाली!',
+            hi: 'गिरवी सफलतापूर्वक बनाई गई!',
+            style: TextStyle(color: GirviColors.ink, fontSize: 22, fontWeight: FontWeight.w900),
+            textAlign: TextAlign.center,
+          ),
           const SizedBox(height: 28),
           Container(
             padding: const EdgeInsets.all(18),
@@ -2101,22 +2107,19 @@ class _SuccessStep extends StatelessWidget {
 // ─── Shared helper widgets ────────────────────────────────────────────────────
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.titleMr, required this.titleEn});
+  const _SectionTitle({required this.titleMr, required this.titleEn, this.titleHi});
 
   final String titleMr;
   final String titleEn;
+  final String? titleHi;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(titleMr,
-            style: const TextStyle(color: GirviColors.ink, fontSize: 15, fontWeight: FontWeight.w900)),
-        const SizedBox(height: 2),
-        Text(titleEn,
-            style: const TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600)),
-      ],
+    return BilingualText(
+      en: titleEn,
+      mr: titleMr,
+      hi: titleHi ?? titleMr,
+      style: const TextStyle(color: GirviColors.ink, fontSize: 15, fontWeight: FontWeight.w900),
     );
   }
 }

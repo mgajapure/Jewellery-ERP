@@ -467,6 +467,39 @@ class _GirviCard extends StatelessWidget {
                 _DaysLeftChip(daysLeft: daysLeft),
               ],
             ),
+            if (status != 'REDEEMED') ...[
+              const Divider(height: 22, color: GirviColors.line),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ActionButton(
+                      labelMr: 'पेमेंट',
+                      labelEn: 'Pay',
+                      color: GirviColors.green,
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ActionButton(
+                      labelMr: 'नूतनीकरण',
+                      labelEn: 'Renew',
+                      color: GirviColors.gold,
+                      onTap: () {},
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: _ActionButton(
+                      labelMr: 'परतफेड',
+                      labelEn: 'Redeem',
+                      color: GirviColors.navy,
+                      onTap: () {},
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -576,6 +609,50 @@ class _DaysLeftChip extends StatelessWidget {
           color: color,
           fontSize: 8,
           fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.labelMr,
+    required this.labelEn,
+    required this.color,
+    required this.onTap,
+  });
+
+  final String labelMr;
+  final String labelEn;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
+        ),
+        child: Center(
+          child: BilingualText(
+            en: labelEn,
+            mr: labelMr,
+            style: TextStyle(
+              color: color,
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+          ),
         ),
       ),
     );

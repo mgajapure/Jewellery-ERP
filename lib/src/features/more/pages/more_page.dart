@@ -121,32 +121,16 @@ class MorePage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const BilingualText(
-                en: 'More Modules',
-                mr: 'अधिक मॉड्यूल्स',
-                hi: 'और अधिक',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF071A49),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: _modules.map((module) => _ModuleCard(module: module)).toList(),
                 ),
               ),
-              const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _modules.map((module) => _ModuleCard(module: module)).toList(),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     ],
   ),
 ),

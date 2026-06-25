@@ -95,7 +95,6 @@ class CustomerListPage extends StatelessWidget {
                 ],
               ),
             ),
-            const _PaginationFooter(),
             AppBottomNav(
               currentIndex: 2,
               onTap: (index) {
@@ -332,15 +331,48 @@ class _CustomerTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: CustomerColors.ink,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w900,
-                    ),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: CustomerColors.ink,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w900,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: (active
+                                  ? CustomerColors.green
+                                  : CustomerColors.red)
+                              .withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: BilingualText(
+                          en: active ? 'Active' : 'Inactive',
+                          mr: active ? 'सक्रिय' : 'निष्क्रिय',
+                          style: TextStyle(
+                            color: active
+                                ? CustomerColors.green
+                                : CustomerColors.red,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w800,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -349,32 +381,6 @@ class _CustomerTile extends StatelessWidget {
                       color: CustomerColors.muted,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
-                    ),
-                    decoration: BoxDecoration(
-                      color:
-                          (active ? CustomerColors.green : CustomerColors.red)
-                              .withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: BilingualText(
-                      en: active ? 'Active' : 'Inactive',
-                      mr: active ? 'सक्रिय' : 'निष्क्रिय',
-                      style: TextStyle(
-                        color: active
-                            ? CustomerColors.green
-                            : CustomerColors.red,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -432,55 +438,3 @@ class _InitialsAvatar extends StatelessWidget {
   }
 }
 
-class _PaginationFooter extends StatelessWidget {
-  const _PaginationFooter();
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 4, 20, 12),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.chevron_left,
-              color: CustomerColors.muted,
-              size: 22,
-            ),
-            tooltip: 'Previous',
-          ),
-          const SizedBox(width: 8),
-          const Text(
-            'पृष्ठ 1 / 16',
-            style: TextStyle(
-              color: CustomerColors.ink,
-              fontSize: 13,
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-          const SizedBox(width: 4),
-          const Text(
-            '• Page 1 of 16',
-            style: TextStyle(
-              color: CustomerColors.muted,
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            onPressed: () {},
-            icon: const Icon(
-              Icons.chevron_right,
-              color: CustomerColors.ink,
-              size: 22,
-            ),
-            tooltip: 'Next',
-          ),
-        ],
-      ),
-    );
-  }
-}

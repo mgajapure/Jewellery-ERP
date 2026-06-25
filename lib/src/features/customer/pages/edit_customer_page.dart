@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/customer.dart';
 import '../presentation/bloc/customer_detail_bloc.dart';
 import '../presentation/bloc/customer_detail_event.dart';
@@ -192,11 +193,14 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                           const _SectionTitle(
                             titleMr: 'वैयक्तिक माहिती',
                             titleEn: 'Personal Information',
+                            titleHi: 'व्यक्तिगत जानकारी',
                           ),
                           const SizedBox(height: 12),
                           _AppTextField(
                             controller: _nameController,
-                            label: 'पूर्ण नाव / Full Name',
+                            labelEn: 'Full Name',
+                            labelMr: 'पूर्ण नाव',
+                            labelHi: 'पूर्ण नाम',
                             hint: 'ग्राहकाचे पूर्ण नाव टाका',
                             prefixIcon: Icons.person_outline,
                             validator: (v) =>
@@ -206,14 +210,18 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                           ),
                           const SizedBox(height: 14),
                           _ReadOnlyField(
-                            label: 'मोबाईल नंबर / Mobile Number',
+                            labelEn: 'Mobile Number',
+                            labelMr: 'मोबाईल नंबर',
+                            labelHi: 'मोबाइल नंबर',
                             value: widget.customer.mobile,
                             prefixIcon: Icons.phone_outlined,
                           ),
                           const SizedBox(height: 14),
                           _AppTextField(
                             controller: _altMobileController,
-                            label: 'पर्यायी मोबाईल / Alternate Mobile',
+                            labelEn: 'Alternate Mobile',
+                            labelMr: 'पर्यायी मोबाईल',
+                            labelHi: 'वैकल्पिक मोबाइल',
                             hint: 'पर्यायी मोबाईल नंबर (ऐच्छिक)',
                             prefixIcon: Icons.phone_android_outlined,
                             keyboardType: TextInputType.phone,
@@ -240,11 +248,14 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                           const _SectionTitle(
                             titleMr: 'पत्ता',
                             titleEn: 'Address',
+                            titleHi: 'पता',
                           ),
                           const SizedBox(height: 12),
                           _AppTextField(
                             controller: _addressController,
-                            label: 'पत्ता / Address',
+                            labelEn: 'Address',
+                            labelMr: 'पत्ता',
+                            labelHi: 'पता',
                             hint: 'घर क्रमांक, रस्ता, परिसर',
                             prefixIcon: Icons.home_outlined,
                             maxLines: 2,
@@ -258,7 +269,9 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                               Expanded(
                                 child: _AppTextField(
                                   controller: _cityController,
-                                  label: 'शहर / City',
+                                  labelEn: 'City',
+                                  labelMr: 'शहर',
+                                  labelHi: 'शहर',
                                   hint: 'शहर',
                                   prefixIcon: Icons.location_city_outlined,
                                   validator: (v) =>
@@ -271,7 +284,9 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                               Expanded(
                                 child: _AppTextField(
                                   controller: _pincodeController,
-                                  label: 'पिनकोड / Pincode',
+                                  labelEn: 'Pincode',
+                                  labelMr: 'पिनकोड',
+                                  labelHi: 'पिनकोड',
                                   hint: '6 अंक',
                                   prefixIcon: Icons.pin_drop_outlined,
                                   keyboardType: TextInputType.number,
@@ -295,7 +310,9 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                           const SizedBox(height: 14),
                           _AppTextField(
                             controller: _stateController,
-                            label: 'राज्य / State',
+                            labelEn: 'State',
+                            labelMr: 'राज्य',
+                            labelHi: 'राज्य',
                             hint: 'राज्य',
                             prefixIcon: Icons.map_outlined,
                             validator: (v) => (v == null || v.trim().isEmpty)
@@ -306,11 +323,14 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                           const _SectionTitle(
                             titleMr: 'KYC माहिती',
                             titleEn: 'KYC Information',
+                            titleHi: 'KYC जानकारी',
                           ),
                           const SizedBox(height: 12),
                           _AppTextField(
                             controller: _panController,
-                            label: 'PAN क्रमांक / PAN Number',
+                            labelEn: 'PAN Number',
+                            labelMr: 'PAN क्रमांक',
+                            labelHi: 'PAN नंबर',
                             hint: 'ABCDE1234F',
                             prefixIcon: Icons.credit_card_outlined,
                             textCapitalization:
@@ -342,8 +362,11 @@ class _EditCustomerViewState extends State<_EditCustomerView> {
                                         strokeWidth: 2.5,
                                       ),
                                     )
-                                  : const Text(
-                                      'ग्राहक अपडेट करा / Update Customer',
+                                  : const BilingualText(
+                                      en: 'Update Customer',
+                                      mr: 'ग्राहक अपडेट करा',
+                                      hi: 'ग्राहक अपडेट करें',
+                                      compact: true,
                                       style: TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.w800,
@@ -387,8 +410,11 @@ class _EditCustomerHeader extends StatelessWidget {
             tooltip: 'Back',
           ),
           const Expanded(
-            child: Text(
-              'ग्राहक संपादित करा / Edit Customer',
+            child: BilingualText(
+              en: 'Edit Customer',
+              mr: 'ग्राहक संपादित करा',
+              hi: 'ग्राहक संपादित करें',
+              compact: true,
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: CustomerColors.ink,
@@ -405,46 +431,43 @@ class _EditCustomerHeader extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.titleMr, required this.titleEn});
+  const _SectionTitle({
+    required this.titleMr,
+    required this.titleEn,
+    required this.titleHi,
+  });
 
   final String titleMr;
   final String titleEn;
+  final String titleHi;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          titleMr,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 15,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          titleEn,
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
+    return BilingualText(
+      en: titleEn,
+      mr: titleMr,
+      hi: titleHi,
+      style: const TextStyle(
+        color: CustomerColors.ink,
+        fontSize: 15,
+        fontWeight: FontWeight.w900,
+      ),
     );
   }
 }
 
 class _ReadOnlyField extends StatelessWidget {
   const _ReadOnlyField({
-    required this.label,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
     required this.value,
     required this.prefixIcon,
   });
 
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final String value;
   final IconData prefixIcon;
 
@@ -453,8 +476,11 @@ class _ReadOnlyField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          hi: labelHi,
+          compact: true,
           style: const TextStyle(
             color: CustomerColors.ink,
             fontSize: 13,
@@ -496,7 +522,9 @@ class _ReadOnlyField extends StatelessWidget {
 class _AppTextField extends StatelessWidget {
   const _AppTextField({
     this.controller,
-    required this.label,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
     required this.hint,
     this.prefixIcon,
     this.keyboardType,
@@ -508,7 +536,9 @@ class _AppTextField extends StatelessWidget {
   });
 
   final TextEditingController? controller;
-  final String label;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
   final String hint;
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
@@ -523,8 +553,11 @@ class _AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          hi: labelHi,
+          compact: true,
           style: const TextStyle(
             color: CustomerColors.ink,
             fontSize: 13,
@@ -605,8 +638,11 @@ class _DatePickerField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'जन्मतारीख / Date of Birth',
+        const BilingualText(
+          en: 'Date of Birth',
+          mr: 'जन्मतारीख',
+          hi: 'जन्म तिथि',
+          compact: true,
           style: TextStyle(
             color: CustomerColors.ink,
             fontSize: 13,
@@ -663,8 +699,11 @@ class _GenderDropdown extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'लिंग / Gender',
+        const BilingualText(
+          en: 'Gender',
+          mr: 'लिंग',
+          hi: 'लिंग',
+          compact: true,
           style: TextStyle(
             color: CustomerColors.ink,
             fontSize: 13,
@@ -688,11 +727,32 @@ class _GenderDropdown extends StatelessWidget {
                   color: CustomerColors.muted),
               items: const [
                 DropdownMenuItem(
-                    value: 'Male', child: Text('पुरुष / Male')),
+                  value: 'Male',
+                  child: BilingualText(
+                    en: 'Male',
+                    mr: 'पुरुष',
+                    hi: 'पुरुष',
+                    compact: true,
+                  ),
+                ),
                 DropdownMenuItem(
-                    value: 'Female', child: Text('स्त्री / Female')),
+                  value: 'Female',
+                  child: BilingualText(
+                    en: 'Female',
+                    mr: 'स्त्री',
+                    hi: 'महिला',
+                    compact: true,
+                  ),
+                ),
                 DropdownMenuItem(
-                    value: 'Other', child: Text('इतर / Other')),
+                  value: 'Other',
+                  child: BilingualText(
+                    en: 'Other',
+                    mr: 'इतर',
+                    hi: 'अन्य',
+                    compact: true,
+                  ),
+                ),
               ],
               onChanged: onChanged,
             ),

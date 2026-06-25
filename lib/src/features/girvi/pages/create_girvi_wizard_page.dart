@@ -1287,8 +1287,12 @@ class _ValuationStep extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('आजचा सोन्याचा दर / Gold Rate Today',
-                  style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700)),
+              const BilingualText(
+                en: 'Gold Rate Today',
+                mr: 'आजचा सोन्याचा दर',
+                hi: 'आज का सोने का भाव',
+                style: TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.w700),
+              ),
               const SizedBox(height: 6),
               Row(
                 children: [
@@ -1297,11 +1301,21 @@ class _ValuationStep extends StatelessWidget {
                     style: const TextStyle(color: GirviColors.gold, fontSize: 24, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(width: 10),
-                  const Text('प्रति 10 ग्रॅम / 10g', style: TextStyle(color: Colors.white70, fontSize: 12)),
+                  const BilingualText(
+                    en: 'per 10g',
+                    mr: 'प्रति 10 ग्रॅम',
+                    hi: 'प्रति 10 ग्राम',
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
-              const Text('स्रोत: MCX (mock)', style: TextStyle(color: Colors.white54, fontSize: 11)),
+              const BilingualText(
+                en: 'Source: MCX (mock)',
+                mr: 'स्रोत: MCX (mock)',
+                hi: 'स्रोत: MCX (mock)',
+                style: TextStyle(color: Colors.white54, fontSize: 11),
+              ),
             ],
           ),
         ),
@@ -1347,20 +1361,28 @@ class _ValuationStep extends StatelessWidget {
               border: Border.all(color: GirviColors.line),
             ),
             child: const Center(
-              child: Text('दागिने जोडल्यानंतर मूल्यांकन दिसेल',
-                  style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w600)),
+              child: BilingualText(
+                en: 'Valuation will appear after adding items',
+                mr: 'दागिने जोडल्यानंतर मूल्यांकन दिसेल',
+                hi: 'वस्तुएं जोड़ने के बाद मूल्यांकन दिखेगा',
+                style: TextStyle(color: GirviColors.muted, fontWeight: FontWeight.w600),
+              ),
             ),
           ),
           const SizedBox(height: 16),
         ],
 
-        const Text(
-          'LTV पर्याय निवडा / Select LTV Option',
+        const BilingualText(
+          en: 'Select LTV Option',
+          mr: 'LTV पर्याय निवडा',
+          hi: 'LTV विकल्प चुनें',
           style: TextStyle(color: GirviColors.ink, fontSize: 13, fontWeight: FontWeight.w900),
         ),
         const SizedBox(height: 4),
-        const Text(
-          'RBI मार्गदर्शक तत्त्वे: सोने कर्जावर कमाल 75% LTV / Max 75% LTV as per RBI',
+        const BilingualText(
+          en: 'Max 75% LTV as per RBI guidelines',
+          mr: 'RBI मार्गदर्शक तत्त्वे: सोने कर्जावर कमाल 75% LTV',
+          hi: 'RBI दिशानिर्देश: अधिकतम 75% LTV',
           style: TextStyle(color: GirviColors.muted, fontSize: 11, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 10),
@@ -1601,8 +1623,12 @@ class _LoanTermsStepState extends State<_LoanTermsStep> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('कर्ज रक्कम / Loan Amount',
-                      style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700)),
+                  const BilingualText(
+                en: 'Loan Amount',
+                mr: 'कर्ज रक्कम',
+                hi: 'ऋण राशि',
+                style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w700),
+              ),
                   Text(
                     _currencyFmt.format(loanAmt),
                     style: const TextStyle(color: GirviColors.gold, fontSize: 22, fontWeight: FontWeight.w900),
@@ -1617,8 +1643,12 @@ class _LoanTermsStepState extends State<_LoanTermsStep> {
         const SizedBox(height: 14),
 
         // Interest type
-        const Text('व्याज प्रकार / Interest Type',
-            style: TextStyle(color: GirviColors.ink, fontSize: 13, fontWeight: FontWeight.w800)),
+        const BilingualText(
+          en: 'Interest Type',
+          mr: 'व्याज प्रकार',
+          hi: 'ब्याज प्रकार',
+          style: TextStyle(color: GirviColors.ink, fontSize: 13, fontWeight: FontWeight.w800),
+        ),
         const SizedBox(height: 8),
         Row(
           children: [
@@ -1796,14 +1826,26 @@ class _KfsPreviewStep extends StatelessWidget {
           child: const Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('लिलाव नियम / Auction Rules',
-                  style: TextStyle(color: GirviColors.ink, fontSize: 13, fontWeight: FontWeight.w900)),
+              BilingualText(
+                en: 'Auction Rules',
+                mr: 'लिलाव नियम',
+                hi: 'नीलामी नियम',
+                style: TextStyle(color: GirviColors.ink, fontSize: 13, fontWeight: FontWeight.w900),
+              ),
               SizedBox(height: 6),
-              Text('• 14 दिवसांची सूचना दिल्यानंतर लिलाव करता येईल.',
-                  style: TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600)),
+              BilingualText(
+                en: '• Auction can be held after 14 days notice.',
+                mr: '• 14 दिवसांची सूचना दिल्यानंतर लिलाव करता येईल.',
+                hi: '• 14 दिनों की नोटिस के बाद नीलामी की जा सकती है।',
+                style: TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
               SizedBox(height: 4),
-              Text('• सोने परत करण्यासाठी 7 कामकाजाचे दिवस.',
-                  style: TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600)),
+              BilingualText(
+                en: '• 7 working days to return gold.',
+                mr: '• सोने परत करण्यासाठी 7 कामकाजाचे दिवस.',
+                hi: '• सोना वापस करने के लिए 7 कार्य दिवस।',
+                style: TextStyle(color: GirviColors.muted, fontSize: 12, fontWeight: FontWeight.w600),
+              ),
             ],
           ),
         ),
@@ -1821,8 +1863,10 @@ class _KfsPreviewStep extends StatelessWidget {
                     activeColor: GirviColors.navy,
                   ),
                   const Expanded(
-                    child: Text(
-                      'मी KFS वाचले आणि सहमत आहे / I have read and agree to the KFS',
+                    child: BilingualText(
+                      en: 'I have read and agree to the KFS',
+                      mr: 'मी KFS वाचले आणि सहमत आहे',
+                      hi: 'मैंने KFS पढ़ा है और सहमत हूं',
                       style: TextStyle(color: GirviColors.ink, fontSize: 12, fontWeight: FontWeight.w700),
                     ),
                   ),

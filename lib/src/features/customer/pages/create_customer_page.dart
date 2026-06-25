@@ -7,7 +7,10 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/di/injection.dart';
+import '../../../core/l10n/app_language.dart';
+import '../../../core/l10n/app_l10n_provider.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/customer.dart';
 import '../presentation/bloc/customer_detail_bloc.dart';
 import '../presentation/bloc/customer_detail_event.dart';
@@ -190,13 +193,23 @@ class _CreateCustomerWizardState extends State<_CreateCustomerWizard> {
             ListTile(
               leading: const Icon(Icons.camera_alt_outlined,
                   color: CustomerColors.navy),
-              title: const Text('कॅमेरा / Camera'),
+              title: const BilingualText(
+                en: 'Camera',
+                mr: 'कॅमेरा',
+                hi: 'कैमरा',
+                compact: true,
+              ),
               onTap: () => Navigator.pop(sheetCtx, ImageSource.camera),
             ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined,
                   color: CustomerColors.navy),
-              title: const Text('गॅलरी / Gallery'),
+              title: const BilingualText(
+                en: 'Gallery',
+                mr: 'गॅलरी',
+                hi: 'गैलरी',
+                compact: true,
+              ),
               onTap: () => Navigator.pop(sheetCtx, ImageSource.gallery),
             ),
             const SizedBox(height: 8),
@@ -277,12 +290,6 @@ class _CreateCustomerWizardState extends State<_CreateCustomerWizard> {
                   _StepIndicator(
                     current: _step,
                     total: _totalSteps,
-                    labels: const [
-                      'वैयक्तिक\nPersonal',
-                      'पत्ता\nAddress',
-                      'KYC',
-                      'पुष्टी\nConfirm',
-                    ],
                   ),
                   const SizedBox(height: 8),
                   Expanded(
@@ -353,15 +360,51 @@ class _WizardHeader extends StatelessWidget {
 
   final int step;
 
-  static const _titles = [
-    'वैयक्तिक माहिती / Personal',
-    'पत्ता / Address',
-    'KYC दस्तऐवज / Documents',
-    'पुष्टीकरण / Confirm',
+  static const _titlesMr = [
+    'वैयक्तिक माहिती',
+    'पत्ता',
+    'KYC दस्तऐवज',
+    'पुष्टीकरण',
+  ];
+
+  static const _titlesHi = [
+    'व्यक्तिगत जानकारी',
+    'पता',
+    'KYC दस्तावेज़',
+    'पुष्टि',
+  ];
+
+  static const _titlesEn = [
+    'Personal Info',
+    'Address',
+    'KYC Documents',
+    'Confirm',
   ];
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+
+    final String stepTitle;
+    if (lang == AppLanguage.mr) {
+      stepTitle = _titlesMr[step];
+    } else if (lang == AppLanguage.hi) {
+      stepTitle = _titlesHi[step];
+    } else {
+      stepTitle = _titlesEn[step];
+    }
+
+    final String headerPrefix;
+    if (lang == AppLanguage.mr) {
+      headerPrefix = 'नवीन ग्राहक';
+    } else if (lang == AppLanguage.hi) {
+      headerPrefix = 'नया ग्राहक';
+    } else {
+      headerPrefix = 'New Customer';
+    }
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 10, 16, 4),
       child: Row(
@@ -375,7 +418,7 @@ class _WizardHeader extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              'नवीन ग्राहक / ${_titles[step]}',
+              '$headerPrefix / $stepTitle',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 color: CustomerColors.ink,
@@ -397,15 +440,30 @@ class _StepIndicator extends StatelessWidget {
   const _StepIndicator({
     required this.current,
     required this.total,
-    required this.labels,
   });
 
   final int current;
   final int total;
-  final List<String> labels;
+
+  static const _labelsMr = ['वैयक्तिक', 'पत्ता', 'KYC', 'पुष्टी'];
+  static const _labelsHi = ['व्यक्तिगत', 'पता', 'KYC', 'पुष्टि'];
+  static const _labelsEn = ['Personal', 'Address', 'KYC', 'Confirm'];
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+
+    final List<String> labels;
+    if (lang == AppLanguage.mr) {
+      labels = _labelsMr;
+    } else if (lang == AppLanguage.hi) {
+      labels = _labelsHi;
+    } else {
+      labels = _labelsEn;
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
@@ -526,7 +584,12 @@ class _WizardFooter extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('मागे / Back'),
+              child: const BilingualText(
+                en: 'Back',
+                mr: 'मागे',
+                hi: 'वापस',
+                compact: true,
+              ),
             ),
             const SizedBox(width: 12),
           ],
@@ -553,10 +616,11 @@ class _WizardFooter extends StatelessWidget {
                         strokeWidth: 2.5,
                       ),
                     )
-                  : Text(
-                      isLast
-                          ? 'ग्राहक जतन करा / Save Customer'
-                          : 'पुढे जा / Continue',
+                  : BilingualText(
+                      en: isLast ? 'Save Customer' : 'Continue',
+                      mr: isLast ? 'ग्राहक जतन करा' : 'पुढे जा',
+                      hi: isLast ? 'ग्राहक सहेजें' : 'आगे बढ़ें',
+                      compact: true,
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w800,
@@ -595,27 +659,73 @@ class _PersonalStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+
     return _StepCard(
       children: [
         _AppTextField(
           controller: nameCtrl,
-          label: 'पूर्ण नाव / Full Name (मराठी)',
-          hint: 'मराठी नाव टाका',
+          labelWidget: const BilingualText(
+            en: 'Full Name (Marathi)',
+            mr: 'पूर्ण नाव (मराठी)',
+            hi: 'पूरा नाम (मराठी)',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? 'मराठी नाव टाका'
+              : lang == AppLanguage.hi
+                  ? 'मराठी नाम दर्ज करें'
+                  : 'Enter Marathi name',
           prefixIcon: Icons.person_outline,
         ),
         const SizedBox(height: 14),
         _AppTextField(
           controller: nameEnCtrl,
-          label: 'Name in English',
-          hint: 'English name',
+          labelWidget: const BilingualText(
+            en: 'Name in English',
+            mr: 'इंग्रजी नाव',
+            hi: 'अंग्रेज़ी में नाम',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? 'इंग्रजी नाव'
+              : lang == AppLanguage.hi
+                  ? 'अंग्रेज़ी नाम'
+                  : 'English name',
           prefixIcon: Icons.person_outline,
           textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: 14),
         _AppTextField(
           controller: mobileCtrl,
-          label: 'मोबाईल नंबर / Mobile Number',
-          hint: '10 अंकी मोबाईल नंबर',
+          labelWidget: const BilingualText(
+            en: 'Mobile Number',
+            mr: 'मोबाईल नंबर',
+            hi: 'मोबाइल नंबर',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? '10 अंकी मोबाईल नंबर'
+              : lang == AppLanguage.hi
+                  ? '10 अंकीय मोबाइल नंबर'
+                  : '10-digit mobile number',
           prefixIcon: Icons.phone_outlined,
           keyboardType: TextInputType.phone,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -624,8 +734,22 @@ class _PersonalStep extends StatelessWidget {
         const SizedBox(height: 14),
         _AppTextField(
           controller: altMobileCtrl,
-          label: 'पर्यायी मोबाईल / Alternate Mobile (ऐच्छिक)',
-          hint: 'पर्यायी मोबाईल नंबर',
+          labelWidget: const BilingualText(
+            en: 'Alternate Mobile (Optional)',
+            mr: 'पर्यायी मोबाईल (ऐच्छिक)',
+            hi: 'वैकल्पिक मोबाइल (वैकल्पिक)',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? 'पर्यायी मोबाईल नंबर'
+              : lang == AppLanguage.hi
+                  ? 'वैकल्पिक मोबाइल नंबर'
+                  : 'Alternate mobile number',
           prefixIcon: Icons.phone_android_outlined,
           keyboardType: TextInputType.phone,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -657,12 +781,30 @@ class _AddressStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+
     return _StepCard(
       children: [
         _AppTextField(
           controller: addressCtrl,
-          label: 'पत्ता / Address',
-          hint: 'घर क्रमांक, रस्ता, परिसर',
+          labelWidget: const BilingualText(
+            en: 'Address',
+            mr: 'पत्ता',
+            hi: 'पता',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? 'घर क्रमांक, रस्ता, परिसर'
+              : lang == AppLanguage.hi
+                  ? 'मकान नंबर, सड़क, क्षेत्र'
+                  : 'House no., street, area',
           prefixIcon: Icons.home_outlined,
           maxLines: 2,
         ),
@@ -672,8 +814,22 @@ class _AddressStep extends StatelessWidget {
             Expanded(
               child: _AppTextField(
                 controller: cityCtrl,
-                label: 'शहर / City',
-                hint: 'शहर',
+                labelWidget: const BilingualText(
+                  en: 'City',
+                  mr: 'शहर',
+                  hi: 'शहर',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                hint: lang == AppLanguage.mr
+                    ? 'शहर'
+                    : lang == AppLanguage.hi
+                        ? 'शहर'
+                        : 'City',
                 prefixIcon: Icons.location_city_outlined,
               ),
             ),
@@ -681,8 +837,22 @@ class _AddressStep extends StatelessWidget {
             Expanded(
               child: _AppTextField(
                 controller: pincodeCtrl,
-                label: 'पिनकोड / Pincode',
-                hint: '6 अंक',
+                labelWidget: const BilingualText(
+                  en: 'Pincode',
+                  mr: 'पिनकोड',
+                  hi: 'पिनकोड',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.ink,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                hint: lang == AppLanguage.mr
+                    ? '6 अंक'
+                    : lang == AppLanguage.hi
+                        ? '6 अंक'
+                        : '6 digits',
                 prefixIcon: Icons.pin_drop_outlined,
                 keyboardType: TextInputType.number,
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -694,8 +864,22 @@ class _AddressStep extends StatelessWidget {
         const SizedBox(height: 14),
         _AppTextField(
           controller: stateCtrl,
-          label: 'राज्य / State',
-          hint: 'राज्य',
+          labelWidget: const BilingualText(
+            en: 'State',
+            mr: 'राज्य',
+            hi: 'राज्य',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? 'राज्य'
+              : lang == AppLanguage.hi
+                  ? 'राज्य'
+                  : 'State',
           prefixIcon: Icons.map_outlined,
         ),
       ],
@@ -720,13 +904,19 @@ class _KycStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+
     return _StepCard(
       children: [
         _DocCaptureTile(
           icon: Icons.document_scanner_outlined,
           titleMr: 'आधार कार्ड फोटो',
+          titleHi: 'आधार कार्ड फ़ोटो',
           titleEn: 'Aadhaar Card Photo',
           capturedMr: 'आधार फोटो कॅप्चर झाला',
+          capturedHi: 'आधार फ़ोटो कैप्चर हुआ',
           capturedEn: 'Aadhaar captured · Tap to retake',
           imagePath: aadhaarImagePath,
           onTap: onPickAadhaar,
@@ -734,8 +924,22 @@ class _KycStep extends StatelessWidget {
         const SizedBox(height: 14),
         _AppTextField(
           controller: aadhaarCtrl,
-          label: 'आधार क्रमांक / Aadhaar Number',
-          hint: '12 अंकी आधार क्रमांक',
+          labelWidget: const BilingualText(
+            en: 'Aadhaar Number',
+            mr: 'आधार क्रमांक',
+            hi: 'आधार नंबर',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          hint: lang == AppLanguage.mr
+              ? '12 अंकी आधार क्रमांक'
+              : lang == AppLanguage.hi
+                  ? '12 अंकीय आधार नंबर'
+                  : '12-digit Aadhaar number',
           prefixIcon: Icons.badge_outlined,
           keyboardType: TextInputType.number,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -744,7 +948,17 @@ class _KycStep extends StatelessWidget {
         const SizedBox(height: 14),
         _AppTextField(
           controller: panCtrl,
-          label: 'PAN क्रमांक / PAN Number (ऐच्छिक)',
+          labelWidget: const BilingualText(
+            en: 'PAN Number (Optional)',
+            mr: 'PAN क्रमांक (ऐच्छिक)',
+            hi: 'PAN नंबर (वैकल्पिक)',
+            compact: true,
+            style: TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           hint: 'ABCDE1234F',
           prefixIcon: Icons.credit_card_outlined,
           textCapitalization: TextCapitalization.characters,
@@ -760,15 +974,17 @@ class _KycStep extends StatelessWidget {
               color: CustomerColors.gold.withValues(alpha: 0.25),
             ),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.info_outline,
+              const Icon(Icons.info_outline,
                   color: CustomerColors.gold, size: 16),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               Expanded(
-                child: Text(
-                  '₹50,000 पेक्षा जास्त व्यवहारासाठी PAN अनिवार्य\nPAN mandatory for transactions above ₹50,000',
-                  style: TextStyle(
+                child: BilingualText(
+                  en: 'PAN mandatory for transactions above ₹50,000',
+                  mr: '₹50,000 पेक्षा जास्त व्यवहारासाठी PAN अनिवार्य',
+                  hi: '₹50,000 से अधिक लेनदेन के लिए PAN अनिवार्य है',
+                  style: const TextStyle(
                     color: CustomerColors.ink,
                     fontSize: 11,
                     height: 1.4,
@@ -813,8 +1029,10 @@ class _ConfirmStep extends StatelessWidget {
         _DocCaptureTile(
           icon: Icons.person_outline,
           titleMr: 'ग्राहकाचा फोटो',
+          titleHi: 'ग्राहक की फ़ोटो',
           titleEn: 'Customer Photo',
           capturedMr: 'फोटो कॅप्चर झाला',
+          capturedHi: 'फ़ोटो कैप्चर हुई',
           capturedEn: 'Photo captured · Tap to retake',
           imagePath: photoPath,
           onTap: onPickPhoto,
@@ -838,21 +1056,69 @@ class _ConfirmStep extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _ReviewSectionTitle(
-                  titleMr: 'माहिती पुनरावलोकन',
-                  titleEn: 'Review Information'),
+                titleMr: 'माहिती पुनरावलोकन',
+                titleHi: 'जानकारी समीक्षा',
+                titleEn: 'Review Information',
+              ),
               const SizedBox(height: 12),
-              _ReviewRow(label: 'नाव / Name', value: name.isEmpty ? '—' : name),
               _ReviewRow(
-                  label: 'English Name',
-                  value: nameEn.isEmpty ? '—' : nameEn),
+                labelWidget: const BilingualText(
+                  en: 'Name',
+                  mr: 'नाव',
+                  hi: 'नाम',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                value: name.isEmpty ? '—' : name,
+              ),
               _ReviewRow(
-                  label: 'मोबाईल / Mobile',
-                  value: mobile.isEmpty ? '—' : mobile),
+                labelWidget: const BilingualText(
+                  en: 'English Name',
+                  mr: 'इंग्रजी नाव',
+                  hi: 'अंग्रेज़ी नाम',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                value: nameEn.isEmpty ? '—' : nameEn,
+              ),
               _ReviewRow(
-                  label: 'पत्ता / Address',
-                  value: [address, city, state]
-                      .where((s) => s.isNotEmpty)
-                      .join(', ')),
+                labelWidget: const BilingualText(
+                  en: 'Mobile',
+                  mr: 'मोबाईल',
+                  hi: 'मोबाइल',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                value: mobile.isEmpty ? '—' : mobile,
+              ),
+              _ReviewRow(
+                labelWidget: const BilingualText(
+                  en: 'Address',
+                  mr: 'पत्ता',
+                  hi: 'पता',
+                  compact: true,
+                  style: TextStyle(
+                    color: CustomerColors.muted,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                value: [address, city, state]
+                    .where((s) => s.isNotEmpty)
+                    .join(', '),
+              ),
             ],
           ),
         ),
@@ -865,14 +1131,16 @@ class _ConfirmStep extends StatelessWidget {
             border: Border.all(
                 color: CustomerColors.navy.withValues(alpha: 0.15)),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.check_circle_outline,
+              const Icon(Icons.check_circle_outline,
                   color: CustomerColors.navy, size: 18),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'सर्व माहिती तपासा आणि "ग्राहक जतन करा" दाबा\nReview all details before saving the customer',
+              const SizedBox(width: 10),
+              const Expanded(
+                child: BilingualText(
+                  en: 'Review all details before saving the customer',
+                  mr: 'सर्व माहिती तपासा आणि "ग्राहक जतन करा" दाबा',
+                  hi: 'ग्राहक सहेजने से पहले सभी विवरण जांचें',
                   style: TextStyle(
                     color: CustomerColors.ink,
                     fontSize: 12,
@@ -922,7 +1190,7 @@ class _StepCard extends StatelessWidget {
 class _AppTextField extends StatelessWidget {
   const _AppTextField({
     this.controller,
-    required this.label,
+    this.labelWidget,
     required this.hint,
     this.prefixIcon,
     this.keyboardType,
@@ -933,7 +1201,7 @@ class _AppTextField extends StatelessWidget {
   });
 
   final TextEditingController? controller;
-  final String label;
+  final Widget? labelWidget;
   final String hint;
   final IconData? prefixIcon;
   final TextInputType? keyboardType;
@@ -947,14 +1215,7 @@ class _AppTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 12,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
+        ?labelWidget,
         const SizedBox(height: 6),
         TextField(
           controller: controller,
@@ -1009,8 +1270,11 @@ class _GenderPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'लिंग / Gender',
+        const BilingualText(
+          en: 'Gender',
+          mr: 'लिंग',
+          hi: 'लिंग',
+          compact: true,
           style: TextStyle(
             color: CustomerColors.ink,
             fontSize: 12,
@@ -1033,11 +1297,32 @@ class _GenderPicker extends StatelessWidget {
                   color: CustomerColors.muted),
               items: const [
                 DropdownMenuItem(
-                    value: 'Male', child: Text('पुरुष / Male')),
+                  value: 'Male',
+                  child: BilingualText(
+                    en: 'Male',
+                    mr: 'पुरुष',
+                    hi: 'पुरुष',
+                    compact: true,
+                  ),
+                ),
                 DropdownMenuItem(
-                    value: 'Female', child: Text('स्त्री / Female')),
+                  value: 'Female',
+                  child: BilingualText(
+                    en: 'Female',
+                    mr: 'स्त्री',
+                    hi: 'महिला',
+                    compact: true,
+                  ),
+                ),
                 DropdownMenuItem(
-                    value: 'Other', child: Text('इतर / Other')),
+                  value: 'Other',
+                  child: BilingualText(
+                    en: 'Other',
+                    mr: 'इतर',
+                    hi: 'अन्य',
+                    compact: true,
+                  ),
+                ),
               ],
               onChanged: onChanged,
             ),
@@ -1065,8 +1350,11 @@ class _DobPicker extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'जन्मतारीख / Date of Birth',
+        const BilingualText(
+          en: 'Date of Birth',
+          mr: 'जन्मतारीख',
+          hi: 'जन्म तिथि',
+          compact: true,
           style: TextStyle(
             color: CustomerColors.ink,
             fontSize: 12,
@@ -1114,8 +1402,10 @@ class _DocCaptureTile extends StatelessWidget {
   const _DocCaptureTile({
     required this.icon,
     required this.titleMr,
+    required this.titleHi,
     required this.titleEn,
     required this.capturedMr,
+    required this.capturedHi,
     required this.capturedEn,
     required this.imagePath,
     required this.onTap,
@@ -1123,8 +1413,10 @@ class _DocCaptureTile extends StatelessWidget {
 
   final IconData icon;
   final String titleMr;
+  final String titleHi;
   final String titleEn;
   final String capturedMr;
+  final String capturedHi;
   final String capturedEn;
   final String? imagePath;
   final VoidCallback onTap;
@@ -1186,23 +1478,17 @@ class _DocCaptureTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    _captured ? capturedMr : titleMr,
+                  BilingualText(
+                    en: _captured ? capturedEn : titleEn,
+                    mr: _captured ? capturedMr : titleMr,
+                    hi: _captured ? capturedHi : titleHi,
+                    compact: true,
                     style: TextStyle(
                       color: _captured
                           ? CustomerColors.green
                           : CustomerColors.ink,
                       fontSize: 13,
                       fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    _captured ? capturedEn : titleEn,
-                    style: const TextStyle(
-                      color: CustomerColors.muted,
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -1223,10 +1509,14 @@ class _DocCaptureTile extends StatelessWidget {
 }
 
 class _ReviewSectionTitle extends StatelessWidget {
-  const _ReviewSectionTitle(
-      {required this.titleMr, required this.titleEn});
+  const _ReviewSectionTitle({
+    required this.titleMr,
+    required this.titleHi,
+    required this.titleEn,
+  });
 
   final String titleMr;
+  final String titleHi;
   final String titleEn;
 
   @override
@@ -1236,21 +1526,16 @@ class _ReviewSectionTitle extends StatelessWidget {
         const Icon(Icons.checklist_outlined,
             color: CustomerColors.navy, size: 18),
         const SizedBox(width: 8),
-        Text(
-          titleMr,
-          style: const TextStyle(
-            color: CustomerColors.ink,
-            fontSize: 14,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        const SizedBox(width: 4),
-        Text(
-          '/ $titleEn',
-          style: const TextStyle(
-            color: CustomerColors.muted,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+        Expanded(
+          child: BilingualText(
+            en: titleEn,
+            mr: titleMr,
+            hi: titleHi,
+            style: const TextStyle(
+              color: CustomerColors.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w900,
+            ),
           ),
         ),
       ],
@@ -1259,9 +1544,9 @@ class _ReviewSectionTitle extends StatelessWidget {
 }
 
 class _ReviewRow extends StatelessWidget {
-  const _ReviewRow({required this.label, required this.value});
+  const _ReviewRow({required this.labelWidget, required this.value});
 
-  final String label;
+  final Widget labelWidget;
   final String value;
 
   @override
@@ -1273,14 +1558,7 @@ class _ReviewRow extends StatelessWidget {
         children: [
           SizedBox(
             width: 120,
-            child: Text(
-              label,
-              style: const TextStyle(
-                color: CustomerColors.muted,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: labelWidget,
           ),
           Expanded(
             child: Text(

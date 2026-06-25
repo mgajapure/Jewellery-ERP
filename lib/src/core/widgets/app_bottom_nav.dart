@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_l10n_provider.dart';
+import '../theme/app_colors.dart';
+
 /// Shared full-width bottom navigation used across the main app shells.
 ///
 /// Items (left-to-right):
@@ -17,41 +20,21 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  static const _gold = Color(0xFFE7A726);
-  static const _ink = Color(0xFF071A49);
-  static const _line = Color(0xFFE5E8EF);
-
-  final List<_NavItemConfig> _items = const [
-    _NavItemConfig(
-      icon: Icons.home_outlined,
-      titleMr: 'डॅशबोर्ड',
-      titleEn: 'Dashboard',
-    ),
-    _NavItemConfig(
-      icon: Icons.diamond_outlined,
-      titleMr: 'गिरवी',
-      titleEn: 'Girvi',
-    ),
-    _NavItemConfig(
-      icon: Icons.groups_outlined,
-      titleMr: 'ग्राहक',
-      titleEn: 'Customers',
-    ),
-    _NavItemConfig(
-      icon: Icons.apps_outlined,
-      titleMr: 'अधिक',
-      titleEn: 'More',
-    ),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final s = AppLangProvider.of(context);
+    final items = [
+      (Icons.home_outlined, s.navDashboard),
+      (Icons.diamond_outlined, s.navGirvi),
+      (Icons.groups_outlined, s.navCustomers),
+      (Icons.apps_outlined, s.navMore),
+    ];
+
     return Container(
-      height: 76,
-      padding: const EdgeInsets.only(top: 8),
+      height: 68,
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _line)),
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.line)),
         boxShadow: [
           BoxShadow(
             color: Color(0x14000000),
@@ -61,8 +44,8 @@ class AppBottomNav extends StatelessWidget {
         ],
       ),
       child: Row(
-        children: List.generate(_items.length, (index) {
-          final item = _items[index];
+        children: List.generate(items.length, (index) {
+          final (icon, label) = items[index];
           final selected = index == currentIndex;
           return Expanded(
             child: InkWell(
@@ -71,29 +54,20 @@ class AppBottomNav extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    item.icon,
-                    color: selected ? _gold : _ink,
+                    icon,
+                    color: selected ? AppColors.gold : AppColors.ink,
                     size: 22,
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    item.titleMr,
+                    label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      color: selected ? _gold : _ink,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    item.titleEn,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected ? _gold : _ink,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w600,
+                      color: selected ? AppColors.gold : AppColors.ink,
+                      fontSize: 10,
+                      fontWeight:
+                          selected ? FontWeight.w800 : FontWeight.w600,
                     ),
                   ),
                 ],
@@ -104,16 +78,4 @@ class AppBottomNav extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NavItemConfig {
-  const _NavItemConfig({
-    required this.icon,
-    required this.titleMr,
-    required this.titleEn,
-  });
-
-  final IconData icon;
-  final String titleMr;
-  final String titleEn;
 }

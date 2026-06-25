@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/l10n/app_language.dart';
+import '../../../core/l10n/app_l10n_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_header.dart';
@@ -20,10 +22,12 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
   bool _notifyPayments = true;
   bool _notifyExpiry = false;
   bool _biometricLock = false;
-  String _language = 'mr';
 
   @override
   Widget build(BuildContext context) {
+    final s = AppLangProvider.of(context);
+    final langNotifier = AppLangProvider.notifierOf(context);
+
     return Scaffold(
       backgroundColor: SettingsColors.screenBg,
       body: SafeArea(
@@ -32,6 +36,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
             AppHeader(
               titleMr: 'सेटिंग्ज',
               titleEn: 'Settings',
+              titleHi: 'सेटिंग्स',
               showBackButton: true,
               backFallbackRoute: 'more',
             ),
@@ -41,33 +46,32 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                 children: [
                   _Section(
                     icon: Icons.store_rounded,
-                    titleMr: 'दुकानाची माहिती',
-                    titleEn: 'Shop Profile',
+                    title: s.settingsShopProfile,
                     color: SettingsColors.navy,
                     children: [
                       _InfoTile(
-                        label: 'दुकानाचे नाव / Shop Name',
+                        label: s.settingsShopName,
                         value: 'Patil Jewellers',
                         icon: Icons.storefront_outlined,
-                        onTap: () => _editField(context, 'Shop Name'),
+                        onTap: () => _editField(context, s.settingsShopName),
                       ),
                       _InfoTile(
-                        label: 'पत्ता / Address',
+                        label: s.settingsAddress,
                         value: 'Main Road, Pune - 411001',
                         icon: Icons.location_on_outlined,
-                        onTap: () => _editField(context, 'Address'),
+                        onTap: () => _editField(context, s.settingsAddress),
                       ),
                       _InfoTile(
-                        label: 'GST नंबर / GST Number',
+                        label: s.settingsGstNumber,
                         value: '27AABCP1234A1Z5',
                         icon: Icons.receipt_long_outlined,
-                        onTap: () => _editField(context, 'GST Number'),
+                        onTap: () => _editField(context, s.settingsGstNumber),
                       ),
                       _InfoTile(
-                        label: 'PAN नंबर / PAN Number',
+                        label: s.settingsPanNumber,
                         value: 'AABCP1234A',
                         icon: Icons.badge_outlined,
-                        onTap: () => _editField(context, 'PAN Number'),
+                        onTap: () => _editField(context, s.settingsPanNumber),
                         isLast: true,
                       ),
                     ],
@@ -75,33 +79,29 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.monetization_on_rounded,
-                    titleMr: 'आजचे भाव',
-                    titleEn: 'Today\'s Rates',
+                    title: s.settingsTodaysRates,
                     color: AppColors.gold,
                     children: [
                       _RateTile(
-                        labelMr: 'सोने (24K)',
-                        labelEn: 'Gold (24K)',
+                        label: s.settingsGold24k,
                         value: '₹7,250',
-                        unit: 'प्रति ग्राम / per gram',
+                        unit: s.perGram,
                         color: AppColors.gold,
-                        onTap: () => _editRate(context, 'Gold (24K) Rate'),
+                        onTap: () => _editRate(context, s.settingsGold24k),
                       ),
                       _RateTile(
-                        labelMr: 'सोने (22K)',
-                        labelEn: 'Gold (22K)',
+                        label: s.settingsGold22k,
                         value: '₹6,645',
-                        unit: 'प्रति ग्राम / per gram',
+                        unit: s.perGram,
                         color: AppColors.gold,
-                        onTap: () => _editRate(context, 'Gold (22K) Rate'),
+                        onTap: () => _editRate(context, s.settingsGold22k),
                       ),
                       _RateTile(
-                        labelMr: 'चांदी',
-                        labelEn: 'Silver',
+                        label: s.settingsSilver,
                         value: '₹85',
-                        unit: 'प्रति ग्राम / per gram',
+                        unit: s.perGram,
                         color: AppColors.muted,
-                        onTap: () => _editRate(context, 'Silver Rate'),
+                        onTap: () => _editRate(context, s.settingsSilver),
                         isLast: true,
                       ),
                     ],
@@ -109,25 +109,24 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.percent_rounded,
-                    titleMr: 'व्याजदर',
-                    titleEn: 'Interest Rates',
+                    title: s.settingsInterestRates,
                     color: AppColors.green,
                     children: [
                       _RateTile(
-                        labelMr: 'गिर्‍वी व्याज (मासिक)',
-                        labelEn: 'Girvi Interest (monthly)',
+                        label: s.settingsGirviInterest,
                         value: '1.5%',
-                        unit: 'प्रति महिना / per month',
+                        unit: s.perMonth,
                         color: AppColors.green,
-                        onTap: () => _editRate(context, 'Girvi Interest Rate'),
+                        onTap: () =>
+                            _editRate(context, s.settingsGirviInterest),
                       ),
                       _RateTile(
-                        labelMr: 'दंड व्याज',
-                        labelEn: 'Penal Interest',
+                        label: s.settingsPenalInterest,
                         value: '2.0%',
-                        unit: 'प्रति महिना / per month',
+                        unit: s.perMonth,
                         color: AppColors.red,
-                        onTap: () => _editRate(context, 'Penal Interest Rate'),
+                        onTap: () =>
+                            _editRate(context, s.settingsPenalInterest),
                         isLast: true,
                       ),
                     ],
@@ -135,8 +134,7 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.language_rounded,
-                    titleMr: 'भाषा',
-                    titleEn: 'Language',
+                    title: s.settingsLanguage,
                     color: const Color(0xFF5B67CA),
                     children: [
                       Padding(
@@ -146,15 +144,28 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                             _LangOption(
                               label: 'मराठी',
                               sublabel: 'Marathi',
-                              selected: _language == 'mr',
-                              onTap: () => setState(() => _language = 'mr'),
+                              selected:
+                                  langNotifier.language == AppLanguage.mr,
+                              onTap: () => langNotifier
+                                  .setLanguage(AppLanguage.mr),
                             ),
-                            const SizedBox(width: 10),
+                            const SizedBox(width: 8),
                             _LangOption(
                               label: 'English',
-                              sublabel: 'इंग्रजी',
-                              selected: _language == 'en',
-                              onTap: () => setState(() => _language = 'en'),
+                              sublabel: 'अंग्रेज़ी',
+                              selected:
+                                  langNotifier.language == AppLanguage.en,
+                              onTap: () => langNotifier
+                                  .setLanguage(AppLanguage.en),
+                            ),
+                            const SizedBox(width: 8),
+                            _LangOption(
+                              label: 'हिंदी',
+                              sublabel: 'Hindi',
+                              selected:
+                                  langNotifier.language == AppLanguage.hi,
+                              onTap: () => langNotifier
+                                  .setLanguage(AppLanguage.hi),
                             ),
                           ],
                         ),
@@ -164,29 +175,25 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.notifications_rounded,
-                    titleMr: 'सूचना',
-                    titleEn: 'Notifications',
+                    title: s.settingsNotifications,
                     color: const Color(0xFF5B67CA),
                     children: [
                       _ToggleTile(
-                        labelMr: 'देय तारीख स्मरणपत्र',
-                        labelEn: 'Due date reminders',
+                        label: s.settingsDueReminders,
                         icon: Icons.event_outlined,
                         value: _notifyDueReminders,
                         onChanged: (v) =>
                             setState(() => _notifyDueReminders = v),
                       ),
                       _ToggleTile(
-                        labelMr: 'पेमेंट सूचना',
-                        labelEn: 'Payment alerts',
+                        label: s.settingsPaymentAlerts,
                         icon: Icons.payments_outlined,
                         value: _notifyPayments,
                         onChanged: (v) =>
                             setState(() => _notifyPayments = v),
                       ),
                       _ToggleTile(
-                        labelMr: 'कालबाह्य सूचना',
-                        labelEn: 'Expiry alerts',
+                        label: s.settingsExpiryAlerts,
                         icon: Icons.warning_amber_outlined,
                         value: _notifyExpiry,
                         onChanged: (v) =>
@@ -198,21 +205,18 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.security_rounded,
-                    titleMr: 'सुरक्षा',
-                    titleEn: 'Security',
+                    title: s.settingsSecurity,
                     color: AppColors.red,
                     children: [
                       _ToggleTile(
-                        labelMr: 'बायोमेट्रिक लॉक',
-                        labelEn: 'Biometric lock',
+                        label: s.settingsBiometricLock,
                         icon: Icons.fingerprint_outlined,
                         value: _biometricLock,
                         onChanged: (v) =>
                             setState(() => _biometricLock = v),
                       ),
                       _ActionTile(
-                        labelMr: 'पिन बदला',
-                        labelEn: 'Change PIN',
+                        label: s.settingsChangePIN,
                         icon: Icons.pin_outlined,
                         onTap: () {},
                         isLast: true,
@@ -222,29 +226,26 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
                   const SizedBox(height: 16),
                   _Section(
                     icon: Icons.info_outline_rounded,
-                    titleMr: 'अॅपबद्दल',
-                    titleEn: 'About App',
+                    title: s.settingsAbout,
                     color: SettingsColors.muted,
                     children: [
                       _InfoTile(
-                        label: 'आवृत्ती / Version',
+                        label: s.settingsVersion,
                         value: '1.0.0 (Build 1)',
                         icon: Icons.apps_rounded,
                       ),
                       _InfoTile(
-                        label: 'डेव्हलपर / Developer',
+                        label: s.settingsDeveloper,
                         value: 'Jewellery ERP Team',
                         icon: Icons.code_rounded,
                       ),
                       _ActionTile(
-                        labelMr: 'गोपनीयता धोरण',
-                        labelEn: 'Privacy Policy',
+                        label: s.settingsPrivacyPolicy,
                         icon: Icons.privacy_tip_outlined,
                         onTap: () {},
                       ),
                       _ActionTile(
-                        labelMr: 'सहाय्य / Support',
-                        labelEn: 'Contact Support',
+                        label: s.settingsContactSupport,
                         icon: Icons.support_agent_outlined,
                         onTap: () {},
                         isLast: true,
@@ -290,14 +291,13 @@ class _SettingsDashboardPageState extends State<SettingsDashboardPage> {
 class _Section extends StatelessWidget {
   const _Section({
     required this.icon,
-    required this.titleMr,
-    required this.titleEn,
+    required this.title,
     required this.color,
     required this.children,
   });
 
   final IconData icon;
-  final String titleMr, titleEn;
+  final String title;
   final Color color;
   final List<Widget> children;
 
@@ -320,7 +320,7 @@ class _Section extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Text(
-                '$titleMr / $titleEn',
+                title,
                 style: AppTextStyles.bodyMedium.copyWith(
                   fontWeight: FontWeight.w700,
                   color: color,
@@ -399,8 +399,7 @@ class _InfoTile extends StatelessWidget {
 
 class _RateTile extends StatelessWidget {
   const _RateTile({
-    required this.labelMr,
-    required this.labelEn,
+    required this.label,
     required this.value,
     required this.unit,
     required this.color,
@@ -408,7 +407,7 @@ class _RateTile extends StatelessWidget {
     this.isLast = false,
   });
 
-  final String labelMr, labelEn, value, unit;
+  final String label, value, unit;
   final Color color;
   final VoidCallback onTap;
   final bool isLast;
@@ -427,13 +426,12 @@ class _RateTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('$labelMr / $labelEn',
+                      Text(label,
                           style: AppTextStyles.bodySmall.copyWith(
                               fontWeight: FontWeight.w600,
                               color: AppColors.navy)),
                       const SizedBox(height: 2),
-                      Text(unit,
-                          style: AppTextStyles.labelLarge),
+                      Text(unit, style: AppTextStyles.labelLarge),
                     ],
                   ),
                 ),
@@ -455,15 +453,14 @@ class _RateTile extends StatelessWidget {
 
 class _ToggleTile extends StatelessWidget {
   const _ToggleTile({
-    required this.labelMr,
-    required this.labelEn,
+    required this.label,
     required this.icon,
     required this.value,
     required this.onChanged,
     this.isLast = false,
   });
 
-  final String labelMr, labelEn;
+  final String label;
   final IconData icon;
   final bool value;
   final ValueChanged<bool> onChanged;
@@ -480,11 +477,10 @@ class _ToggleTile extends StatelessWidget {
               Icon(icon, size: 18, color: SettingsColors.muted),
               const SizedBox(width: 12),
               Expanded(
-                child: Text('$labelMr\n$labelEn',
+                child: Text(label,
                     style: AppTextStyles.bodySmall.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: AppColors.navy,
-                        height: 1.4)),
+                        color: AppColors.navy)),
               ),
               Switch.adaptive(
                 value: value,
@@ -503,14 +499,13 @@ class _ToggleTile extends StatelessWidget {
 
 class _ActionTile extends StatelessWidget {
   const _ActionTile({
-    required this.labelMr,
-    required this.labelEn,
+    required this.label,
     required this.icon,
     required this.onTap,
     this.isLast = false,
   });
 
-  final String labelMr, labelEn;
+  final String label;
   final IconData icon;
   final VoidCallback onTap;
   final bool isLast;
@@ -528,7 +523,7 @@ class _ActionTile extends StatelessWidget {
                 Icon(icon, size: 18, color: SettingsColors.muted),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Text('$labelMr / $labelEn',
+                  child: Text(label,
                       style: AppTextStyles.bodyMedium.copyWith(
                           fontWeight: FontWeight.w600,
                           color: AppColors.navy)),
@@ -595,14 +590,14 @@ class _LangOption extends StatelessWidget {
 class _LogoutButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final s = AppLangProvider.of(context);
     return SizedBox(
       width: double.infinity,
       height: 46,
       child: OutlinedButton.icon(
-        icon: const Icon(Icons.logout_rounded,
-            color: AppColors.red, size: 18),
-        label: const Text('लॉग आउट / Log Out',
-            style: TextStyle(
+        icon: const Icon(Icons.logout_rounded, color: AppColors.red, size: 18),
+        label: Text(s.btnLogout,
+            style: const TextStyle(
                 color: AppColors.red, fontWeight: FontWeight.w700)),
         style: OutlinedButton.styleFrom(
           side: const BorderSide(color: AppColors.red),

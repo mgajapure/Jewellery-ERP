@@ -47,7 +47,7 @@ class CustomerListPage extends StatelessWidget {
                     active: true,
                     avatarColor: const Color(0xFFFFF7E9),
                     initialsColor: const Color(0xFFE7A726),
-                    customer: _demoCustomer('CUS-000101', 'रमेश महाजन', 'Ramesh Mahajan', '98765 43210', true),
+                    customer: _kDemoCustomers['CUS-000101']!,
                   ),
                   const SizedBox(height: 10),
                   _CustomerTile(
@@ -58,7 +58,7 @@ class CustomerListPage extends StatelessWidget {
                     active: true,
                     avatarColor: const Color(0xFFF0F4FF),
                     initialsColor: const Color(0xFF5E72E4),
-                    customer: _demoCustomer('CUS-000102', 'सुरेश मोरे', 'Suresh More', '87654 32109', true),
+                    customer: _kDemoCustomers['CUS-000102']!,
                   ),
                   const SizedBox(height: 10),
                   _CustomerTile(
@@ -69,7 +69,7 @@ class CustomerListPage extends StatelessWidget {
                     active: true,
                     avatarColor: const Color(0xFFE6F7EF),
                     initialsColor: const Color(0xFF07934A),
-                    customer: _demoCustomer('CUS-000103', 'प्रिया पाटील', 'Priya Patil', '77788 99001', true),
+                    customer: _kDemoCustomers['CUS-000103']!,
                   ),
                   const SizedBox(height: 10),
                   _CustomerTile(
@@ -80,7 +80,7 @@ class CustomerListPage extends StatelessWidget {
                     active: false,
                     avatarColor: const Color(0xFFFFEBEE),
                     initialsColor: const Color(0xFFE21B2D),
-                    customer: _demoCustomer('CUS-000104', 'विक्रम जाधव', 'Vikram Jadhav', '90909 12345', false),
+                    customer: _kDemoCustomers['CUS-000104']!,
                   ),
                   const SizedBox(height: 10),
                   _CustomerTile(
@@ -91,7 +91,7 @@ class CustomerListPage extends StatelessWidget {
                     active: true,
                     avatarColor: const Color(0xFFFFF3E0),
                     initialsColor: const Color(0xFFEF6C00),
-                    customer: _demoCustomer('CUS-000105', 'अनिल कदम', 'Anil Kadam', '70203 45678', true),
+                    customer: _kDemoCustomers['CUS-000105']!,
                   ),
                   const SizedBox(height: 10),
                   _CustomerTile(
@@ -102,7 +102,7 @@ class CustomerListPage extends StatelessWidget {
                     active: true,
                     avatarColor: const Color(0xFFF3E5F5),
                     initialsColor: const Color(0xFF8E24AA),
-                    customer: _demoCustomer('CUS-000106', 'मीना देशमुख', 'Meena Deshmukh', '98220 33445', true),
+                    customer: _kDemoCustomers['CUS-000106']!,
                   ),
                 ],
               ),
@@ -132,31 +132,74 @@ class CustomerListPage extends StatelessWidget {
   }
 }
 
-Customer _demoCustomer(
-  String id,
-  String name,
-  String nameEn,
-  String mobile,
-  bool isActive,
-) {
-  final now = DateTime(2025, 1, 1);
-  return Customer(
-    id: id,
-    tenantId: 'demo',
-    digitalCustomerId: id,
-    name: name,
-    nameEn: nameEn,
-    mobile: mobile,
-    address: 'Demo Address, Pune, Maharashtra - 411001',
-    riskCategory: RiskCategory.low,
-    isActive: isActive,
-    activeGirvi: 0,
-    outstanding: 0,
-    createdAt: now,
-    updatedAt: now,
-    version: 1,
-  );
-}
+final _kDemoCustomers = <String, Customer>{
+  'CUS-000101': Customer(
+    id: 'CUS-000101', tenantId: 'demo', digitalCustomerId: 'CUS-000101',
+    name: 'रमेश महाजन', nameEn: 'Ramesh Mahajan',
+    mobile: '9876543210', alternateMobile: '9823001122',
+    address: 'Plot 12, Ganesh Nagar, Kothrud, Pune, Maharashtra - 411038',
+    aadhaarMasked: 'XXXX-XXXX-3456', panNumber: 'AABPM1234C',
+    dateOfBirth: DateTime(1978, 4, 12),
+    riskCategory: RiskCategory.low, isActive: true,
+    activeGirvi: 3, outstanding: 142500,
+    createdAt: DateTime(2022, 6, 15), updatedAt: DateTime(2025, 3, 10), version: 5,
+  ),
+  'CUS-000102': Customer(
+    id: 'CUS-000102', tenantId: 'demo', digitalCustomerId: 'CUS-000102',
+    name: 'सुरेश मोरे', nameEn: 'Suresh More',
+    mobile: '8765432109',
+    address: 'Flat 4B, Shivaji Housing Society, Hadapsar, Pune, Maharashtra - 411028',
+    aadhaarMasked: 'XXXX-XXXX-7890', panNumber: 'BCFPS5678D',
+    dateOfBirth: DateTime(1985, 9, 22),
+    riskCategory: RiskCategory.medium, isActive: true,
+    activeGirvi: 1, outstanding: 38000,
+    createdAt: DateTime(2023, 2, 8), updatedAt: DateTime(2025, 1, 20), version: 2,
+  ),
+  'CUS-000103': Customer(
+    id: 'CUS-000103', tenantId: 'demo', digitalCustomerId: 'CUS-000103',
+    name: 'प्रिया पाटील', nameEn: 'Priya Patil',
+    mobile: '7778899001',
+    address: '88, Laxmi Road, Narayan Peth, Pune, Maharashtra - 411030',
+    aadhaarMasked: 'XXXX-XXXX-2211', panNumber: 'CGQPP2345E',
+    dateOfBirth: DateTime(1992, 1, 5),
+    riskCategory: RiskCategory.low, isActive: true,
+    activeGirvi: 2, outstanding: 67000,
+    createdAt: DateTime(2021, 11, 30), updatedAt: DateTime(2025, 4, 2), version: 8,
+  ),
+  'CUS-000104': Customer(
+    id: 'CUS-000104', tenantId: 'demo', digitalCustomerId: 'CUS-000104',
+    name: 'विक्रम जाधव', nameEn: 'Vikram Jadhav',
+    mobile: '9090912345',
+    address: 'House 7, Ram Krishna Nagar, Aundh, Pune, Maharashtra - 411007',
+    aadhaarMasked: 'XXXX-XXXX-5544',
+    dateOfBirth: DateTime(1970, 7, 18),
+    riskCategory: RiskCategory.high, isActive: false,
+    activeGirvi: 0, outstanding: 0,
+    createdAt: DateTime(2020, 5, 5), updatedAt: DateTime(2024, 12, 1), version: 3,
+  ),
+  'CUS-000105': Customer(
+    id: 'CUS-000105', tenantId: 'demo', digitalCustomerId: 'CUS-000105',
+    name: 'अनिल कदम', nameEn: 'Anil Kadam',
+    mobile: '7020345678',
+    address: 'D-203, Suyog Apartments, Wakad, Pune, Maharashtra - 411057',
+    aadhaarMasked: 'XXXX-XXXX-9988', panNumber: 'DHKAK7890F',
+    dateOfBirth: DateTime(1981, 3, 30),
+    riskCategory: RiskCategory.low, isActive: true,
+    activeGirvi: 1, outstanding: 25500,
+    createdAt: DateTime(2023, 8, 14), updatedAt: DateTime(2025, 2, 28), version: 1,
+  ),
+  'CUS-000106': Customer(
+    id: 'CUS-000106', tenantId: 'demo', digitalCustomerId: 'CUS-000106',
+    name: 'मीना देशमुख', nameEn: 'Meena Deshmukh',
+    mobile: '9822033445',
+    address: '15, Tilak Road, Sadashiv Peth, Pune, Maharashtra - 411030',
+    aadhaarMasked: 'XXXX-XXXX-6677', panNumber: 'EJLMD3456G',
+    dateOfBirth: DateTime(1968, 11, 25),
+    riskCategory: RiskCategory.low, isActive: true,
+    activeGirvi: 4, outstanding: 198000,
+    createdAt: DateTime(2019, 3, 20), updatedAt: DateTime(2025, 5, 1), version: 12,
+  ),
+};
 
 class _CustomerListHeader extends StatelessWidget {
   const _CustomerListHeader();

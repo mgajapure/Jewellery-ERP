@@ -4,6 +4,8 @@ import 'package:jewellery_erp/src/features/dashboard/dashboard_page.dart';
 import 'package:jewellery_erp/src/features/girvi/pages/girvi_list_page.dart';
 import 'package:jewellery_erp/src/features/more/more.dart';
 
+import '../../../core/l10n/app_language.dart';
+import '../../../core/l10n/app_l10n_provider.dart';
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/customer.dart';
@@ -11,15 +13,73 @@ import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_demo_data.dart';
 import 'customer_details_page.dart';
-/// SCR-010 Customer List / Search
-/// Displays a searchable, filterable list of customers with pagination.
-class CustomerListPage extends StatelessWidget {
+
+class CustomerListPage extends StatefulWidget {
   const CustomerListPage({super.key});
 
   static const routeName = 'customer-list';
 
   @override
+  State<CustomerListPage> createState() => _CustomerListPageState();
+}
+
+class _CustomerListPageState extends State<CustomerListPage> {
+  final _searchController = TextEditingController();
+  String _query = '';
+  int _filterIndex = 0;
+
+  static const _tileColors = {
+    'CUS-000101': (bg: Color(0xFFFFF7E9), fg: Color(0xFFE7A726)),
+    'CUS-000102': (bg: Color(0xFFF0F4FF), fg: Color(0xFF5E72E4)),
+    'CUS-000103': (bg: Color(0xFFE6F7EF), fg: Color(0xFF07934A)),
+    'CUS-000104': (bg: Color(0xFFFFEBEE), fg: Color(0xFFE21B2D)),
+    'CUS-000105': (bg: Color(0xFFFFF3E0), fg: Color(0xFFEF6C00)),
+    'CUS-000106': (bg: Color(0xFFF3E5F5), fg: Color(0xFF8E24AA)),
+  };
+
+  static const _defaultColor = (
+    bg: Color(0xFFF0F4FF),
+    fg: Color(0xFF5E72E4),
+  );
+
+  List<Customer> get _allCustomers => kDemoCustomers.values.toList();
+
+  List<Customer> get _filteredCustomers {
+    var list = _allCustomers;
+    if (_filterIndex == 1) list = list.where((c) => c.isActive).toList();
+    if (_filterIndex == 2) list = list.where((c) => !c.isActive).toList();
+    final q = _query.toLowerCase().trim();
+    if (q.isNotEmpty) {
+      list = list.where((c) =>
+        c.name.toLowerCase().contains(q) ||
+        c.nameEn.toLowerCase().contains(q) ||
+        c.mobile.contains(q) ||
+        c.digitalCustomerId.toLowerCase().contains(q),
+      ).toList();
+    }
+    return list;
+  }
+
+  String _formatMobile(String mobile) {
+    if (mobile.length == 10) {
+      return '${mobile.substring(0, 5)} ${mobile.substring(5)}';
+    }
+    return mobile;
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final customers = _filteredCustomers;
+    final allCount = _allCustomers.length;
+    final activeCount = _allCustomers.where((c) => c.isActive).length;
+    final inactiveCount = allCount - activeCount;
+
     return Scaffold(
       backgroundColor: CustomerColors.screenBg,
       body: SafeArea(
@@ -28,81 +88,41 @@ class CustomerListPage extends StatelessWidget {
             const _CustomerListHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: const _SearchBar(),
+              child: _SearchField(
+                controller: _searchController,
+                onChanged: (q) => setState(() => _query = q),
+              ),
             ),
-            const _FilterChips(),
+            _FilterChips(
+              selectedIndex: _filterIndex,
+              onChanged: (i) => setState(() => _filterIndex = i),
+              allCount: allCount,
+              activeCount: activeCount,
+              inactiveCount: inactiveCount,
+            ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                children: [
-                  _CustomerTile(
-                    nameEn: 'Ramesh Mahajan',
-                    nameMr: 'रमेश महाजन',
-                    mobile: '98765 43210',
-                    customerId: 'CUS-000101',
-                    active: true,
-                    avatarColor: const Color(0xFFFFF7E9),
-                    initialsColor: const Color(0xFFE7A726),
-                    customer: kDemoCustomers['CUS-000101']!,
-                  ),
-                  const SizedBox(height: 10),
-                  _CustomerTile(
-                    nameEn: 'Suresh More',
-                    nameMr: 'सुरेश मोरे',
-                    mobile: '87654 32109',
-                    customerId: 'CUS-000102',
-                    active: true,
-                    avatarColor: const Color(0xFFF0F4FF),
-                    initialsColor: const Color(0xFF5E72E4),
-                    customer: kDemoCustomers['CUS-000102']!,
-                  ),
-                  const SizedBox(height: 10),
-                  _CustomerTile(
-                    nameEn: 'Priya Patil',
-                    nameMr: 'प्रिया पाटील',
-                    mobile: '77788 99001',
-                    customerId: 'CUS-000103',
-                    active: true,
-                    avatarColor: const Color(0xFFE6F7EF),
-                    initialsColor: const Color(0xFF07934A),
-                    customer: kDemoCustomers['CUS-000103']!,
-                  ),
-                  const SizedBox(height: 10),
-                  _CustomerTile(
-                    nameEn: 'Vikram Jadhav',
-                    nameMr: 'विक्रम जाधव',
-                    mobile: '90909 12345',
-                    customerId: 'CUS-000104',
-                    active: false,
-                    avatarColor: const Color(0xFFFFEBEE),
-                    initialsColor: const Color(0xFFE21B2D),
-                    customer: kDemoCustomers['CUS-000104']!,
-                  ),
-                  const SizedBox(height: 10),
-                  _CustomerTile(
-                    nameEn: 'Anil Kadam',
-                    nameMr: 'अनिल कदम',
-                    mobile: '70203 45678',
-                    customerId: 'CUS-000105',
-                    active: true,
-                    avatarColor: const Color(0xFFFFF3E0),
-                    initialsColor: const Color(0xFFEF6C00),
-                    customer: kDemoCustomers['CUS-000105']!,
-                  ),
-                  const SizedBox(height: 10),
-                  _CustomerTile(
-                    nameEn: 'Meena Deshmukh',
-                    nameMr: 'मीना देशमुख',
-                    mobile: '98220 33445',
-                    customerId: 'CUS-000106',
-                    active: true,
-                    avatarColor: const Color(0xFFF3E5F5),
-                    initialsColor: const Color(0xFF8E24AA),
-                    customer: kDemoCustomers['CUS-000106']!,
-                  ),
-                ],
-              ),
+              child: customers.isEmpty
+                  ? _NoResults(query: _query)
+                  : ListView.separated(
+                      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+                      itemCount: customers.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (context, i) {
+                        final c = customers[i];
+                        final colors = _tileColors[c.id] ?? _defaultColor;
+                        return _CustomerTile(
+                          nameEn: c.nameEn,
+                          nameMr: c.name,
+                          mobile: _formatMobile(c.mobile),
+                          customerId: c.digitalCustomerId,
+                          active: c.isActive,
+                          avatarColor: colors.bg,
+                          initialsColor: colors.fg,
+                          customer: c,
+                        );
+                      },
+                    ),
             ),
             AppBottomNav(
               currentIndex: 2,
@@ -129,6 +149,7 @@ class CustomerListPage extends StatelessWidget {
   }
 }
 
+// ── Header ───────────────────────────────────────────────────────────────────
 
 class _CustomerListHeader extends StatelessWidget {
   const _CustomerListHeader();
@@ -188,86 +209,107 @@ class _CustomerListHeader extends StatelessWidget {
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+// ── Search field ─────────────────────────────────────────────────────────────
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.controller, required this.onChanged});
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        decoration: BoxDecoration(
-          color: Colors.white,
+    final provider = context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final lang = provider?.notifier?.language ?? AppLanguage.en;
+    final hint = lang == AppLanguage.mr
+        ? 'नाव, मोबाईल, ग्राहक ID शोधा'
+        : lang == AppLanguage.hi
+            ? 'नाम, मोबाइल, ग्राहक ID खोजें'
+            : 'Search name, mobile or ID';
+
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        filled: true,
+        fillColor: Colors.white,
+        hintText: hint,
+        hintStyle: const TextStyle(
+          color: CustomerColors.muted,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        prefixIcon: const Icon(Icons.search, color: CustomerColors.muted, size: 22),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: controller,
+          builder: (_, value, __) => value.text.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.close, color: CustomerColors.muted, size: 20),
+                  onPressed: () {
+                    controller.clear();
+                    onChanged('');
+                  },
+                )
+              : const Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
+        ),
+        border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: CustomerColors.line),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x10000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
-            ),
-          ],
+          borderSide: const BorderSide(color: CustomerColors.line),
         ),
-        child: Row(
-          children: const [
-            Icon(Icons.search, color: CustomerColors.muted, size: 22),
-            SizedBox(width: 12),
-            Expanded(
-              child: BilingualText(
-                en: 'Search name, mobile, customer ID',
-                mr: 'नाव, मोबाईल, ग्राहक ID शोधा',
-                hi: 'नाम, मोबाइल, ग्राहक ID खोजें',
-                style: TextStyle(
-                  color: CustomerColors.muted,
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-              ),
-            ),
-            SizedBox(width: 8),
-            Icon(Icons.qr_code_scanner, color: CustomerColors.muted, size: 22),
-          ],
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: CustomerColors.line),
         ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: CustomerColors.navy, width: 1.5),
+        ),
+        contentPadding: const EdgeInsets.symmetric(vertical: 14),
       ),
     );
   }
 }
 
-class _FilterChips extends StatefulWidget {
-  const _FilterChips();
+// ── Filter chips ─────────────────────────────────────────────────────────────
 
-  @override
-  State<_FilterChips> createState() => _FilterChipsState();
-}
+class _FilterChips extends StatelessWidget {
+  const _FilterChips({
+    required this.selectedIndex,
+    required this.onChanged,
+    required this.allCount,
+    required this.activeCount,
+    required this.inactiveCount,
+  });
 
-class _FilterChipsState extends State<_FilterChips> {
-  final List<_FilterChipData> _filters = const [
-    _FilterChipData(mr: 'सर्व', hi: 'सभी', en: 'All', count: 156),
-    _FilterChipData(mr: 'सक्रिय', hi: 'सक्रिय', en: 'Active', count: 112),
-    _FilterChipData(mr: 'निष्क्रिय', hi: 'निष्क्रिय', en: 'Inactive', count: 44),
-  ];
-  int _selected = 0;
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+  final int allCount;
+  final int activeCount;
+  final int inactiveCount;
 
   @override
   Widget build(BuildContext context) {
+    final filters = [
+      (mr: 'सर्व', hi: 'सभी', en: 'All', count: allCount),
+      (mr: 'सक्रिय', hi: 'सक्रिय', en: 'Active', count: activeCount),
+      (mr: 'निष्क्रिय', hi: 'निष्क्रिय', en: 'Inactive', count: inactiveCount),
+    ];
+
     return SizedBox(
       height: 56,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
-        itemCount: _filters.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 10),
+        itemCount: filters.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final selected = index == _selected;
-          final filter = _filters[index];
+          final selected = index == selectedIndex;
+          final f = filters[index];
           return ChoiceChip(
             label: BilingualText(
-              en: '${filter.en} (${filter.count})',
-              mr: '${filter.mr} (${filter.count})',
-              hi: '${filter.hi} (${filter.count})',
+              en: '${f.en} (${f.count})',
+              mr: '${f.mr} (${f.count})',
+              hi: '${f.hi} (${f.count})',
               style: TextStyle(
                 color: selected ? Colors.white : CustomerColors.ink,
                 fontSize: 12,
@@ -285,7 +327,7 @@ class _FilterChipsState extends State<_FilterChips> {
                 color: selected ? CustomerColors.navy : CustomerColors.line,
               ),
             ),
-            onSelected: (_) => setState(() => _selected = index),
+            onSelected: (_) => onChanged(index),
           );
         },
       ),
@@ -293,19 +335,57 @@ class _FilterChipsState extends State<_FilterChips> {
   }
 }
 
-class _FilterChipData {
-  const _FilterChipData({
-    required this.mr,
-    required this.hi,
-    required this.en,
-    required this.count,
-  });
+// ── No results ────────────────────────────────────────────────────────────────
 
-  final String mr;
-  final String hi;
-  final String en;
-  final int count;
+class _NoResults extends StatelessWidget {
+  const _NoResults({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.person_search_outlined,
+              size: 56,
+              color: CustomerColors.muted.withValues(alpha: 0.4),
+            ),
+            const SizedBox(height: 16),
+            const BilingualText(
+              en: 'No Customer Found',
+              mr: 'ग्राहक सापडला नाही',
+              hi: 'कोई ग्राहक नहीं मिला',
+              style: TextStyle(
+                color: CustomerColors.ink,
+                fontSize: 15,
+                fontWeight: FontWeight.w800,
+              ),
+            ),
+            const SizedBox(height: 4),
+            BilingualText(
+              en: query.isEmpty ? 'No customers in this category' : 'No match for "$query"',
+              mr: query.isEmpty ? 'या श्रेणीत ग्राहक नाही' : '"$query" साठी ग्राहक सापडला नाही',
+              hi: query.isEmpty ? 'इस श्रेणी में कोई ग्राहक नहीं' : '"$query" के लिए कोई ग्राहक नहीं',
+              style: const TextStyle(
+                color: CustomerColors.muted,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
+
+// ── Customer tile ─────────────────────────────────────────────────────────────
 
 class _CustomerTile extends StatelessWidget {
   const _CustomerTile({
@@ -433,6 +513,8 @@ class _CustomerTile extends StatelessWidget {
   }
 }
 
+// ── Initials avatar ───────────────────────────────────────────────────────────
+
 class _InitialsAvatar extends StatelessWidget {
   const _InitialsAvatar({
     required this.name,
@@ -472,4 +554,3 @@ class _InitialsAvatar extends StatelessWidget {
     );
   }
 }
-

@@ -1,0 +1,293 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format width=80
+
+// **************************************************************************
+// InjectableConfigGenerator
+// **************************************************************************
+
+// ignore_for_file: type=lint
+// coverage:ignore-file
+
+// ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
+import 'package:get_it/get_it.dart' as _i174;
+import 'package:injectable/injectable.dart' as _i526;
+import 'package:shared_preferences/shared_preferences.dart' as _i460;
+
+import '../../features/auth/data/repositories/auth_repository_impl.dart'
+    as _i301;
+import '../../features/auth/domain/repositories/auth_repository.dart'
+    as _i302;
+import '../../features/auth/presentation/bloc/auth_bloc.dart' as _i303;
+import '../../features/auth/presentation/bloc/mobile_bloc.dart' as _i304;
+import '../../features/auth/presentation/bloc/otp_bloc.dart' as _i305;
+import '../../features/customer/data/repositories/customer_repository_impl.dart'
+    as _i101;
+import '../../features/customer/domain/repositories/customer_repository.dart'
+    as _i102;
+import '../../features/customer/presentation/bloc/customer_detail_bloc.dart'
+    as _i103;
+import '../../features/customer/presentation/bloc/customer_list_bloc.dart'
+    as _i104;
+import '../../features/dashboard/data/repositories/dashboard_repository_impl.dart'
+    as _i201;
+import '../../features/dashboard/domain/repositories/dashboard_repository.dart'
+    as _i202;
+import '../../features/dashboard/presentation/bloc/dashboard_bloc.dart'
+    as _i203;
+import '../../features/girvi/data/repositories/girvi_repository_impl.dart'
+    as _i731;
+import '../../features/girvi/domain/repositories/girvi_repository.dart'
+    as _i812;
+import '../../features/girvi/presentation/bloc/girvi_detail_bloc.dart'
+    as _i943;
+import '../../features/girvi/presentation/bloc/girvi_list_bloc.dart' as _i876;
+import '../../features/interest/data/repositories/interest_repository_impl.dart'
+    as _i501;
+import '../../features/purchase/data/repositories/purchase_repository_impl.dart'
+    as _i701;
+import '../../features/purchase/domain/repositories/purchase_repository.dart'
+    as _i702;
+import '../../features/purchase/presentation/bloc/purchase_dashboard_bloc.dart'
+    as _i703;
+import '../../features/purchase/presentation/bloc/purchase_ledger_bloc.dart'
+    as _i704;
+import '../../features/purchase/presentation/bloc/new_purchase_bloc.dart'
+    as _i705;
+import '../../features/purchase/presentation/bloc/supplier_bloc.dart'
+    as _i706;
+import '../../features/inventory/data/repositories/inventory_repository_impl.dart'
+    as _i901;
+import '../../features/inventory/domain/repositories/inventory_repository.dart'
+    as _i902;
+import '../../features/inventory/presentation/bloc/inventory_list_bloc.dart'
+    as _i903;
+import '../../features/inventory/presentation/bloc/inventory_detail_bloc.dart'
+    as _i904;
+import '../../features/inventory/presentation/bloc/add_inventory_bloc.dart'
+    as _i905;
+import '../../features/compliance/data/repositories/compliance_repository_impl.dart'
+    as _i1001;
+import '../../features/compliance/domain/repositories/compliance_repository.dart'
+    as _i1002;
+import '../../features/compliance/presentation/bloc/compliance_dashboard_bloc.dart'
+    as _i1003;
+import '../../features/compliance/presentation/bloc/form9_bloc.dart'
+    as _i1004;
+import '../../features/compliance/presentation/bloc/generate_form_bloc.dart'
+    as _i1005;
+import '../../features/savings/data/repositories/savings_repository_impl.dart'
+    as _i1101;
+import '../../features/savings/domain/repositories/savings_repository.dart'
+    as _i1102;
+import '../../features/savings/presentation/bloc/savings_dashboard_bloc.dart'
+    as _i1103;
+import '../../features/reports/data/repositories/reports_repository_impl.dart'
+    as _i1201;
+import '../../features/reports/domain/repositories/reports_repository.dart'
+    as _i1202;
+import '../../features/reports/presentation/bloc/reports_dashboard_bloc.dart'
+    as _i1203;
+import '../../features/sales/data/repositories/sales_repository_impl.dart'
+    as _i801;
+import '../../features/sales/domain/repositories/sales_repository.dart'
+    as _i802;
+import '../../features/sales/presentation/bloc/sales_dashboard_bloc.dart'
+    as _i803;
+import '../../features/sales/presentation/bloc/sales_ledger_bloc.dart'
+    as _i804;
+import '../../features/sales/presentation/bloc/new_sale_bloc.dart' as _i805;
+import '../../features/sales/presentation/bloc/sales_return_bloc.dart'
+    as _i806;
+import '../../features/sales/presentation/bloc/barcode_sale_bloc.dart'
+    as _i807;
+import '../../features/vault/data/repositories/vault_repository_impl.dart'
+    as _i601;
+import '../../features/vault/domain/repositories/vault_repository.dart'
+    as _i602;
+import '../../features/vault/presentation/bloc/vault_assignment_bloc.dart'
+    as _i603;
+import '../../features/vault/presentation/bloc/vault_search_bloc.dart'
+    as _i604;
+import '../../features/interest/domain/repositories/interest_repository.dart'
+    as _i502;
+import '../../features/interest/presentation/bloc/calculator_bloc.dart'
+    as _i503;
+import '../../features/interest/presentation/bloc/ledger_bloc.dart' as _i504;
+import '../api/api_client.dart' as _i277;
+import '../storage/prefs_storage.dart' as _i223;
+import '../storage/secure_storage.dart' as _i619;
+import 'register_module.dart' as _i291;
+
+// initializes the registration of main-scope dependencies inside of GetIt
+Future<_i174.GetIt> $initGetIt(
+  _i174.GetIt getIt, {
+  String? environment,
+  _i526.EnvironmentFilter? environmentFilter,
+}) async {
+  final gh = _i526.GetItHelper(getIt, environment, environmentFilter);
+  final registerModule = _$RegisterModule();
+  await gh.factoryAsync<_i460.SharedPreferences>(
+    () => registerModule.prefs,
+    preResolve: true,
+  );
+  gh.singleton<_i558.FlutterSecureStorage>(() => registerModule.secureStorage);
+  gh.lazySingleton<_i223.PrefsStorage>(
+    () => _i223.PrefsStorage(prefs: gh<_i460.SharedPreferences>()),
+  );
+  gh.lazySingleton<_i619.SecureStorage>(
+    () => _i619.SecureStorage(storage: gh<_i558.FlutterSecureStorage>()),
+  );
+  gh.lazySingleton<_i277.ApiClient>(
+    () => _i277.ApiClient(secureStorage: gh<_i619.SecureStorage>()),
+  );
+  // Auth
+  gh.lazySingleton<_i302.AuthRepository>(
+    () => _i301.AuthRepositoryImpl(
+      apiClient: gh<_i277.ApiClient>(),
+      secureStorage: gh<_i619.SecureStorage>(),
+    ),
+  );
+  gh.lazySingleton<_i303.AuthBloc>(
+    () => _i303.AuthBloc(repository: gh<_i302.AuthRepository>()),
+  );
+  gh.factory<_i304.MobileBloc>(
+    () => _i304.MobileBloc(repository: gh<_i302.AuthRepository>()),
+  );
+  gh.factory<_i305.OtpBloc>(
+    () => _i305.OtpBloc(repository: gh<_i302.AuthRepository>()),
+  );
+  // Girvi
+  gh.lazySingleton<_i812.GirviRepository>(
+    () => _i731.GirviRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i876.GirviListBloc>(
+    () => _i876.GirviListBloc(repository: gh<_i812.GirviRepository>()),
+  );
+  gh.factory<_i943.GirviDetailBloc>(
+    () => _i943.GirviDetailBloc(repository: gh<_i812.GirviRepository>()),
+  );
+  // Customer
+  gh.lazySingleton<_i102.CustomerRepository>(
+    () => _i101.CustomerRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i104.CustomerListBloc>(
+    () => _i104.CustomerListBloc(repository: gh<_i102.CustomerRepository>()),
+  );
+  gh.factory<_i103.CustomerDetailBloc>(
+    () =>
+        _i103.CustomerDetailBloc(repository: gh<_i102.CustomerRepository>()),
+  );
+  // Dashboard
+  gh.lazySingleton<_i202.DashboardRepository>(
+    () => _i201.DashboardRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i203.DashboardBloc>(
+    () => _i203.DashboardBloc(repository: gh<_i202.DashboardRepository>()),
+  );
+  // Interest
+  gh.lazySingleton<_i502.InterestRepository>(
+    () => _i501.InterestRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i503.CalculatorBloc>(() => _i503.CalculatorBloc());
+  gh.factory<_i504.LedgerBloc>(
+    () => _i504.LedgerBloc(repository: gh<_i502.InterestRepository>()),
+  );
+  // Purchase
+  gh.lazySingleton<_i702.PurchaseRepository>(
+    () => _i701.PurchaseRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i703.PurchaseDashboardBloc>(
+    () => _i703.PurchaseDashboardBloc(
+        repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i704.PurchaseLedgerBloc>(
+    () =>
+        _i704.PurchaseLedgerBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i705.NewPurchaseBloc>(
+    () => _i705.NewPurchaseBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  gh.factory<_i706.SupplierBloc>(
+    () => _i706.SupplierBloc(repository: gh<_i702.PurchaseRepository>()),
+  );
+  // Sales
+  gh.lazySingleton<_i802.SalesRepository>(
+    () => _i801.SalesRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i803.SalesDashboardBloc>(
+    () => _i803.SalesDashboardBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i804.SalesLedgerBloc>(
+    () => _i804.SalesLedgerBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i805.NewSaleBloc>(
+    () => _i805.NewSaleBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i806.SalesReturnBloc>(
+    () => _i806.SalesReturnBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  gh.factory<_i807.BarcodeSaleBloc>(
+    () => _i807.BarcodeSaleBloc(repository: gh<_i802.SalesRepository>()),
+  );
+  // Inventory
+  gh.lazySingleton<_i902.InventoryRepository>(
+    () => _i901.InventoryRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i903.InventoryListBloc>(
+    () => _i903.InventoryListBloc(
+        repository: gh<_i902.InventoryRepository>()),
+  );
+  gh.factory<_i904.InventoryDetailBloc>(
+    () => _i904.InventoryDetailBloc(
+        repository: gh<_i902.InventoryRepository>()),
+  );
+  gh.factory<_i905.AddInventoryBloc>(
+    () => _i905.AddInventoryBloc(
+        repository: gh<_i902.InventoryRepository>()),
+  );
+  // Compliance
+  gh.lazySingleton<_i1002.ComplianceRepository>(
+    () => _i1001.ComplianceRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1003.ComplianceDashboardBloc>(
+    () => _i1003.ComplianceDashboardBloc(
+        repository: gh<_i1002.ComplianceRepository>()),
+  );
+  gh.factory<_i1004.Form9Bloc>(
+    () => _i1004.Form9Bloc(repository: gh<_i1002.ComplianceRepository>()),
+  );
+  gh.factory<_i1005.GenerateFormBloc>(
+    () =>
+        _i1005.GenerateFormBloc(repository: gh<_i1002.ComplianceRepository>()),
+  );
+  // Savings
+  gh.lazySingleton<_i1102.SavingsRepository>(
+    () => _i1101.SavingsRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1103.SavingsDashboardBloc>(
+    () => _i1103.SavingsDashboardBloc(
+        repository: gh<_i1102.SavingsRepository>()),
+  );
+  // Reports
+  gh.lazySingleton<_i1202.ReportsRepository>(
+    () => _i1201.ReportsRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i1203.ReportsDashboardBloc>(
+    () => _i1203.ReportsDashboardBloc(
+        repository: gh<_i1202.ReportsRepository>()),
+  );
+  // Vault
+  gh.lazySingleton<_i602.VaultRepository>(
+    () => _i601.VaultRepositoryImpl(apiClient: gh<_i277.ApiClient>()),
+  );
+  gh.factory<_i604.VaultSearchBloc>(
+    () => _i604.VaultSearchBloc(repository: gh<_i602.VaultRepository>()),
+  );
+  gh.factory<_i603.VaultAssignmentBloc>(
+    () => _i603.VaultAssignmentBloc(repository: gh<_i602.VaultRepository>()),
+  );
+  return getIt;
+}
+
+class _$RegisterModule extends _i291.RegisterModule {}

@@ -1,14 +1,24 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import 'package:jewellery_erp/src/features/girvi/girvi.dart';
-
+import 'package:intl/intl.dart';
+import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/bilingual_text.dart';
+import '../../../shared/widgets/app_error_state.dart';
+import '../../../shared/widgets/app_loader.dart';
+import '../domain/entities/girvi.dart';
+import '../presentation/bloc/girvi_detail_bloc.dart';
+import '../presentation/bloc/girvi_detail_event.dart';
+import '../presentation/bloc/girvi_detail_state.dart';
 import '../theme/girvi_colors.dart';
+import '../widgets/girvi_status_badge.dart';
+import 'girvi_list_page.dart';
+import 'partial_payment_page.dart';
+import 'renewal_page.dart';
 
 /// SCR-018 Girvi Detail View
-/// Displays a single girvi/loan with a tabbed layout for Details, Items,
-/// Payments and KFS documents, plus quick Call / Take Payment / Renew actions.
 class GirviDetailsPage extends StatelessWidget {
   const GirviDetailsPage({super.key});
 
@@ -16,40 +26,113 @@ class GirviDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 4,
-      child: Scaffold(
-        backgroundColor: GirviColors.screenBg,
-        body: SafeArea(
-          child: Column(
-            children: const [
-              _GirviDetailsHeader(),
-              _GirviHeaderCard(),
-              _GirviTabBar(),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    _DetailsTab(),
-                    _ItemsTab(),
-                    _PaymentsTab(),
-                    _KfsDocsTab(),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        bottomNavigationBar: const _BottomActionBar(),
-      ),
+    final id = GoRouterState.of(context).pathParameters['id']!;
+    return BlocProvider(
+      create: (_) =>
+          getIt<GirviDetailBloc>()..add(LoadGirviDetail(id)),
+      child: const _GirviDetailsView(),
     );
   }
 }
 
-class _GirviDetailsHeader extends StatelessWidget {
-  const _GirviDetailsHeader();
+class _GirviDetailsView extends StatelessWidget {
+  const _GirviDetailsView();
 
   @override
   Widget build(BuildContext context) {
+    return BlocConsumer<GirviDetailBloc, GirviDetailState>(
+      listener: (context, state) {
+        if (state is GirviOperationSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: GirviColors.green,
+            ),
+          );
+        }
+        if (state is GirviOperationFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: GirviColors.red,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        if (state is GirviDetailLoading || state is GirviDetailInitial) {
+          return const Scaffold(
+            backgroundColor: GirviColors.screenBg,
+            body: SafeArea(child: AppLoader(message: 'गिरवी लोड होत आहे...')),
+          );
+        }
+        if (state is GirviDetailError) {
+          final id = GoRouterState.of(context).pathParameters['id']!;
+          return Scaffold(
+            backgroundColor: GirviColors.screenBg,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _header(context, girvi: null),
+                  Expanded(
+                    child: AppErrorState(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<GirviDetailBloc>()
+                          .add(LoadGirviDetail(id)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+        Girvi? girvi;
+        if (state is GirviDetailLoaded) girvi = state.girvi;
+        if (state is GirviOperationLoading) girvi = state.girvi;
+        if (state is GirviOperationSuccess) girvi = state.girvi;
+        if (state is GirviOperationFailure) girvi = state.girvi;
+
+        if (girvi == null) return const SizedBox.shrink();
+
+        final isLoading = state is GirviOperationLoading;
+
+        return DefaultTabController(
+          length: 4,
+          child: Scaffold(
+            backgroundColor: GirviColors.screenBg,
+            body: SafeArea(
+              child: Column(
+                children: [
+                  _header(context, girvi: girvi),
+                  _GirviHeaderCard(girvi: girvi),
+                  const _GirviTabBar(),
+                  Expanded(
+                    child: TabBarView(
+                      children: [
+                        _DetailsTab(girvi: girvi),
+                        _ItemsTab(girvi: girvi),
+                        _PaymentsTab(girvi: girvi),
+                        const _KfsDocsTab(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            bottomNavigationBar: isLoading
+                ? const LinearProgressIndicator(
+                    color: GirviColors.gold,
+                    backgroundColor: GirviColors.line,
+                  )
+                : _BottomActionBar(girvi: girvi),
+          ),
+        );
+      },
+    );
+  }
+
+  static Widget _header(BuildContext context, {Girvi? girvi}) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 8, 8, 8),
       child: Row(
@@ -61,8 +144,10 @@ class _GirviDetailsHeader extends StatelessWidget {
             tooltip: 'Back',
           ),
           const Expanded(
-            child: Text(
-              'गिरवी तपशील / Girvi Detail',
+            child: BilingualText(
+              en: 'Girvi Detail',
+              mr: 'गिरवी तपशील',
+              hi: 'गिरवी विवरण',
               textAlign: TextAlign.center,
               style: TextStyle(
                 color: GirviColors.ink,
@@ -72,14 +157,123 @@ class _GirviDetailsHeader extends StatelessWidget {
             ),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: BilingualText(
+                    en: 'Print coming soon',
+                    mr: 'प्रिंट लवकरच',
+                    hi: 'प्रिंट जल्द आएगा',
+                  ),
+                  behavior: SnackBarBehavior.floating,
+                ),
+              );
+            },
             icon: const Icon(Icons.print_outlined, color: GirviColors.ink),
             tooltip: 'Print',
           ),
-          IconButton(
-            onPressed: () {},
+          PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: GirviColors.ink),
             tooltip: 'More',
+            onSelected: (value) {
+              if (girvi == null) return;
+              switch (value) {
+                case 'partial-payment':
+                  context.pushNamed(
+                    PartialPaymentPage.routeName,
+                    pathParameters: {'id': girvi.id},
+                  );
+                case 'renewal':
+                  context.pushNamed(
+                    RenewalPage.routeName,
+                    pathParameters: {'id': girvi.id},
+                  );
+                case 'redemption':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: BilingualText(
+                        en: 'Redemption coming soon',
+                        mr: 'मोचन लवकरच',
+                        hi: 'मोचन जल्द आएगा',
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                case 'auction':
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: BilingualText(
+                        en: 'Auction coming soon',
+                        mr: 'लिलाव प्रक्रिया लवकरच',
+                        hi: 'नीलामी प्रक्रिया जल्द आएगी',
+                      ),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+              }
+            },
+            itemBuilder: (_) => const [
+              PopupMenuItem(
+                value: 'partial-payment',
+                child: Row(
+                  children: [
+                    Icon(Icons.currency_rupee, size: 18,
+                        color: GirviColors.navy),
+                    SizedBox(width: 10),
+                    BilingualText(
+                      en: 'Partial Payment',
+                      mr: 'आंशिक पेमेंट',
+                      hi: 'आंशिक भुगतान',
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'renewal',
+                child: Row(
+                  children: [
+                    Icon(Icons.autorenew, size: 18,
+                        color: GirviColors.navy),
+                    SizedBox(width: 10),
+                    BilingualText(
+                      en: 'Renew',
+                      mr: 'नूतनीकरण',
+                      hi: 'नवीनीकरण',
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'redemption',
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 18,
+                        color: GirviColors.green),
+                    SizedBox(width: 10),
+                    BilingualText(
+                      en: 'Redeem',
+                      mr: 'मोचन',
+                      hi: 'मोचन',
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'auction',
+                child: Row(
+                  children: [
+                    Icon(Icons.gavel_outlined, size: 18,
+                        color: GirviColors.red),
+                    SizedBox(width: 10),
+                    BilingualText(
+                      en: 'Auction Workflow',
+                      mr: 'लिलाव',
+                      hi: 'नीलामी',
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ],
       ),
@@ -88,7 +282,26 @@ class _GirviDetailsHeader extends StatelessWidget {
 }
 
 class _GirviHeaderCard extends StatelessWidget {
-  const _GirviHeaderCard();
+  const _GirviHeaderCard({required this.girvi});
+
+  final Girvi girvi;
+
+  String _formatCurrency(double amount) {
+    final fmt = NumberFormat('#,##,##0', 'en_IN');
+    return '₹${fmt.format(amount.toInt())}';
+  }
+
+  String _dateLabel(DateTime d) =>
+      DateFormat('dd MMM yyyy').format(d);
+
+  double get _ltv {
+    final totalValuation = girvi.items.fold<double>(
+      0,
+      (sum, i) => sum + i.valuationAmount,
+    );
+    if (totalValuation == 0) return 0;
+    return (girvi.loanAmount / totalValuation) * 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,26 +329,42 @@ class _GirviHeaderCard extends StatelessWidget {
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: const [
+                  children: [
                     Text(
-                      'Ramesh Mahajan',
-                      style: TextStyle(
+                      girvi.customerNameEn,
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      '98765 43210',
-                      style: TextStyle(
+                      girvi.customerMobile,
+                      style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    SizedBox(height: 14),
-                    _InlineInfoRow(),
+                    const SizedBox(height: 14),
+                    Row(
+                      children: [
+                        _InlineInfo(
+                          labelMr: 'कर्ज आयडी',
+                          labelEn: 'Loan ID',
+                          labelHi: 'ऋण आईडी',
+                          value: girvi.serialId,
+                        ),
+                        const SizedBox(width: 24),
+                        _InlineInfo(
+                          labelMr: 'दिनांक',
+                          labelEn: 'Date',
+                          labelHi: 'दिनांक',
+                          value: _dateLabel(girvi.startDate),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),
@@ -143,24 +372,7 @@ class _GirviHeaderCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: GirviColors.green.withValues(alpha: 0.15),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'सक्रिय / Active',
-                      style: TextStyle(
-                        color: GirviColors.green,
-                        fontSize: 11,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
+                  GirviStatusBadge(status: girvi.status),
                   const SizedBox(height: 12),
                   Container(
                     width: 56,
@@ -180,19 +392,21 @@ class _GirviHeaderCard extends StatelessWidget {
           const Divider(height: 1, color: Colors.white24),
           const SizedBox(height: 16),
           Row(
-            children: const [
+            children: [
               Expanded(
                 child: _HeaderStat(
                   labelMr: 'कर्ज रक्कम',
                   labelEn: 'Loan Amount',
-                  value: '₹1,50,000',
+                  labelHi: 'ऋण राशि',
+                  value: _formatCurrency(girvi.loanAmount),
                 ),
               ),
               Expanded(
                 child: _HeaderStat(
                   labelMr: 'बाकी रक्कम',
                   labelEn: 'Outstanding',
-                  value: '₹12,450',
+                  labelHi: 'बकाया राशि',
+                  value: _formatCurrency(girvi.outstandingAmount),
                   valueColor: GirviColors.gold,
                 ),
               ),
@@ -200,7 +414,8 @@ class _GirviHeaderCard extends StatelessWidget {
                 child: _HeaderStat(
                   labelMr: 'LTV',
                   labelEn: 'Loan to Value',
-                  value: '68%',
+                  labelHi: 'LTV',
+                  value: '${_ltv.toStringAsFixed(1)}%',
                 ),
               ),
             ],
@@ -241,7 +456,6 @@ class _CustomerAvatar extends StatelessWidget {
   }
 }
 
-/// A small, deterministic QR-style placeholder used in the header card.
 class _QrCodePlaceholder extends StatelessWidget {
   const _QrCodePlaceholder();
 
@@ -250,8 +464,6 @@ class _QrCodePlaceholder extends StatelessWidget {
     const size = 48.0;
     const cells = 9;
     const cellSize = size / cells;
-
-    // 9x9 binary pattern that resembles a QR code.
     const pattern = [
       [1, 1, 1, 1, 1, 1, 1, 0, 1],
       [1, 0, 0, 0, 0, 0, 1, 0, 0],
@@ -263,7 +475,6 @@ class _QrCodePlaceholder extends StatelessWidget {
       [0, 0, 0, 0, 0, 0, 0, 0, 0],
       [1, 0, 1, 0, 1, 0, 1, 0, 1],
     ];
-
     return SizedBox(
       width: size,
       height: size,
@@ -288,34 +499,17 @@ class _QrCodePlaceholder extends StatelessWidget {
   }
 }
 
-class _InlineInfoRow extends StatelessWidget {
-  const _InlineInfoRow();
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: const [
-        _InlineInfo(
-          labelMr: 'कर्ज आयडी',
-          labelEn: 'Loan ID',
-          value: 'GIN-2026-000123',
-        ),
-        SizedBox(width: 24),
-        _InlineInfo(labelMr: 'दिनांक', labelEn: 'Date', value: '06 Jun 2026'),
-      ],
-    );
-  }
-}
-
 class _InlineInfo extends StatelessWidget {
   const _InlineInfo({
     required this.labelMr,
     required this.labelEn,
+    required this.labelHi,
     required this.value,
   });
 
   final String labelMr;
   final String labelEn;
+  final String labelHi;
   final String value;
 
   @override
@@ -323,8 +517,10 @@ class _InlineInfo extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          '$labelMr / $labelEn',
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          hi: labelHi,
           style: const TextStyle(
             color: Colors.white54,
             fontSize: 10,
@@ -349,12 +545,14 @@ class _HeaderStat extends StatelessWidget {
   const _HeaderStat({
     required this.labelMr,
     required this.labelEn,
+    required this.labelHi,
     required this.value,
     this.valueColor = Colors.white,
   });
 
   final String labelMr;
   final String labelEn;
+  final String labelHi;
   final String value;
   final Color valueColor;
 
@@ -362,21 +560,15 @@ class _HeaderStat extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(
-          labelMr,
+        BilingualText(
+          en: labelEn,
+          mr: labelMr,
+          hi: labelHi,
+          textAlign: TextAlign.center,
           style: const TextStyle(
             color: Colors.white70,
             fontSize: 11,
             fontWeight: FontWeight.w700,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          labelEn,
-          style: const TextStyle(
-            color: Colors.white54,
-            fontSize: 10,
-            fontWeight: FontWeight.w600,
           ),
         ),
         const SizedBox(height: 8),
@@ -409,10 +601,7 @@ class _GirviTabBar extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(12),
         child: const TabBar(
-          indicator: BoxDecoration(
-            color: GirviColors.navy,
-            borderRadius: BorderRadius.zero,
-          ),
+          indicator: BoxDecoration(color: GirviColors.navy),
           indicatorSize: TabBarIndicatorSize.tab,
           labelColor: Colors.white,
           unselectedLabelColor: GirviColors.muted,
@@ -422,10 +611,10 @@ class _GirviTabBar extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
           tabs: [
-            _TabLabel(mr: 'तपशील', en: 'Details'),
-            _TabLabel(mr: 'दागिने', en: 'Items'),
-            _TabLabel(mr: 'पेमेंट्स', en: 'Payments'),
-            _TabLabel(mr: 'KFS दस्तऐवज', en: 'KFS Docs'),
+            _TabLabel(mr: 'तपशील', en: 'Details', hi: 'विवरण'),
+            _TabLabel(mr: 'दागिने', en: 'Items', hi: 'आभूषण'),
+            _TabLabel(mr: 'पेमेंट्स', en: 'Payments', hi: 'भुगतान'),
+            _TabLabel(mr: 'KFS दस्तऐवज', en: 'KFS Docs', hi: 'KFS दस्तावेज़'),
           ],
         ),
       ),
@@ -434,32 +623,75 @@ class _GirviTabBar extends StatelessWidget {
 }
 
 class _TabLabel extends StatelessWidget {
-  const _TabLabel({required this.mr, required this.en});
+  const _TabLabel({required this.mr, required this.en, required this.hi});
 
   final String mr;
   final String en;
+  final String hi;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(mr),
-          const SizedBox(height: 2),
-          Text(en, style: const TextStyle(fontSize: 9)),
-        ],
+      child: BilingualText(
+        en: en,
+        mr: mr,
+        hi: hi,
+        textAlign: TextAlign.center,
       ),
     );
   }
 }
 
 class _DetailsTab extends StatelessWidget {
-  const _DetailsTab();
+  const _DetailsTab({required this.girvi});
+
+  final Girvi girvi;
+
+  String _dateLabel(DateTime d) =>
+      DateFormat('dd MMM yyyy').format(d);
+
+  Widget _interestTypeWidget(InterestType t) {
+    switch (t) {
+      case InterestType.simple:
+        return const BilingualText(
+          en: 'Simple',
+          mr: 'साधं व्याज',
+          hi: 'साधारण ब्याज',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      case InterestType.katmiti:
+        return const BilingualText(
+          en: 'Katmiti',
+          mr: 'कात्मिती',
+          hi: 'वार्षिक',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      case InterestType.daily:
+        return const BilingualText(
+          en: 'Daily',
+          mr: 'दैनिक',
+          hi: 'दैनिक',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final daysLeft = girvi.daysLeft;
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       children: [
@@ -477,45 +709,183 @@ class _DetailsTab extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: const [
+            children: [
               _DetailRow(
                 icon: Icons.calendar_today_outlined,
-                label: 'देय तारीख / Due Date',
-                value: '12 Jun 2026 (6 दिवस शिल्लक / 6 days left)',
+                labelEn: 'Due Date',
+                labelMr: 'देय तारीख',
+                labelHi: 'देय तिथि',
+                valueWidget: _DueDateValue(
+                  dateLabel: _dateLabel(girvi.dueDate),
+                  daysLeft: daysLeft,
+                ),
               ),
-              _DetailDivider(),
+              const _DetailDivider(),
               _DetailRow(
                 icon: Icons.trending_down_outlined,
-                label: 'व्याज प्रकार / Interest Type',
-                value: 'मासिक घटतं / Monthly Reducing',
+                labelEn: 'Interest Type',
+                labelMr: 'व्याज प्रकार',
+                labelHi: 'ब्याज प्रकार',
+                valueWidget: _interestTypeWidget(girvi.interestType),
               ),
-              _DetailDivider(),
+              const _DetailDivider(),
               _DetailRow(
                 icon: Icons.percent_outlined,
-                label: 'व्याज दर / Interest Rate',
-                value: '1.50% प्रति महिना / per month',
+                labelEn: 'Interest Rate',
+                labelMr: 'व्याज दर',
+                labelHi: 'ब्याज दर',
+                valueWidget: _InterestRateValue(rate: girvi.interestRate),
               ),
-              _DetailDivider(),
-              _DetailRow(
-                icon: Icons.timer_outlined,
-                label: 'व्याज थ्रेशहोल्ड / Interest Threshold',
-                value: '25 दिवस / 25 days',
-              ),
-              _DetailDivider(),
+              const _DetailDivider(),
               _DetailRow(
                 icon: Icons.warning_amber_outlined,
-                label: 'दंड / Penalty',
-                value: '2% प्रति महिना / per month',
+                labelEn: 'Penalty Rate',
+                labelMr: 'दंड',
+                labelHi: 'जुर्माना',
+                valueWidget: _PenaltyRateValue(rate: girvi.penaltyRate),
               ),
-              _DetailDivider(),
-              _DetailRow(
-                icon: Icons.lock_outline,
-                label: 'वॉल्ट / Vault',
-                value: 'VLT-01 • ट्रे / Tray T-04',
-              ),
-              _DetailDivider(),
-              _KfsRow(),
+              if (girvi.vaultLocation != null) ...[
+                const _DetailDivider(),
+                _DetailRow(
+                  icon: Icons.lock_outline,
+                  labelEn: 'Vault',
+                  labelMr: 'वॉल्ट',
+                  labelHi: 'तिजोरी',
+                  valueWidget: Text(
+                    girvi.vaultLocation!,
+                    style: const TextStyle(
+                      color: GirviColors.ink,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ],
+              const _DetailDivider(),
+              const _KfsRow(),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DueDateValue extends StatelessWidget {
+  const _DueDateValue({required this.dateLabel, required this.daysLeft});
+
+  final String dateLabel;
+  final int daysLeft;
+
+  @override
+  Widget build(BuildContext context) {
+    if (daysLeft >= 0) {
+      return Row(
+        children: [
+          Text(
+            '$dateLabel  ',
+            style: const TextStyle(
+              color: GirviColors.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          BilingualText(
+            en: '($daysLeft days left)',
+            mr: '($daysLeft दिवस शिल्लक)',
+            hi: '($daysLeft दिन शेष)',
+            style: const TextStyle(
+              color: GirviColors.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      );
+    } else {
+      return Row(
+        children: [
+          Text(
+            '$dateLabel  ',
+            style: const TextStyle(
+              color: GirviColors.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          BilingualText(
+            en: '(${-daysLeft} days late)',
+            mr: '(${-daysLeft} दिवस उशीर)',
+            hi: '(${-daysLeft} दिन देरी)',
+            style: const TextStyle(
+              color: GirviColors.ink,
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+        ],
+      );
+    }
+  }
+}
+
+class _InterestRateValue extends StatelessWidget {
+  const _InterestRateValue({required this.rate});
+
+  final double rate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          '${rate.toStringAsFixed(2)}%  ',
+          style: const TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const BilingualText(
+          en: 'per annum',
+          mr: 'प्रति वर्ष',
+          hi: 'प्रति वर्ष',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _PenaltyRateValue extends StatelessWidget {
+  const _PenaltyRateValue({required this.rate});
+
+  final double rate;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Text(
+          '${rate.toStringAsFixed(2)}%  ',
+          style: const TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const BilingualText(
+          en: 'per month',
+          mr: 'प्रति महिना',
+          hi: 'प्रति माह',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -526,13 +896,17 @@ class _DetailsTab extends StatelessWidget {
 class _DetailRow extends StatelessWidget {
   const _DetailRow({
     required this.icon,
-    required this.label,
-    required this.value,
+    required this.labelEn,
+    required this.labelMr,
+    required this.labelHi,
+    required this.valueWidget,
   });
 
   final IconData icon;
-  final String label;
-  final String value;
+  final String labelEn;
+  final String labelMr;
+  final String labelHi;
+  final Widget valueWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -547,8 +921,10 @@ class _DetailRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  label,
+                BilingualText(
+                  en: labelEn,
+                  mr: labelMr,
+                  hi: labelHi,
                   style: const TextStyle(
                     color: GirviColors.muted,
                     fontSize: 11,
@@ -556,14 +932,7 @@ class _DetailRow extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  value,
-                  style: const TextStyle(
-                    color: GirviColors.ink,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+                valueWidget,
               ],
             ),
           ),
@@ -592,16 +961,12 @@ class _KfsRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
-            Icons.description_outlined,
-            size: 20,
-            color: GirviColors.muted,
-          ),
+          const Icon(Icons.description_outlined, size: 20, color: GirviColors.muted),
           const SizedBox(width: 12),
-          Expanded(
+          const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'KFS',
                   style: TextStyle(
@@ -611,8 +976,10 @@ class _KfsRow extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 4),
-                Text(
-                  'KFS पहा / View KFS',
+                BilingualText(
+                  en: 'View KFS',
+                  mr: 'KFS पहा',
+                  hi: 'KFS देखें',
                   style: TextStyle(
                     color: GirviColors.green,
                     fontSize: 14,
@@ -622,11 +989,7 @@ class _KfsRow extends StatelessWidget {
               ],
             ),
           ),
-          const Icon(
-            Icons.download_outlined,
-            color: GirviColors.green,
-            size: 22,
-          ),
+          const Icon(Icons.download_outlined, color: GirviColors.green, size: 22),
         ],
       ),
     );
@@ -634,7 +997,9 @@ class _KfsRow extends StatelessWidget {
 }
 
 class _ItemsTab extends StatelessWidget {
-  const _ItemsTab();
+  const _ItemsTab({required this.girvi});
+
+  final Girvi girvi;
 
   @override
   Widget build(BuildContext context) {
@@ -655,22 +1020,16 @@ class _ItemsTab extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: const [
-              _ItemTile(
-                name: '22K सोन्याची चेन',
-                nameEn: '22K Gold Chain',
-                type: 'Chain',
-                weight: '12.5 g',
-                purity: '22K',
-              ),
-              _ListDivider(),
-              _ItemTile(
-                name: '22K सोन्याची अंगठी',
-                nameEn: '22K Gold Ring',
-                type: 'Ring',
-                weight: '6.0 g',
-                purity: '22K',
-              ),
+            children: [
+              for (int i = 0; i < girvi.items.length; i++) ...[
+                if (i > 0)
+                  const Divider(
+                    height: 1,
+                    color: GirviColors.line,
+                    indent: 72,
+                  ),
+                _ItemTile(item: girvi.items[i]),
+              ],
             ],
           ),
         ),
@@ -680,19 +1039,9 @@ class _ItemsTab extends StatelessWidget {
 }
 
 class _ItemTile extends StatelessWidget {
-  const _ItemTile({
-    required this.name,
-    required this.nameEn,
-    required this.type,
-    required this.weight,
-    required this.purity,
-  });
+  const _ItemTile({required this.item});
 
-  final String name;
-  final String nameEn;
-  final String type;
-  final String weight;
-  final String purity;
+  final GirviItem item;
 
   @override
   Widget build(BuildContext context) {
@@ -719,7 +1068,7 @@ class _ItemTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  name,
+                  item.description,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -730,7 +1079,7 @@ class _ItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  nameEn,
+                  item.itemType,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -741,7 +1090,7 @@ class _ItemTile extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  '$type • $purity • $weight',
+                  '${item.itemType} • ${item.purity} • ${item.netWeightG.toStringAsFixed(2)} g',
                   style: const TextStyle(
                     color: GirviColors.muted,
                     fontSize: 11,
@@ -758,20 +1107,92 @@ class _ItemTile extends StatelessWidget {
   }
 }
 
-class _ListDivider extends StatelessWidget {
-  const _ListDivider();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Divider(height: 1, color: GirviColors.line, indent: 72);
-  }
-}
-
 class _PaymentsTab extends StatelessWidget {
-  const _PaymentsTab();
+  const _PaymentsTab({required this.girvi});
+
+  final Girvi girvi;
+
+  String _dateLabel(DateTime d) =>
+      DateFormat('dd MMM yyyy').format(d);
+
+  String _formatCurrency(double amount) {
+    final fmt = NumberFormat('#,##,##0', 'en_IN');
+    return '₹${fmt.format(amount.toInt())}';
+  }
+
+  Widget _paymentTypeWidget(PaymentType t) {
+    switch (t) {
+      case PaymentType.cash:
+        return const BilingualText(
+          en: 'Cash',
+          mr: 'रोख',
+          hi: 'नकद',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      case PaymentType.upi:
+        return const Text(
+          'UPI',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      case PaymentType.bankTransfer:
+        return const BilingualText(
+          en: 'Bank Transfer',
+          mr: 'बँक ट्रान्सफर',
+          hi: 'बैंक ट्रांसफर',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+      case PaymentType.cheque:
+        return const BilingualText(
+          en: 'Cheque',
+          mr: 'चेक',
+          hi: 'चेक',
+          style: TextStyle(
+            color: GirviColors.ink,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+          ),
+        );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (girvi.payments.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.receipt_long_outlined, size: 40, color: GirviColors.muted),
+              SizedBox(height: 12),
+              BilingualText(
+                en: 'No Payments Yet',
+                mr: 'कोणतेही पेमेंट नाही',
+                hi: 'कोई भुगतान नहीं',
+                style: TextStyle(
+                  color: GirviColors.muted,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
       children: [
@@ -789,93 +1210,65 @@ class _PaymentsTab extends StatelessWidget {
             ],
           ),
           child: Column(
-            children: const [
-              _PaymentTile(
-                type: 'व्याज पेमेंट / Interest Payment',
-                amount: '₹3,250',
-                date: '05 Jun 2026',
-              ),
-              _ListDivider(),
-              _PaymentTile(
-                type: 'आंशिक पेमेंट / Partial Payment',
-                amount: '₹5,000',
-                date: '05 May 2026',
-              ),
+            children: [
+              for (int i = 0; i < girvi.payments.length; i++) ...[
+                if (i > 0)
+                  const Divider(
+                    height: 1,
+                    color: GirviColors.line,
+                    indent: 66,
+                  ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 40,
+                        height: 40,
+                        decoration: BoxDecoration(
+                          color: GirviColors.green.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.south_west,
+                          color: GirviColors.green,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _paymentTypeWidget(girvi.payments[i].paymentType),
+                            const SizedBox(height: 4),
+                            Text(
+                              _dateLabel(girvi.payments[i].paidAt),
+                              style: const TextStyle(
+                                color: GirviColors.muted,
+                                fontSize: 11,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        _formatCurrency(girvi.payments[i].amount),
+                        style: const TextStyle(
+                          color: GirviColors.ink,
+                          fontSize: 15,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ],
-    );
-  }
-}
-
-class _PaymentTile extends StatelessWidget {
-  const _PaymentTile({
-    required this.type,
-    required this.amount,
-    required this.date,
-  });
-
-  final String type;
-  final String amount;
-  final String date;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-      child: Row(
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: GirviColors.green.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Icon(
-              Icons.south_west,
-              color: GirviColors.green,
-              size: 20,
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  type,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    color: GirviColors.ink,
-                    fontSize: 13,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    color: GirviColors.muted,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            amount,
-            style: const TextStyle(
-              color: GirviColors.ink,
-              fontSize: 15,
-              fontWeight: FontWeight.w900,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }
@@ -895,16 +1288,14 @@ class _KfsDocsTab extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: GirviColors.line),
           ),
-          child: Column(
-            children: const [
-              Icon(
-                Icons.description_outlined,
-                size: 40,
-                color: GirviColors.muted,
-              ),
+          child: const Column(
+            children: [
+              Icon(Icons.description_outlined, size: 40, color: GirviColors.muted),
               SizedBox(height: 12),
-              Text(
-                'KFS दस्तऐवज',
+              BilingualText(
+                en: 'KFS Documents',
+                mr: 'KFS दस्तऐवज',
+                hi: 'KFS दस्तावेज़',
                 style: TextStyle(
                   color: GirviColors.ink,
                   fontSize: 14,
@@ -929,10 +1320,14 @@ class _KfsDocsTab extends StatelessWidget {
 }
 
 class _BottomActionBar extends StatelessWidget {
-  const _BottomActionBar();
+  const _BottomActionBar({required this.girvi});
+
+  final Girvi girvi;
 
   @override
   Widget build(BuildContext context) {
+    final canShowActions = girvi.status != GirviStatus.redeemed;
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -947,95 +1342,89 @@ class _BottomActionBar extends StatelessWidget {
       ),
       child: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
           child: Row(
             children: [
-              Expanded(
-                child: _ActionButton(
-                  icon: Icons.call,
-                  labelMr: 'कॉल करा',
-                  labelEn: 'Call',
-                  backgroundColor: Colors.white,
-                  foregroundColor: GirviColors.ink,
-                  onTap: () {},
+              InkWell(
+                onTap: () {},
+                borderRadius: BorderRadius.circular(14),
+                child: Container(
+                  width: 42,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: GirviColors.screenBg,
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(color: GirviColors.line),
+                  ),
+                  child: const Icon(Icons.call, color: GirviColors.ink, size: 22),
                 ),
               ),
-              Container(width: 1, height: 36, color: GirviColors.line),
+              const SizedBox(width: 10),
               Expanded(
-                child: _ActionButton(
-                  icon: Icons.currency_rupee,
-                  labelMr: 'पेमेंट घ्या',
-                  labelEn: 'Take Payment',
-                  backgroundColor: GirviColors.navy,
-                  foregroundColor: Colors.white,
-                  onTap: () => context.goNamed(PartialPaymentPage.routeName),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.currency_rupee, size: 18),
+                  label: const BilingualText(
+                    en: 'Take Payment',
+                    mr: 'पेमेंट घ्या',
+                    hi: 'भुगतान लें',
+                  ),
+                  onPressed: canShowActions
+                      ? () => context.pushNamed(
+                            PartialPaymentPage.routeName,
+                            pathParameters: {'id': girvi.id},
+                          )
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GirviColors.navy,
+                    foregroundColor: Colors.white,
+                    disabledBackgroundColor: GirviColors.line,
+                    disabledForegroundColor: GirviColors.muted,
+                    minimumSize: const Size(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
-              Container(width: 1, height: 36, color: GirviColors.line),
+              const SizedBox(width: 10),
               Expanded(
-                child: _ActionButton(
-                  icon: Icons.autorenew,
-                  labelMr: 'नूतनीकरण',
-                  labelEn: 'Renew',
-                  backgroundColor: GirviColors.gold,
-                  foregroundColor: GirviColors.ink,
-                  onTap: () => context.goNamed(RenewalPage.routeName),
+                child: ElevatedButton.icon(
+                  icon: const Icon(Icons.autorenew, size: 18),
+                  label: const BilingualText(
+                    en: 'Renew',
+                    mr: 'नूतनीकरण',
+                    hi: 'नवीनीकरण',
+                  ),
+                  onPressed: canShowActions
+                      ? () => context.pushNamed(
+                            RenewalPage.routeName,
+                            pathParameters: {'id': girvi.id},
+                          )
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: GirviColors.gold,
+                    foregroundColor: GirviColors.ink,
+                    disabledBackgroundColor: GirviColors.line,
+                    disabledForegroundColor: GirviColors.muted,
+                    minimumSize: const Size(0, 40),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    elevation: 0,
+                    textStyle: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
                 ),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionButton extends StatelessWidget {
-  const _ActionButton({
-    required this.icon,
-    required this.labelMr,
-    required this.labelEn,
-    required this.backgroundColor,
-    required this.foregroundColor,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String labelMr;
-  final String labelEn;
-  final Color backgroundColor;
-  final Color foregroundColor;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Container(
-        color: backgroundColor,
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: foregroundColor, size: 22),
-            const SizedBox(height: 6),
-            Text(
-              labelMr,
-              style: TextStyle(
-                color: foregroundColor,
-                fontSize: 12,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            Text(
-              labelEn,
-              style: TextStyle(
-                color: foregroundColor.withValues(alpha: 0.8),
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
         ),
       ),
     );

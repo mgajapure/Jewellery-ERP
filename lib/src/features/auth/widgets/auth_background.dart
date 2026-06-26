@@ -47,21 +47,9 @@ class AuthLightScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox.expand(
       child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
-                    child: child,
-                  ),
-                ),
-              ),
-            );
-          },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(18, 12, 18, 0),
+          child: child,
         ),
       ),
     );

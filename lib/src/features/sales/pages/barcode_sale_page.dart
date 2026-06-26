@@ -1,46 +1,65 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
+import '../presentation/bloc/barcode_sale_bloc.dart';
 import '../theme/sales_colors.dart';
-import 'sales_dashboard_page.dart';
 
 /// SCR-081 Barcode Sales Screen
-///
-/// Fast counter sales via barcode scanning.
-class BarcodeSalePage extends StatefulWidget {
+class BarcodeSalePage extends StatelessWidget {
   const BarcodeSalePage({super.key});
 
   static const routeName = 'barcode-sale';
 
   @override
-  State<BarcodeSalePage> createState() => _BarcodeSalePageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<BarcodeSaleBloc>(),
+      child: BlocListener<BarcodeSaleBloc, BarcodeSaleState>(
+        listener: (context, state) {
+          if (state is BarcodeSaleSuccess) {
+            context.goNamed('invoice-preview', extra: state.order);
+          }
+          if (state is BarcodeSaleItemNotFound) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(
+                    'बारकोड सापडला नाही: ${state.barcode} / Barcode not found'),
+                backgroundColor: SalesColors.red,
+              ),
+            );
+          }
+          if (state is BarcodeSaleError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: SalesColors.red,
+              ),
+            );
+          }
+        },
+        child: const _BarcodeSaleScaffold(),
+      ),
+    );
+  }
 }
 
-class _BarcodeSalePageState extends State<BarcodeSalePage> {
-  final _barcodeController = TextEditingController();
+class _BarcodeSaleScaffold extends StatefulWidget {
+  const _BarcodeSaleScaffold();
 
-  final List<Map<String, dynamic>> _cart = [
-    {
-      'name': 'Gold Chain 22K',
-      'barcode': 'ITM-1001',
-      'price': 128750.0,
-    },
-  ];
+  @override
+  State<_BarcodeSaleScaffold> createState() => _BarcodeSaleScaffoldState();
+}
 
-  double get _total => _cart.fold<double>(0, (sum, item) => sum + (item['price'] as double));
-
-  void _scan() {
-    // TODO: trigger barcode scanner.
-  }
-
-  void _checkout() {
-    context.goNamed('invoice-preview');
-  }
+class _BarcodeSaleScaffoldState extends State<_BarcodeSaleScaffold> {
+  final _barcodeCtrl = TextEditingController();
 
   @override
   void dispose() {
-    _barcodeController.dispose();
+    _barcodeCtrl.dispose();
     super.dispose();
   }
 
@@ -48,152 +67,202 @@ class _BarcodeSalePageState extends State<BarcodeSalePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: SalesColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: SalesColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            SalesDashboardPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'बारकोड विक्री',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
-            ),
-            Text(
-              'Barcode Sale',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SafeArea(
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _barcodeController,
-                      decoration: InputDecoration(
-                        hintText: 'बारकोड स्कॅन करा / Scan Barcode',
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: SalesColors.line),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: SalesColors.line),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: SalesColors.navy, width: 1.5),
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: _scan,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: SalesColors.navy,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Icon(Icons.qr_code_scanner),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _cart.length,
-                separatorBuilder: (_, __) => const SizedBox(height: 10),
-                itemBuilder: (context, index) {
-                  final item = _cart[index];
-                  return _CartItemTile(
-                    name: item['name'] as String,
-                    barcode: item['barcode'] as String,
-                    price: item['price'] as double,
-                    onDelete: () {
-                      // TODO: remove item.
-                    },
-                  );
-                },
-              ),
-            ),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                border: Border(top: BorderSide(color: SalesColors.line)),
-              ),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: BlocBuilder<BarcodeSaleBloc, BarcodeSaleState>(
+          builder: (context, state) {
+            final cart = state is BarcodeSaleCartState
+                ? state
+                : BarcodeSaleCartState(items: const []);
+            final isCheckingOut = state is BarcodeSaleCheckingOut;
+
+            return Column(
+              children: [
+                AppHeader(
+                  titleMr: 'बारकोड विक्री',
+                  titleEn: 'Barcode Sale',
+                  showBackButton: true,
+                  backFallbackRoute: 'sales-dashboard',
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
                     children: [
-                      const Text(
-                        'एकूण / Total',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: SalesColors.ink,
+                      Expanded(
+                        child: TextField(
+                          controller: _barcodeCtrl,
+                          decoration: InputDecoration(
+                            hintText:
+                                'बारकोड स्कॅन करा / Scan Barcode',
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: SalesColors.line),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: SalesColors.line),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                  color: SalesColors.navy, width: 1.5),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14, vertical: 14),
+                          ),
+                          onSubmitted: (barcode) {
+                            if (barcode.trim().isNotEmpty) {
+                              context.read<BarcodeSaleBloc>().add(
+                                    BarcodeSaleItemScanned(
+                                        barcode: barcode.trim()),
+                                  );
+                              _barcodeCtrl.clear();
+                            }
+                          },
                         ),
                       ),
-                      Text(
-                        '₹ ${_total.toStringAsFixed(0)}',
-                        style: const TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: SalesColors.navy,
+                      const SizedBox(width: 10),
+                      ElevatedButton(
+                        onPressed: () {
+                          final b = _barcodeCtrl.text.trim();
+                          if (b.isNotEmpty) {
+                            context
+                                .read<BarcodeSaleBloc>()
+                                .add(BarcodeSaleItemScanned(barcode: b));
+                            _barcodeCtrl.clear();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: SalesColors.navy,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 14, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Icon(Icons.qr_code_scanner),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: cart.items.isEmpty
+                      ? const _EmptyCart()
+                      : ListView.separated(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: 16),
+                          itemCount: cart.items.length,
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final item = cart.items[index];
+                            return _CartItemTile(
+                              name: item.name,
+                              barcode: item.barcode,
+                              price: item.totalAmount,
+                              onDelete: () => context
+                                  .read<BarcodeSaleBloc>()
+                                  .add(BarcodeSaleItemRemoved(
+                                      itemId: item.id)),
+                            );
+                          },
+                        ),
+                ),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    border:
+                        Border(top: BorderSide(color: SalesColors.line)),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'एकूण / Total',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: SalesColors.ink,
+                            ),
+                          ),
+                          Text(
+                            '₹${NumberFormat('#,##,##0.00', 'en_IN').format(cart.total)}',
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: SalesColors.navy,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: isCheckingOut || cart.items.isEmpty
+                              ? null
+                              : () => context
+                                  .read<BarcodeSaleBloc>()
+                                  .add(BarcodeSaleCheckoutStarted()),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: SalesColors.navy,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: isCheckingOut
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('चेकआउट / Checkout'),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: _checkout,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: SalesColors.navy,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      child: const Text('चेकआउट / Checkout'),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+              ],
+            );
+          },
         ),
+      ),
+    );
+  }
+}
+
+class _EmptyCart extends StatelessWidget {
+  const _EmptyCart();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.shopping_cart_outlined,
+              size: 48, color: SalesColors.muted),
+          SizedBox(height: 12),
+          Text(
+            'कार्ट रिकामी आहे\nCart is empty',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: SalesColors.muted, fontSize: 14),
+          ),
+        ],
       ),
     );
   }
@@ -227,7 +296,7 @@ class _CartItemTile extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: SalesColors.navy.withAlpha(10),
+              color: SalesColors.navy.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(Icons.qr_code, color: SalesColors.navy),
@@ -257,7 +326,7 @@ class _CartItemTile extends StatelessWidget {
             ),
           ),
           Text(
-            '₹ ${price.toStringAsFixed(0)}',
+            '₹${NumberFormat('#,##,##0.00', 'en_IN').format(price)}',
             style: const TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.w700,

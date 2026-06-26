@@ -1,136 +1,191 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
+import '../domain/entities/purchase_entry.dart';
 import '../theme/purchase_colors.dart';
 import 'purchase_ledger_page.dart';
 
 /// SCR-059 Purchase Details
-///
-/// Displays complete details of a purchase transaction with item and payment info.
 class PurchaseDetailsPage extends StatelessWidget {
-  const PurchaseDetailsPage({super.key});
+  const PurchaseDetailsPage({super.key, required this.entry});
 
   static const routeName = 'purchase-details';
+
+  final PurchaseEntry entry;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: PurchaseColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: PurchaseColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            PurchaseLedgerPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SafeArea(
+        child: Column(
           children: [
-            Text(
-              'खरेदी तपशील',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+            AppHeader(
+              titleMr: 'खरेदी तपशील',
+              titleEn: 'Purchase Details',
+              showBackButton: true,
+              backFallbackRoute: PurchaseLedgerPage.routeName,
             ),
-            Text(
-              'Purchase Details',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(16),
+                child: _DetailsBody(entry: entry),
               ),
             ),
           ],
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _StatusHeader(
-                purchaseId: 'PUR-20250622-001',
-                status: 'Approved',
-                date: '22 Jun 2025',
-              ),
-              const SizedBox(height: 16),
-              _SummaryCard(
-                amount: '₹ 1,25,000',
-                netWeight: '24.50 g',
-                purity: '91.6%',
-                rate: '₹ 5,102 /g',
-              ),
-              const SizedBox(height: 20),
-              _SectionTitle(titleMr: 'पुरवठादार', titleEn: 'Supplier'),
-              _DetailTile(labelMr: 'नाव', labelEn: 'Name', value: 'Ramesh Jewellers'),
-              _DetailTile(labelMr: 'मोबाईल', labelEn: 'Mobile', value: '+91 98765 43210'),
-              _DetailTile(labelMr: 'बिल क्र.', labelEn: 'Bill No.', value: 'BJ/2025/045'),
-              const SizedBox(height: 20),
-              _SectionTitle(titleMr: 'वस्तू तपशील', titleEn: 'Item Details'),
-              _DetailTile(labelMr: 'धातू', labelEn: 'Metal', value: 'Gold 22K'),
-              _DetailTile(labelMr: 'वस्तू', labelEn: 'Item', value: 'Gold Chain'),
-              _DetailTile(labelMr: 'ग्रॉस वजन', labelEn: 'Gross Wt', value: '26.10 g'),
-              _DetailTile(labelMr: 'नेट वजन', labelEn: 'Net Wt', value: '24.50 g'),
-              _DetailTile(labelMr: 'शुद्धता', labelEn: 'Purity', value: '91.6%'),
-              _DetailTile(labelMr: 'दर', labelEn: 'Rate', value: '₹ 5,102 /g'),
-              const SizedBox(height: 20),
-              _SectionTitle(titleMr: 'पेमेंट तपशील', titleEn: 'Payment Details'),
-              _DetailTile(labelMr: 'पेमेंट पद्धत', labelEn: 'Payment Mode', value: 'Bank Transfer'),
-              _DetailTile(labelMr: 'रक्कम', labelEn: 'Amount', value: '₹ 1,25,000'),
-              _DetailTile(labelMr: 'GST', labelEn: 'GST', value: '₹ 0'),
-              _DetailTile(labelMr: 'एकूण', labelEn: 'Total', value: '₹ 1,25,000'),
-              const SizedBox(height: 24),
-              Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: share / print PDF.
-                      },
-                      icon: const Icon(Icons.print_outlined),
-                      label: const Text('प्रिंट / Print'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: PurchaseColors.navy,
-                        side: const BorderSide(color: PurchaseColors.navy),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: ElevatedButton.icon(
-                      onPressed: () {
-                        // TODO: edit purchase.
-                      },
-                      icon: const Icon(Icons.edit_outlined),
-                      label: const Text('संपादन / Edit'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: PurchaseColors.navy,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
+  }
+}
+
+class _DetailsBody extends StatelessWidget {
+  const _DetailsBody({required this.entry});
+
+  final PurchaseEntry entry;
+
+  @override
+  Widget build(BuildContext context) {
+    final dateFmt = DateFormat('dd MMM yyyy');
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _StatusHeader(
+          purchaseId: entry.id,
+          status: entry.status.labelEn,
+          statusColor: _statusColor(entry.status),
+          date: dateFmt.format(entry.date),
+        ),
+        const SizedBox(height: 16),
+        _SummaryCard(
+          amount: '₹${amtFmt.format(entry.totalAmount)}',
+          netWeight: '${entry.netWeight.toStringAsFixed(2)} g',
+          purity: '${entry.purity.toStringAsFixed(1)}%',
+          rate: '₹${amtFmt.format(entry.rate)}/g',
+        ),
+        const SizedBox(height: 20),
+        _SectionTitle(titleMr: 'पुरवठादार', titleEn: 'Supplier'),
+        _DetailTile(
+            labelMr: 'नाव', labelEn: 'Name', value: entry.supplierName),
+        _DetailTile(
+            labelMr: 'मोबाईल',
+            labelEn: 'Mobile',
+            value: entry.supplierMobile),
+        _DetailTile(
+            labelMr: 'बिल क्र.', labelEn: 'Bill No.', value: entry.billNo),
+        const SizedBox(height: 20),
+        _SectionTitle(titleMr: 'वस्तू तपशील', titleEn: 'Item Details'),
+        _DetailTile(
+            labelMr: 'खरेदी प्रकार',
+            labelEn: 'Purchase Type',
+            value: entry.purchaseType.labelEn),
+        _DetailTile(
+            labelMr: 'धातू',
+            labelEn: 'Metal',
+            value: entry.metalType.labelEn),
+        _DetailTile(
+            labelMr: 'वस्तू', labelEn: 'Item', value: entry.itemName),
+        _DetailTile(
+            labelMr: 'ग्रॉस वजन',
+            labelEn: 'Gross Wt',
+            value: '${entry.grossWeight.toStringAsFixed(2)} g'),
+        _DetailTile(
+            labelMr: 'नेट वजन',
+            labelEn: 'Net Wt',
+            value: '${entry.netWeight.toStringAsFixed(2)} g'),
+        _DetailTile(
+            labelMr: 'शुद्धता',
+            labelEn: 'Purity',
+            value: '${entry.purity.toStringAsFixed(1)}%'),
+        _DetailTile(
+            labelMr: 'दर',
+            labelEn: 'Rate',
+            value: '₹${amtFmt.format(entry.rate)}/g'),
+        const SizedBox(height: 20),
+        _SectionTitle(titleMr: 'पेमेंट तपशील', titleEn: 'Payment Details'),
+        _DetailTile(
+            labelMr: 'पेमेंट पद्धत',
+            labelEn: 'Payment Mode',
+            value: entry.paymentMode.labelEn),
+        _DetailTile(
+            labelMr: 'रक्कम',
+            labelEn: 'Amount',
+            value: '₹${amtFmt.format(entry.amount)}'),
+        _DetailTile(
+            labelMr: 'GST',
+            labelEn: 'GST',
+            value: '₹${amtFmt.format(entry.gst)}'),
+        _DetailTile(
+            labelMr: 'एकूण',
+            labelEn: 'Total',
+            value: '₹${amtFmt.format(entry.totalAmount)}'),
+        const SizedBox(height: 24),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.print_outlined),
+                label: const Text('प्रिंट / Print'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: PurchaseColors.navy,
+                  side: const BorderSide(color: PurchaseColors.navy),
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                          'खरेदी संपादन लवकरच / Edit purchase coming soon'),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.edit_outlined),
+                label: const Text('संपादन / Edit'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: PurchaseColors.navy,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Color _statusColor(PurchaseStatus status) {
+    switch (status) {
+      case PurchaseStatus.approved:
+        return PurchaseColors.green;
+      case PurchaseStatus.rejected:
+        return PurchaseColors.red;
+      case PurchaseStatus.pending:
+        return PurchaseColors.orange;
+    }
   }
 }
 
@@ -138,11 +193,13 @@ class _StatusHeader extends StatelessWidget {
   const _StatusHeader({
     required this.purchaseId,
     required this.status,
+    required this.statusColor,
     required this.date,
   });
 
   final String purchaseId;
   final String status;
+  final Color statusColor;
   final String date;
 
   @override
@@ -170,17 +227,15 @@ class _StatusHeader extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 date,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: Colors.white70,
-                ),
+                style: const TextStyle(fontSize: 12, color: Colors.white70),
               ),
             ],
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: PurchaseColors.green,
+              color: statusColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -266,10 +321,7 @@ class _SummaryItem extends StatelessWidget {
         const SizedBox(height: 2),
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 11,
-            color: PurchaseColors.muted,
-          ),
+          style: const TextStyle(fontSize: 11, color: PurchaseColors.muted),
         ),
       ],
     );
@@ -327,9 +379,7 @@ class _DetailTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: PurchaseColors.line),
-        ),
+        border: Border(bottom: BorderSide(color: PurchaseColors.line)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -337,9 +387,7 @@ class _DetailTile extends StatelessWidget {
           Text(
             '$labelMr / $labelEn',
             style: const TextStyle(
-              fontSize: 13,
-              color: PurchaseColors.muted,
-            ),
+                fontSize: 13, color: PurchaseColors.muted),
           ),
           Text(
             value,

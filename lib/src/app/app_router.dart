@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import '../features/auth/auth.dart';
+import '../features/auth/domain/entities/auth_session.dart';
 import '../features/customer/customer.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/girvi/girvi.dart';
@@ -32,7 +33,8 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/otp',
       name: OtpVerificationPage.routeName,
-      builder: (context, state) => const OtpVerificationPage(),
+      builder: (context, state) =>
+          OtpVerificationPage(args: state.extra! as OtpArgs),
     ),
     GoRoute(
       path: '/registration-pending',
@@ -50,9 +52,16 @@ final appRouter = GoRouter(
       builder: (context, state) => const InventoryListPage(),
     ),
     GoRoute(
+      path: '/inventory/create',
+      name: AddInventoryItemPage.routeName,
+      builder: (context, state) => const AddInventoryItemPage(),
+    ),
+    GoRoute(
       path: '/inventory/:id',
       name: InventoryDetailsPage.routeName,
-      builder: (context, state) => const InventoryDetailsPage(),
+      builder: (context, state) => InventoryDetailsPage(
+        item: state.extra! as InventoryItem,
+      ),
     ),
     GoRoute(
       path: '/customers',
@@ -73,6 +82,11 @@ final appRouter = GoRouter(
       path: '/customers/:id',
       name: CustomerDetailsPage.routeName,
       builder: (context, state) => const CustomerDetailsPage(),
+    ),
+    GoRoute(
+      path: '/customers/:id/edit',
+      name: EditCustomerPage.routeName,
+      builder: (context, state) => const EditCustomerPage(),
     ),
     GoRoute(
       path: '/girvi',
@@ -182,7 +196,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/purchase/:id',
       name: PurchaseDetailsPage.routeName,
-      builder: (context, state) => const PurchaseDetailsPage(),
+      builder: (context, state) => PurchaseDetailsPage(
+        entry: state.extra! as PurchaseEntry,
+      ),
     ),
     GoRoute(
       path: '/sales',
@@ -197,7 +213,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/sales/invoice-preview',
       name: InvoicePreviewPage.routeName,
-      builder: (context, state) => const InvoicePreviewPage(),
+      builder: (context, state) => InvoicePreviewPage(
+        order: state.extra! as SaleOrder,
+      ),
     ),
     GoRoute(
       path: '/sales/ledger',
@@ -217,7 +235,9 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/sales/:id',
       name: SalesDetailsPage.routeName,
-      builder: (context, state) => const SalesDetailsPage(),
+      builder: (context, state) => SalesDetailsPage(
+        order: state.extra! as SaleOrder,
+      ),
     ),
     GoRoute(
       path: '/more',

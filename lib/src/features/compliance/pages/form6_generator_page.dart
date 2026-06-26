@@ -1,29 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
+import '../presentation/bloc/generate_form_bloc.dart';
 import '../theme/compliance_colors.dart';
 import 'compliance_dashboard_page.dart';
 
 /// SCR-036 Form 6 Generator
 ///
 /// Generates Money Lending License records for Maharashtra compliance.
-class Form6GeneratorPage extends StatefulWidget {
+class Form6GeneratorPage extends StatelessWidget {
   const Form6GeneratorPage({super.key});
 
   static const routeName = 'form6-generator';
 
   @override
-  State<Form6GeneratorPage> createState() => _Form6GeneratorPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<GenerateFormBloc>(),
+      child: const _Form6Scaffold(),
+    );
+  }
 }
 
-class _Form6GeneratorPageState extends State<Form6GeneratorPage> {
-  final TextEditingController _licenseController =
+class _Form6Scaffold extends StatefulWidget {
+  const _Form6Scaffold();
+
+  @override
+  State<_Form6Scaffold> createState() => _Form6ScaffoldState();
+}
+
+class _Form6ScaffoldState extends State<_Form6Scaffold> {
+  final _licenseController =
       TextEditingController(text: 'ML-2026-000123');
-  final TextEditingController _businessController =
+  final _businessController =
       TextEditingController(text: 'Shree Jewellers');
-  final TextEditingController _ownerController =
+  final _ownerController =
       TextEditingController(text: 'Mayur Patil');
-  final TextEditingController _addressController =
+  final _addressController =
       TextEditingController(text: '123, MG Road, Pune, Maharashtra');
 
   @override
@@ -35,144 +50,194 @@ class _Form6GeneratorPageState extends State<Form6GeneratorPage> {
     super.dispose();
   }
 
+  void _generate() {
+    context
+        .read<GenerateFormBloc>()
+        .add(GenerateFormSubmitted(formType: 'FORM6'));
+  }
+
+  void _showSuccess(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape:
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.check_circle_outline,
+                color: ComplianceColors.green, size: 28),
+            SizedBox(width: 10),
+            Text(
+              'यशस्वी / Success',
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: ComplianceColors.ink),
+            ),
+          ],
+        ),
+        content: const Text(
+          'फॉर्म ६ यशस्वीरित्या तयार केला.\nForm 6 has been generated successfully.',
+          style:
+              TextStyle(fontSize: 14, color: ComplianceColors.muted),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text(
+              'ठीक आहे / OK',
+              style: TextStyle(
+                  color: ComplianceColors.navy,
+                  fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: ComplianceColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: ComplianceColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            ComplianceDashboardPage.routeName,
-          ),
-        ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'फॉर्म ६ जनरेटर',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
-              ),
+    return BlocListener<GenerateFormBloc, GenerateFormState>(
+      listener: (context, state) {
+        if (state is GenerateFormSuccess) {
+          _showSuccess(context);
+        } else if (state is GenerateFormError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: ComplianceColors.red,
             ),
-            Text(
-              'Form 6 Generator',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: ComplianceColors.screenBg,
+        body: SafeArea(
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'फॉर्म ६ जनरेटर',
+                titleEn: 'Form 6 Generator',
+                showBackButton: true,
+                backFallbackRoute: ComplianceDashboardPage.routeName,
               ),
-            ),
-          ],
-        ),
-      ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SectionTitle(
-                      titleMr: 'परवाना माहिती',
-                      titleEn: 'License Information',
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'परवाना क्रमांक',
-                      labelEn: 'License Number',
-                      controller: _licenseController,
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'व्यवसायाचे नाव',
-                      labelEn: 'Business Name',
-                      controller: _businessController,
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'मालकाचे नाव',
-                      labelEn: 'Owner Name',
-                      controller: _ownerController,
-                    ),
-                    const SizedBox(height: 12),
-                    _InputField(
-                      labelMr: 'पत्ता',
-                      labelEn: 'Address',
-                      controller: _addressController,
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 24),
-                    _PreviewCard(
-                      license: _licenseController.text,
-                      business: _businessController.text,
-                      owner: _ownerController.text,
-                      address: _addressController.text,
-                    ),
-                  ],
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const _SectionTitle(
+                        titleMr: 'परवाना माहिती',
+                        titleEn: 'License Information',
+                      ),
+                      const SizedBox(height: 12),
+                      _InputField(
+                        labelMr: 'परवाना क्रमांक',
+                        labelEn: 'License Number',
+                        controller: _licenseController,
+                      ),
+                      const SizedBox(height: 12),
+                      _InputField(
+                        labelMr: 'व्यवसायाचे नाव',
+                        labelEn: 'Business Name',
+                        controller: _businessController,
+                      ),
+                      const SizedBox(height: 12),
+                      _InputField(
+                        labelMr: 'मालकाचे नाव',
+                        labelEn: 'Owner Name',
+                        controller: _ownerController,
+                      ),
+                      const SizedBox(height: 12),
+                      _InputField(
+                        labelMr: 'पत्ता',
+                        labelEn: 'Address',
+                        controller: _addressController,
+                        maxLines: 3,
+                      ),
+                      const SizedBox(height: 24),
+                      _PreviewCard(
+                        license: _licenseController.text,
+                        business: _businessController.text,
+                        owner: _ownerController.text,
+                        address: _addressController.text,
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: OutlinedButton.icon(
-                      onPressed: () {
-                        // TODO: preview generated PDF.
-                      },
-                      icon: const Icon(Icons.visibility_outlined, size: 18),
-                      label: const Text('Preview'),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: ComplianceColors.navy,
-                        side: const BorderSide(color: ComplianceColors.navy),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    flex: 2,
-                    child: SizedBox(
-                      height: 48,
-                      child: ElevatedButton.icon(
-                        onPressed: () {
-                          // TODO: generate Form 6 PDF.
-                        },
-                        icon: const Icon(Icons.picture_as_pdf_outlined, size: 20),
-                        label: const Text(
-                          'फॉर्म ६ तयार करा / Generate Form 6',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+              BlocBuilder<GenerateFormBloc, GenerateFormState>(
+                builder: (context, state) {
+                  final isLoading = state is GenerateFormLoading;
+                  return Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: isLoading ? null : () {},
+                            icon: const Icon(
+                                Icons.visibility_outlined,
+                                size: 18),
+                            label: const Text('Preview'),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: ComplianceColors.navy,
+                              side: const BorderSide(
+                                  color: ComplianceColors.navy),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius:
+                                      BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 14),
+                            ),
                           ),
                         ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: ComplianceColors.navy,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          flex: 2,
+                          child: SizedBox(
+                            height: 48,
+                            child: ElevatedButton.icon(
+                              onPressed: isLoading ? null : _generate,
+                              icon: isLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                        color: Colors.white,
+                                        strokeWidth: 2,
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.picture_as_pdf_outlined,
+                                      size: 20),
+                              label: const Text(
+                                'फॉर्म ६ तयार करा / Generate Form 6',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: ComplianceColors.navy,
+                                foregroundColor: Colors.white,
+                                shape: RoundedRectangleBorder(
+                                    borderRadius:
+                                        BorderRadius.circular(12)),
+                                elevation: 0,
+                              ),
+                            ),
                           ),
-                          elevation: 0,
                         ),
-                      ),
+                      ],
                     ),
-                  ),
-                ],
+                  );
+                },
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -201,9 +266,7 @@ class _SectionTitle extends StatelessWidget {
         Text(
           titleEn,
           style: const TextStyle(
-            fontSize: 12,
-            color: ComplianceColors.muted,
-          ),
+              fontSize: 12, color: ComplianceColors.muted),
         ),
       ],
     );
@@ -238,9 +301,7 @@ class _InputField extends StatelessWidget {
           Text(
             '$labelMr / $labelEn',
             style: const TextStyle(
-              fontSize: 11,
-              color: ComplianceColors.muted,
-            ),
+                fontSize: 11, color: ComplianceColors.muted),
           ),
           TextField(
             controller: controller,
@@ -318,9 +379,7 @@ class _PreviewRow extends StatelessWidget {
         Text(
           label,
           style: const TextStyle(
-            fontSize: 11,
-            color: ComplianceColors.muted,
-          ),
+              fontSize: 11, color: ComplianceColors.muted),
         ),
         const SizedBox(height: 2),
         Text(

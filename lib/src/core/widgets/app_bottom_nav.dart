@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_language.dart';
+import '../l10n/app_l10n_provider.dart';
+import '../theme/app_colors.dart';
+import 'bilingual_text.dart';
+
 /// Shared full-width bottom navigation used across the main app shells.
 ///
-/// Items (left-to-right):
-/// 0 - Dashboard
-/// 1 - Girvi
-/// 2 - Customers
-/// 3 - More
+/// Items (left-to-right):  0=Dashboard  1=Girvi  2=Customers  3=More
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({
     super.key,
@@ -17,43 +18,26 @@ class AppBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
 
-  static const _navy = Color(0xFF061C49);
-  static const _gold = Color(0xFFE7A726);
-  static const _ink = Color(0xFF071A49);
-  static const _muted = Color(0xFF5E6880);
-  static const _line = Color(0xFFE5E8EF);
-
-  final List<_NavItemConfig> _items = const [
-    _NavItemConfig(
-      icon: Icons.home_outlined,
-      titleMr: 'डॅशबोर्ड',
-      titleEn: 'Dashboard',
-    ),
-    _NavItemConfig(
-      icon: Icons.diamond_outlined,
-      titleMr: 'गिरवी',
-      titleEn: 'Girvi',
-    ),
-    _NavItemConfig(
-      icon: Icons.groups_outlined,
-      titleMr: 'ग्राहक',
-      titleEn: 'Customers',
-    ),
-    _NavItemConfig(
-      icon: Icons.apps_outlined,
-      titleMr: 'अधिक',
-      titleEn: 'More',
-    ),
+  // (en, mr, hi, icon)
+  static const _items = [
+    ('Dashboard', 'डॅशबोर्ड', 'डैशबोर्ड', Icons.home_outlined),
+    ('Girvi', 'गिरवी', 'गिरवी', Icons.diamond_outlined),
+    ('Customers', 'ग्राहक', 'ग्राहक', Icons.groups_outlined),
+    ('More', 'अधिक', 'और', Icons.apps_outlined),
   ];
 
   @override
   Widget build(BuildContext context) {
+    final provider =
+        context.dependOnInheritedWidgetOfExactType<AppLangProvider>();
+    final isEnglish =
+        (provider?.notifier?.language ?? AppLanguage.en) == AppLanguage.en;
+
     return Container(
-      height: 76,
-      padding: const EdgeInsets.only(top: 8),
+      height: isEnglish ? 64 : 76,
       decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(top: BorderSide(color: _line)),
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.line)),
         boxShadow: [
           BoxShadow(
             color: Color(0x14000000),
@@ -64,39 +48,30 @@ class AppBottomNav extends StatelessWidget {
       ),
       child: Row(
         children: List.generate(_items.length, (index) {
-          final item = _items[index];
+          final (en, mr, hi, icon) = _items[index];
           final selected = index == currentIndex;
+          final itemColor = selected ? AppColors.gold : AppColors.ink;
           return Expanded(
             child: InkWell(
               onTap: () => onTap(index),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    item.icon,
-                    color: selected ? _gold : _ink,
-                    size: 22,
-                  ),
+                  Icon(icon, color: itemColor, size: 22),
                   const SizedBox(height: 3),
-                  Text(
-                    item.titleMr,
+                  BilingualText(
+                    en: en,
+                    mr: mr,
+                    hi: hi,
+                    style: TextStyle(
+                      color: itemColor,
+                      fontSize: 10,
+                      fontWeight:
+                          selected ? FontWeight.w800 : FontWeight.w600,
+                    ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected ? _gold : _ink,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Text(
-                    item.titleEn,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      color: selected ? _ink : _muted,
-                      fontSize: 9,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -106,16 +81,4 @@ class AppBottomNav extends StatelessWidget {
       ),
     );
   }
-}
-
-class _NavItemConfig {
-  const _NavItemConfig({
-    required this.icon,
-    required this.titleMr,
-    required this.titleEn,
-  });
-
-  final IconData icon;
-  final String titleMr;
-  final String titleEn;
 }

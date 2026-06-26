@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/di/injection.dart';
+import '../domain/entities/auth_session.dart';
+import '../presentation/bloc/mobile_bloc.dart';
+import '../presentation/bloc/mobile_event.dart';
+import '../presentation/bloc/mobile_state.dart';
 import '../theme/auth_colors.dart';
 import '../widgets/auth_background.dart';
 import '../widgets/auth_footer.dart';
@@ -19,62 +25,129 @@ class MobileNumberPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: AuthLightScaffold(
-        child: Column(
-          children: [
-            AuthTopBar(
-              onBackPressed: () => context.goNamed(SplashPage.routeName),
+    return BlocProvider(
+      create: (_) => getIt<MobileBloc>(),
+      child: const _MobileView(),
+    );
+  }
+}
+
+class _MobileView extends StatefulWidget {
+  const _MobileView();
+
+  @override
+  State<_MobileView> createState() => _MobileViewState();
+}
+
+class _MobileViewState extends State<_MobileView> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit(BuildContext context) {
+    final mobile = _controller.text.trim();
+    if (mobile.length < 10) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('कृपया 10 अंकी मोबाईल क्रमांक टाका.\nEnter a valid 10-digit mobile number.'),
+        ),
+      );
+      return;
+    }
+    context.read<MobileBloc>().add(MobileSubmit(mobile));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocListener<MobileBloc, MobileState>(
+      listener: (context, state) {
+        if (state is MobileOtpSent) {
+          context.goNamed(
+            OtpVerificationPage.routeName,
+            extra: OtpArgs(
+              requestId: state.requestId,
+              mobile: state.mobile,
+              maskedMobile: state.maskedMobile,
             ),
-            const Spacer(),
-            const AuthRoundIcon(icon: Icons.phone_android_outlined),
-            const SizedBox(height: 28),
-            const Text(
-              'मोबाईल क्रमांक प्रविष्ट करा',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AuthColors.ink,
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-              ),
+          );
+        } else if (state is MobileError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: const Color(0xFFB71C1C),
             ),
-            const SizedBox(height: 3),
-            const Text(
-              'Enter Mobile Number',
-              style: TextStyle(
-                color: AuthColors.ink,
-                fontSize: 18,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 22),
-            const Text(
-              'आम्ही तुमच्या मोबाईलवर OTP पाठवू\nWe will send OTP on your mobile',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AuthColors.ink,
-                fontSize: 13,
-                height: 1.55,
-              ),
-            ),
-            const SizedBox(height: 24),
-            const MobileNumberInput(),
-            const SizedBox(height: 15),
-            const AuthInfoNotice(
-              icon: Icons.verified_user_outlined,
-              marathi: 'तुमचा क्रमांक सुरक्षित आहे.',
-              english: 'Your number is safe with us.',
-            ),
-            const SizedBox(height: 15),
-            PrimaryAuthButton(
-              label: 'OTP पाठवा / Send OTP',
-              onPressed: () => context.goNamed(OtpVerificationPage.routeName),
-            ),
-            const SizedBox(height: 22),
-            const _NeedHelp(),
-            const SizedBox(height: 30),
-            const AuthFooter(),
-          ],
+          );
+        }
+      },
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: AuthLightScaffold(
+          child: BlocBuilder<MobileBloc, MobileState>(
+            builder: (context, state) {
+              final isLoading = state is MobileSubmitting;
+              return Column(
+                children: [
+                  AuthTopBar(
+                    onBackPressed: () =>
+                        context.goNamed(SplashPage.routeName),
+                  ),
+                  const Spacer(flex: 10),
+                  const AuthRoundIcon(icon: Icons.phone_android_outlined),
+                  const Spacer(flex: 3),
+                  const Text(
+                    'मोबाईल क्रमांक प्रविष्ट करा',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AuthColors.ink,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  const SizedBox(height: 3),
+                  const Text(
+                    'Enter Mobile Number',
+                    style: TextStyle(
+                      color: AuthColors.ink,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Spacer(flex: 2),
+                  const Text(
+                    'आम्ही तुमच्या मोबाईलवर OTP पाठवू\nWe will send OTP on your mobile',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: AuthColors.ink,
+                      fontSize: 13,
+                      height: 1.55,
+                    ),
+                  ),
+                  const Spacer(flex: 2),
+                  MobileNumberInput(controller: _controller),
+                  const Spacer(flex: 2),
+                  const AuthInfoNotice(
+                    icon: Icons.verified_user_outlined,
+                    marathi: 'तुमचा क्रमांक सुरक्षित आहे.',
+                    english: 'Your number is safe with us.',
+                  ),
+                  const Spacer(flex: 2),
+                  PrimaryAuthButton(
+                    label: 'OTP पाठवा / Send OTP',
+                    isLoading: isLoading,
+                    onPressed: isLoading ? null : () => _submit(context),
+                  ),
+                  const Spacer(flex: 2),
+                  const _NeedHelp(),
+                  const Spacer(flex: 2),
+                  const AuthFooter(),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );
@@ -84,22 +157,69 @@ class MobileNumberPage extends StatelessWidget {
 class _NeedHelp extends StatelessWidget {
   const _NeedHelp();
 
+  void _showHelpDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'मदत / Help',
+          style: TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'लॉगिनमध्ये समस्या येत आहे?',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+            ),
+            Text(
+              'Having trouble logging in?',
+              style: TextStyle(color: Color(0xFF5E6880), fontSize: 12),
+            ),
+            SizedBox(height: 12),
+            Text(
+              '• नोंदणी केलेला मोबाईल नंबर वापरा\n'
+              '  Use your registered mobile number\n\n'
+              '• OTP येण्यासाठी काही मिनिटे थांबा\n'
+              '  Wait a few minutes for OTP\n\n'
+              '• मालकाशी संपर्क साधा\n'
+              '  Contact the shop owner',
+              style: TextStyle(fontSize: 12, height: 1.5),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('ठीक आहे / OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return const Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(Icons.info_outline, color: AuthColors.ink, size: 18),
-        SizedBox(width: 8),
-        Text(
-          'समस्या आहे? मदत घ्या / Need Help?',
-          style: TextStyle(
-            color: AuthColors.ink,
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
+    return GestureDetector(
+      onTap: () => _showHelpDialog(context),
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.info_outline, color: AuthColors.ink, size: 18),
+          SizedBox(width: 8),
+          Text(
+            'समस्या आहे? मदत घ्या / Need Help?',
+            style: TextStyle(
+              color: AuthColors.ink,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              decoration: TextDecoration.underline,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

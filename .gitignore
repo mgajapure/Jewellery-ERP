@@ -34,3 +34,6 @@ windows/flutter/ephemeral/
 Thumbs.db
 *.swp
 *.swo
+
+# Claude Code session artifacts
+.claude/

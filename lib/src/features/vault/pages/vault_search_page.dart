@@ -1,27 +1,47 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/vault_search_result.dart';
+import '../presentation/bloc/vault_search_bloc.dart';
+import '../presentation/bloc/vault_search_event.dart';
+import '../presentation/bloc/vault_search_state.dart';
 import '../theme/vault_colors.dart';
 
 /// SCR-035 Vault Search & Occupancy
 ///
 /// Allows users to locate pledged assets instantly and view vault occupancy
-/// metrics. Search methods include Girvi ID, customer name, mobile, serial
-/// asset ID, and QR scan.
-class VaultSearchPage extends StatefulWidget {
+/// metrics. Search methods include Girvi ID, Customer, Mobile, Serial ID, QR.
+class VaultSearchPage extends StatelessWidget {
   const VaultSearchPage({super.key});
 
   static const routeName = 'vault-search';
 
   @override
-  State<VaultSearchPage> createState() => _VaultSearchPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => GetIt.instance<VaultSearchBloc>()
+        ..add(const VaultSearchStarted()),
+      child: const _VaultSearchView(),
+    );
+  }
 }
 
-class _VaultSearchPageState extends State<VaultSearchPage> {
-  String _searchMode = 'Girvi ID';
-  final TextEditingController _searchController = TextEditingController();
+class _VaultSearchView extends StatefulWidget {
+  const _VaultSearchView();
 
-  final List<String> _searchModes = const [
+  @override
+  State<_VaultSearchView> createState() => _VaultSearchViewState();
+}
+
+class _VaultSearchViewState extends State<_VaultSearchView> {
+  final TextEditingController _searchCtrl = TextEditingController();
+  String _searchMode = 'Girvi ID';
+
+  static const _searchModes = [
     'Girvi ID',
     'Customer',
     'Mobile',
@@ -29,64 +49,28 @@ class _VaultSearchPageState extends State<VaultSearchPage> {
     'QR',
   ];
 
-  final List<Map<String, dynamic>> _mockResults = const [
-    {
-      'customer': 'Ramesh Patil',
-      'girviId': 'GRV-2026-000042',
-      'serialId': 'SA-2026-000042',
-      'status': 'Active',
-      'coordinate': 'VA-A/SF-02/TR-05/SL-18',
-      'mobile': '9876543210',
-    },
-    {
-      'customer': 'Suresh Jadhav',
-      'girviId': 'GRV-2026-000038',
-      'serialId': 'SA-2026-000038',
-      'status': 'Partial Paid',
-      'coordinate': 'VA-A/SF-01/TR-03/SL-07',
-      'mobile': '9123456780',
-    },
-    {
-      'customer': 'Asha Desai',
-      'girviId': 'GRV-2026-000021',
-      'serialId': 'SA-2026-000021',
-      'status': 'Renewed',
-      'coordinate': 'VA-B/SF-03/TR-08/SL-02',
-      'mobile': '9988776655',
-    },
-  ];
-
-  final List<Map<String, dynamic>> _mockOccupancy = const [
-    {'vault': 'Vault-A', 'occupied': 42, 'total': 80},
-    {'vault': 'Vault-B', 'occupied': 64, 'total': 80},
-    {'vault': 'Vault-C', 'occupied': 18, 'total': 60},
-  ];
-
   @override
   void dispose() {
-    _searchController.dispose();
+    _searchCtrl.dispose();
     super.dispose();
   }
 
-  int get _totalSlots {
-    return _mockOccupancy.fold<int>(
-      0,
-      (sum, item) => sum + (item['total'] as int),
-    );
+  void _onSearchChanged(String value) {
+    context.read<VaultSearchBloc>().add(
+          VaultSearchQueryChanged(query: value, searchMode: _searchMode),
+        );
   }
 
-  int get _occupiedSlots {
-    return _mockOccupancy.fold<int>(
-      0,
-      (sum, item) => sum + (item['occupied'] as int),
-    );
-  }
-
-  int get _availableSlots => _totalSlots - _occupiedSlots;
-
-  double get _occupancyPercentage {
-    if (_totalSlots == 0) return 0;
-    return (_occupiedSlots / _totalSlots) * 100;
+  void _onModeChanged(String mode) {
+    setState(() => _searchMode = mode);
+    if (_searchCtrl.text.isNotEmpty) {
+      context.read<VaultSearchBloc>().add(
+            VaultSearchQueryChanged(
+              query: _searchCtrl.text,
+              searchMode: mode,
+            ),
+          );
+    }
   }
 
   @override
@@ -103,51 +87,109 @@ class _VaultSearchPageState extends State<VaultSearchPage> {
               backFallbackRoute: 'more',
             ),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _SearchBar(
-                      controller: _searchController,
-                      searchMode: _searchMode,
-                      onChanged: (value) => setState(() {}),
-                      onScanTap: () {
-                        // TODO: open QR scanner.
-                      },
+              child: BlocBuilder<VaultSearchBloc, VaultSearchState>(
+                builder: (context, state) {
+                  if (state is VaultSearchLoading ||
+                      state is VaultSearchInitial) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state is VaultSearchError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.error_outline,
+                              color: VaultColors.red, size: 48),
+                          const SizedBox(height: 12),
+                          Text(state.message,
+                              style: const TextStyle(
+                                  color: VaultColors.muted, fontSize: 14)),
+                        ],
+                      ),
+                    );
+                  }
+                  final ready = state as VaultSearchReady;
+                  return RefreshIndicator(
+                    color: VaultColors.navy,
+                    onRefresh: () async =>
+                        context
+                            .read<VaultSearchBloc>()
+                            .add(const VaultSearchRefreshed()),
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _SearchBar(
+                            controller: _searchCtrl,
+                            searchMode: _searchMode,
+                            isSearching: ready.isSearching,
+                            onChanged: _onSearchChanged,
+                            onScanTap: () async {
+                              final scanned = await showModalBottomSheet<String>(
+                                context: context,
+                                isScrollControlled: true,
+                                backgroundColor: Colors.transparent,
+                                builder: (_) => const _QrScannerModal(),
+                              );
+                              if (scanned != null && mounted) {
+                                _searchCtrl.text = scanned;
+                                _onSearchChanged(scanned);
+                              }
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          _SearchModeChips(
+                            modes: _searchModes,
+                            selected: _searchMode,
+                            onSelected: _onModeChanged,
+                          ),
+                          const SizedBox(height: 20),
+                          _OccupancySummary(
+                            total: ready.totalSlots,
+                            occupied: ready.occupiedSlots,
+                            available: ready.availableSlots,
+                            percentage: ready.occupancyPercentage,
+                          ),
+                          const SizedBox(height: 20),
+                          const _SectionTitle(
+                            titleMr: 'तिजोरी व्याप्ती हीटमॅप',
+                            titleEn: 'Vault Occupancy Heat Map',
+                          ),
+                          const SizedBox(height: 12),
+                          ...ready.occupancy.map(
+                            (v) => _VaultHeatMap(occupancy: v),
+                          ),
+                          const SizedBox(height: 24),
+                          const _SectionTitle(
+                            titleMr: 'शोध निकाल',
+                            titleEn: 'Search Results',
+                          ),
+                          const SizedBox(height: 12),
+                          if (_searchCtrl.text.isEmpty)
+                            const _EmptySearchState()
+                          else if (ready.isSearching)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 32),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: VaultColors.navy,
+                                ),
+                              ),
+                            )
+                          else if (ready.searchResults == null ||
+                              ready.searchResults!.isEmpty)
+                            _NoResultsState(query: ready.query)
+                          else
+                            ...ready.searchResults!.map(
+                              (r) => _SearchResultCard(result: r),
+                            ),
+                        ],
+                      ),
                     ),
-                    const SizedBox(height: 12),
-                    _SearchModeChips(
-                      modes: _searchModes,
-                      selected: _searchMode,
-                      onSelected: (mode) => setState(() => _searchMode = mode),
-                    ),
-                    const SizedBox(height: 20),
-                    _OccupancySummary(
-                      total: _totalSlots,
-                      occupied: _occupiedSlots,
-                      available: _availableSlots,
-                      percentage: _occupancyPercentage,
-                    ),
-                    const SizedBox(height: 20),
-                    _SectionTitle(
-                      titleMr: 'तिजोरी व्याप्ती हीटमॅप',
-                      titleEn: 'Vault Occupancy Heat Map',
-                    ),
-                    const SizedBox(height: 12),
-                    ..._mockOccupancy.map((item) => _VaultHeatMap(item: item)),
-                    const SizedBox(height: 24),
-                    _SectionTitle(
-                      titleMr: 'शोध निकाल',
-                      titleEn: 'Search Results',
-                    ),
-                    const SizedBox(height: 12),
-                    if (_searchController.text.isEmpty)
-                      const _EmptySearchState()
-                    else
-                      ..._mockResults.map((item) => _SearchResultCard(item: item)),
-                  ],
-                ),
+                  );
+                },
               ),
             ),
           ],
@@ -157,16 +199,20 @@ class _VaultSearchPageState extends State<VaultSearchPage> {
   }
 }
 
+// ─── Widgets ────────────────────────────────────────────────────────────────
+
 class _SearchBar extends StatelessWidget {
   const _SearchBar({
     required this.controller,
     required this.searchMode,
+    required this.isSearching,
     required this.onChanged,
     required this.onScanTap,
   });
 
   final TextEditingController controller;
   final String searchMode;
+  final bool isSearching;
   final ValueChanged<String> onChanged;
   final VoidCallback onScanTap;
 
@@ -195,19 +241,31 @@ class _SearchBar extends StatelessWidget {
               controller: controller,
               onChanged: onChanged,
               decoration: InputDecoration(
-                hintText: '$searchMode ने शोधा / Search by $searchMode',
+                hintText:
+                    '$searchMode ने शोधा / Search by $searchMode',
                 hintStyle: const TextStyle(
                   color: VaultColors.muted,
                   fontSize: 14,
                 ),
                 border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(vertical: 16),
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 16),
               ),
             ),
           ),
-          if (searchMode == 'QR')
+          if (isSearching)
+            const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: VaultColors.navy,
+              ),
+            )
+          else if (searchMode == 'QR')
             IconButton(
-              icon: const Icon(Icons.qr_code_scanner, color: VaultColors.navy),
+              icon: const Icon(Icons.qr_code_scanner,
+                  color: VaultColors.navy),
               onPressed: onScanTap,
             ),
         ],
@@ -307,9 +365,10 @@ class _OccupancySummary extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _statusColor.withValues(alpha: 0.1),
+                  color: _statusColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -330,7 +389,8 @@ class _OccupancySummary extends StatelessWidget {
               value: total == 0 ? 0 : occupied / total,
               minHeight: 10,
               backgroundColor: VaultColors.line,
-              valueColor: AlwaysStoppedAnimation<Color>(_statusColor),
+              valueColor:
+                  AlwaysStoppedAnimation<Color>(_statusColor),
             ),
           ),
           const SizedBox(height: 16),
@@ -383,7 +443,7 @@ class _MetricBox extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: color.withValues(alpha: 0.1),
+          color: color.withAlpha(25),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(
@@ -393,7 +453,7 @@ class _MetricBox extends StatelessWidget {
               '$labelMr / $labelEn',
               style: TextStyle(
                 fontSize: 11,
-                color: color.withValues(alpha: 0.7),
+                color: color.withAlpha(180),
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -414,20 +474,17 @@ class _MetricBox extends StatelessWidget {
 }
 
 class _VaultHeatMap extends StatelessWidget {
-  const _VaultHeatMap({required this.item});
+  const _VaultHeatMap({required this.occupancy});
 
-  final Map<String, dynamic> item;
+  final VaultOccupancy occupancy;
 
   @override
   Widget build(BuildContext context) {
-    final occupied = item['occupied'] as int;
-    final total = item['total'] as int;
-    final percentage = total == 0 ? 0.0 : occupied / total;
-
-    Color barColor;
-    if (percentage >= 0.81) {
+    final pct = occupancy.percentage / 100;
+    final Color barColor;
+    if (occupancy.percentage >= 81) {
       barColor = VaultColors.red;
-    } else if (percentage >= 0.51) {
+    } else if (occupancy.percentage >= 51) {
       barColor = VaultColors.orange;
     } else {
       barColor = VaultColors.green;
@@ -455,7 +512,7 @@ class _VaultHeatMap extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                item['vault'] as String,
+                occupancy.vaultName,
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
@@ -463,7 +520,7 @@ class _VaultHeatMap extends StatelessWidget {
                 ),
               ),
               Text(
-                '${(percentage * 100).toStringAsFixed(0)}% Occupied',
+                '${occupancy.percentage.toStringAsFixed(0)}% Occupied',
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
@@ -476,7 +533,7 @@ class _VaultHeatMap extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
-              value: percentage,
+              value: pct,
               minHeight: 12,
               backgroundColor: VaultColors.line,
               valueColor: AlwaysStoppedAnimation<Color>(barColor),
@@ -484,7 +541,7 @@ class _VaultHeatMap extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            '$occupied occupied • ${total - occupied} available',
+            '${occupancy.occupied} occupied · ${occupancy.available} available',
             style: const TextStyle(
               fontSize: 12,
               color: VaultColors.muted,
@@ -498,9 +555,22 @@ class _VaultHeatMap extends StatelessWidget {
 }
 
 class _SearchResultCard extends StatelessWidget {
-  const _SearchResultCard({required this.item});
+  const _SearchResultCard({required this.result});
 
-  final Map<String, dynamic> item;
+  final VaultSearchResult result;
+
+  Color get _statusColor {
+    switch (result.status.toLowerCase()) {
+      case 'active':
+        return VaultColors.green;
+      case 'overdue':
+        return VaultColors.red;
+      case 'partial paid':
+        return VaultColors.orange;
+      default:
+        return VaultColors.navy;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -527,7 +597,7 @@ class _SearchResultCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item['customer'] as String,
+                  result.customerName,
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w900,
@@ -536,28 +606,32 @@ class _SearchResultCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: VaultColors.cream,
+                  color: _statusColor.withAlpha(15),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  item['status'] as String,
-                  style: const TextStyle(
+                  result.status,
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w800,
-                    color: VaultColors.gold,
+                    color: _statusColor,
                   ),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 10),
-          _ResultRow(icon: Icons.confirmation_number_outlined, text: item['girviId'] as String),
+          _InfoRow(
+            icon: Icons.confirmation_number_outlined,
+            text: result.girviId,
+          ),
           const SizedBox(height: 6),
-          _ResultRow(icon: Icons.qr_code_2_outlined, text: item['serialId'] as String),
+          _InfoRow(icon: Icons.qr_code_2_outlined, text: result.serialId),
           const SizedBox(height: 6),
-          _ResultRow(icon: Icons.phone_outlined, text: item['mobile'] as String),
+          _InfoRow(icon: Icons.phone_outlined, text: result.mobile),
           const Divider(height: 22, color: VaultColors.line),
           Row(
             children: [
@@ -569,7 +643,7 @@ class _SearchResultCard extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  item['coordinate'] as String,
+                  result.coordinate,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w800,
@@ -579,7 +653,14 @@ class _SearchResultCard extends StatelessWidget {
               ),
               InkWell(
                 onTap: () {
-                  // TODO: copy coordinate to clipboard.
+                  Clipboard.setData(
+                      ClipboardData(text: result.coordinate));
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Coordinate copied'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
                 },
                 child: const Icon(
                   Icons.copy_outlined,
@@ -595,7 +676,7 @@ class _SearchResultCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: navigate to Girvi details.
+                    // Navigate to Girvi details
                   },
                   icon: const Icon(Icons.visibility_outlined, size: 18),
                   label: const Text('View Girvi'),
@@ -612,7 +693,7 @@ class _SearchResultCard extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: () {
-                    // TODO: navigate to customer details.
+                    // Navigate to Customer details
                   },
                   icon: const Icon(Icons.person_outline, size: 18),
                   label: const Text('Customer'),
@@ -633,8 +714,8 @@ class _SearchResultCard extends StatelessWidget {
   }
 }
 
-class _ResultRow extends StatelessWidget {
-  const _ResultRow({required this.icon, required this.text});
+class _InfoRow extends StatelessWidget {
+  const _InfoRow({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
@@ -676,7 +757,7 @@ class _EmptySearchState extends StatelessWidget {
           Icon(
             Icons.search_off_outlined,
             size: 48,
-            color: VaultColors.muted.withValues(alpha: 0.5),
+            color: VaultColors.muted.withAlpha(128),
           ),
           const SizedBox(height: 12),
           const Text(
@@ -688,12 +769,143 @@ class _EmptySearchState extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
+          const Text(
             'Type above to search vault locations',
             style: TextStyle(
               fontSize: 12,
               color: VaultColors.muted,
               fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _NoResultsState extends StatelessWidget {
+  const _NoResultsState({required this.query});
+
+  final String query;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: VaultColors.line),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.find_in_page_outlined,
+            size: 48,
+            color: VaultColors.muted.withAlpha(128),
+          ),
+          const SizedBox(height: 12),
+          const Text(
+            'कोणतेही निकाल आढळले नाहीत',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w800,
+              color: VaultColors.ink,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            'No results found for "$query"',
+            style: const TextStyle(
+              fontSize: 12,
+              color: VaultColors.muted,
+              fontWeight: FontWeight.w600,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QrScannerModal extends StatefulWidget {
+  const _QrScannerModal();
+
+  @override
+  State<_QrScannerModal> createState() => _QrScannerModalState();
+}
+
+class _QrScannerModalState extends State<_QrScannerModal> {
+  final MobileScannerController _ctrl = MobileScannerController();
+  bool _scanned = false;
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _onDetect(BarcodeCapture capture) {
+    if (_scanned) return;
+    final barcode = capture.barcodes.firstOrNull;
+    final value = barcode?.rawValue;
+    if (value != null && value.isNotEmpty) {
+      setState(() => _scanned = true);
+      Navigator.pop(context, value);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.65,
+      decoration: const BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 16, 8, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'QR स्कॅन करा / Scan QR',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                IconButton(
+                  onPressed: () => Navigator.pop(context),
+                  icon: const Icon(Icons.close, color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: MobileScanner(
+                controller: _ctrl,
+                onDetect: _onDetect,
+              ),
+            ),
+          ),
+          const Padding(
+            padding: EdgeInsets.all(20),
+            child: Text(
+              'QR कोड फ्रेममध्ये ठेवा / Place QR code within frame',
+              style: TextStyle(
+                color: Colors.white70,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
         ],

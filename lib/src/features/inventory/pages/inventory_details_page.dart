@@ -1,249 +1,287 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
+import '../../../core/widgets/app_header.dart';
+import '../domain/entities/inventory_item.dart';
+import '../presentation/bloc/inventory_detail_bloc.dart';
 import '../theme/inventory_colors.dart';
 import 'inventory_list_page.dart';
 
 /// SCR-049 Inventory Item Details
-///
-/// Complete stock information for a single inventory item including
-/// jewellery details, pricing, images, and movement history.
 class InventoryDetailsPage extends StatelessWidget {
-  const InventoryDetailsPage({super.key});
+  const InventoryDetailsPage({super.key, required this.item});
 
   static const routeName = 'inventory-details';
 
-  final Map<String, dynamic> _item = const {
-    'barcode': 'INV-2026-000001',
-    'name': '22K Gold Necklace',
-    'category': 'Gold Jewellery',
-    'description': 'Traditional 22K gold necklace with intricate design.',
-    'metalType': 'Gold',
-    'grossWeight': 16.20,
-    'netWeight': 15.50,
-    'purity': '22K',
-    'makingCharges': 8500.0,
-    'costPrice': 82000.0,
-    'sellingPrice': 98500.0,
-    'status': 'Available',
-  };
-
-  final List<Map<String, dynamic>> _movements = const [
-    {
-      'date': '15 Jan 2026',
-      'action': 'Created',
-      'user': 'Admin',
-      'reference': 'PUR-2026-00010',
-    },
-    {
-      'date': '18 Jan 2026',
-      'action': 'Price Updated',
-      'user': 'Manager',
-      'reference': '-',
-    },
-    {
-      'date': '20 Jan 2026',
-      'action': 'Available',
-      'user': 'System',
-      'reference': '-',
-    },
-  ];
+  final InventoryItem item;
 
   @override
   Widget build(BuildContext context) {
-    final margin = (_item['sellingPrice'] as double) -
-        (_item['costPrice'] as double);
-    final marginPercent =
-        (margin / (_item['costPrice'] as double)) * 100;
+    return BlocProvider(
+      create: (_) => GetIt.instance<InventoryDetailBloc>(),
+      child: _InventoryDetailsScaffold(item: item),
+    );
+  }
+}
 
-    return Scaffold(
-      backgroundColor: InventoryColors.screenBg,
-      appBar: AppBar(
-        backgroundColor: InventoryColors.navy,
-        foregroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => AppNavigation.popOrGoNamed(
-            context,
-            InventoryListPage.routeName,
+class _InventoryDetailsScaffold extends StatefulWidget {
+  const _InventoryDetailsScaffold({required this.item});
+
+  final InventoryItem item;
+
+  @override
+  State<_InventoryDetailsScaffold> createState() =>
+      _InventoryDetailsScaffoldState();
+}
+
+class _InventoryDetailsScaffoldState
+    extends State<_InventoryDetailsScaffold> {
+  late InventoryItem _item;
+
+  @override
+  void initState() {
+    super.initState();
+    _item = widget.item;
+  }
+
+  Color _statusColor(InventoryStatus status) {
+    switch (status) {
+      case InventoryStatus.available:
+        return InventoryColors.green;
+      case InventoryStatus.reserved:
+        return InventoryColors.orange;
+      case InventoryStatus.sold:
+        return InventoryColors.red;
+      case InventoryStatus.lowStock:
+        return InventoryColors.blue;
+      case InventoryStatus.damaged:
+        return InventoryColors.muted;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+    return BlocListener<InventoryDetailBloc, InventoryDetailState>(
+      listener: (context, state) {
+        if (state is InventoryDetailUpdateSuccess) {
+          setState(() => _item = state.item);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('स्थिती अद्यतनित! / Status updated!'),
+              backgroundColor: InventoryColors.green,
+            ),
+          );
+        }
+        if (state is InventoryDetailError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: InventoryColors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: InventoryColors.screenBg,
+        body: SafeArea(
+          child: Column(
+            children: [
+              AppHeader(
+                titleMr: 'इन्व्हेंटरी तपशील',
+                titleEn: 'Inventory Details',
+                showBackButton: true,
+                backFallbackRoute: InventoryListPage.routeName,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.print_outlined, color: Color(0xFF071A49)),
+                    onPressed: () => _showPrintDialog(context),
+                  ),
+                ],
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _HeaderCard(
+                  item: _item,
+                  statusColor: _statusColor(_item.status),
+                  amtFmt: amtFmt,
+                ),
+                const SizedBox(height: 14),
+                _SectionCard(
+                  titleMr: 'मूळ तपशील',
+                  titleEn: 'Basic Details',
+                  rows: [
+                    _DetailRow(label: 'Barcode', value: _item.barcode),
+                    _DetailRow(label: 'Item Name', value: _item.name),
+                    _DetailRow(label: 'Category', value: _item.category),
+                    if (_item.description.isNotEmpty)
+                      _DetailRow(
+                          label: 'Description', value: _item.description),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SectionCard(
+                  titleMr: 'दागिने तपशील',
+                  titleEn: 'Jewellery Details',
+                  rows: [
+                    _DetailRow(label: 'Metal Type', value: _item.metalType),
+                    _DetailRow(
+                      label: 'Gross Weight',
+                      value: '${_item.grossWeight.toStringAsFixed(2)} g',
+                    ),
+                    _DetailRow(
+                      label: 'Net Weight',
+                      value: '${_item.netWeight.toStringAsFixed(2)} g',
+                    ),
+                    _DetailRow(label: 'Purity', value: _item.purity),
+                    _DetailRow(
+                      label: 'Making Charges',
+                      value: '₹ ${amtFmt.format(_item.makingCharges)}',
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _SectionCard(
+                  titleMr: 'किंमत',
+                  titleEn: 'Pricing',
+                  rows: [
+                    _DetailRow(
+                      label: 'Cost Price',
+                      value: '₹ ${amtFmt.format(_item.costPrice)}',
+                    ),
+                    _DetailRow(
+                      label: 'Selling Price',
+                      value: '₹ ${amtFmt.format(_item.sellingPrice)}',
+                      valueColor: InventoryColors.green,
+                    ),
+                    _DetailRow(
+                      label: 'GST',
+                      value: '₹ ${amtFmt.format(_item.gst)}',
+                    ),
+                    _DetailRow(
+                      label: 'Total Amount',
+                      value: '₹ ${amtFmt.format(_item.totalAmount)}',
+                      valueColor: InventoryColors.navy,
+                    ),
+                    _DetailRow(
+                      label: 'Profit Margin',
+                      value: '${_item.marginPercent.toStringAsFixed(2)}%',
+                      valueColor: InventoryColors.gold,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                _ImageGallery(),
+                const SizedBox(height: 12),
+                if (_item.movements.isNotEmpty)
+                  _MovementHistory(movements: _item.movements),
+              ],
+            ),
+          ),
+              ),
+            ],
           ),
         ),
-        title: const Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        bottomSheet: _BottomActions(
+          item: _item,
+          onReserve: () => context.read<InventoryDetailBloc>().add(
+                InventoryDetailUpdateStatus(
+                  id: _item.id,
+                  status: InventoryStatus.reserved,
+                ),
+              ),
+          onMarkSold: () => context.read<InventoryDetailBloc>().add(
+                InventoryDetailUpdateStatus(
+                  id: _item.id,
+                  status: InventoryStatus.sold,
+                ),
+              ),
+        ),
+      ),
+    );
+  }
+
+  void _showPrintDialog(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: const Text(
+          'बारकोड प्रिंट / Print Barcode',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'इन्व्हेंटरी तपशील',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Container(
+              width: 120,
+              height: 60,
+              decoration: BoxDecoration(
                 color: Colors.white,
+                border: Border.all(color: InventoryColors.line),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Center(
+                child: Icon(Icons.barcode_reader,
+                    size: 40, color: InventoryColors.navy),
               ),
             ),
+            const SizedBox(height: 12),
             Text(
-              'Inventory Details',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
+              _item.barcode,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                letterSpacing: 2,
+                color: InventoryColors.ink,
               ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              _item.name,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12, color: InventoryColors.muted),
             ),
           ],
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.edit_outlined),
-            onPressed: () {
-              // TODO: edit item.
-            },
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('बंद / Close'),
           ),
-          IconButton(
-            icon: const Icon(Icons.print_outlined),
-            onPressed: () {
-              // TODO: print barcode.
-            },
+          ElevatedButton.icon(
+            onPressed: () => Navigator.pop(context),
+            icon: const Icon(Icons.print, size: 16),
+            label: const Text('प्रिंट / Print'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: InventoryColors.navy,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8)),
+            ),
           ),
         ],
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _HeaderCard(item: _item),
-              const SizedBox(height: 16),
-              _SectionCard(
-                titleMr: 'मूळ तपशील',
-                titleEn: 'Basic Details',
-                rows: [
-                  _DetailRow(label: 'Barcode', value: _item['barcode'] as String),
-                  _DetailRow(label: 'Item Name', value: _item['name'] as String),
-                  _DetailRow(label: 'Category', value: _item['category'] as String),
-                  _DetailRow(
-                    label: 'Description',
-                    value: _item['description'] as String,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                titleMr: 'दागिने तपशील',
-                titleEn: 'Jewellery Details',
-                rows: [
-                  _DetailRow(label: 'Metal Type', value: _item['metalType'] as String),
-                  _DetailRow(
-                    label: 'Gross Weight',
-                    value: '${_item['grossWeight']} g',
-                  ),
-                  _DetailRow(
-                    label: 'Net Weight',
-                    value: '${_item['netWeight']} g',
-                  ),
-                  _DetailRow(label: 'Purity', value: _item['purity'] as String),
-                  _DetailRow(
-                    label: 'Making Charges',
-                    value: '₹ ${(_item['makingCharges'] as double).toStringAsFixed(2)}',
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _SectionCard(
-                titleMr: 'किंमत',
-                titleEn: 'Pricing',
-                rows: [
-                  _DetailRow(
-                    label: 'Cost Price',
-                    value: '₹ ${(_item['costPrice'] as double).toStringAsFixed(2)}',
-                  ),
-                  _DetailRow(
-                    label: 'Selling Price',
-                    value: '₹ ${(_item['sellingPrice'] as double).toStringAsFixed(2)}',
-                    valueColor: InventoryColors.green,
-                  ),
-                  _DetailRow(
-                    label: 'Profit Margin',
-                    value: '${marginPercent.toStringAsFixed(2)}%',
-                    valueColor: InventoryColors.gold,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 12),
-              _ImageGallery(),
-              const SizedBox(height: 12),
-              _MovementHistory(movements: _movements),
-              const SizedBox(height: 80),
-            ],
-          ),
-        ),
-      ),
-      bottomSheet: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: InventoryColors.line)),
-        ),
-        child: SafeArea(
-          child: Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: () {
-                    // TODO: mark as reserved.
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: InventoryColors.orange,
-                    side: const BorderSide(color: InventoryColors.orange),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Reserve'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: () {
-                    // TODO: mark as sold.
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: InventoryColors.green,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                  ),
-                  child: const Text('Mark Sold'),
-                ),
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }
 }
 
 class _HeaderCard extends StatelessWidget {
-  const _HeaderCard({required this.item});
+  const _HeaderCard({
+    required this.item,
+    required this.statusColor,
+    required this.amtFmt,
+  });
 
-  final Map<String, dynamic> item;
-
-  Color get _statusColor {
-    switch (item['status'] as String) {
-      case 'Available':
-        return InventoryColors.green;
-      case 'Reserved':
-        return InventoryColors.orange;
-      case 'Sold':
-        return InventoryColors.red;
-      default:
-        return InventoryColors.muted;
-    }
-  }
+  final InventoryItem item;
+  final Color statusColor;
+  final NumberFormat amtFmt;
 
   @override
   Widget build(BuildContext context) {
@@ -262,7 +300,7 @@ class _HeaderCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  item['name'] as String,
+                  item.name,
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
@@ -271,38 +309,45 @@ class _HeaderCard extends StatelessWidget {
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: _statusColor.withAlpha(30),
+                  color: statusColor.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
-                  item['status'] as String,
+                  '${item.status.labelMr} / ${item.status.labelEn}',
                   style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w600,
-                    color: _statusColor,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: statusColor,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 10),
           Text(
-            item['barcode'] as String,
+            item.barcode,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 13,
               color: InventoryColors.gold,
+              fontWeight: FontWeight.w700,
             ),
           ),
           const SizedBox(height: 16),
           Text(
-            '₹ ${(item['sellingPrice'] as double).toStringAsFixed(2)}',
+            '₹ ${amtFmt.format(item.sellingPrice)}',
             style: const TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '${item.metalType} • ${item.purity} • ${item.grossWeight.toStringAsFixed(2)} g',
+            style: const TextStyle(fontSize: 12, color: Colors.white60),
           ),
         ],
       ),
@@ -334,15 +379,28 @@ class _SectionCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$titleMr / $titleEn',
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: InventoryColors.ink,
-            ),
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: InventoryColors.gold,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$titleMr / $titleEn',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: InventoryColors.ink,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           ...rows,
         ],
       ),
@@ -384,7 +442,7 @@ class _DetailRow extends StatelessWidget {
               value,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w500,
+                fontWeight: FontWeight.w600,
                 color: valueColor,
               ),
             ),
@@ -409,13 +467,17 @@ class _ImageGallery extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'फोटो / Images',
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: InventoryColors.ink,
-            ),
+          const Row(
+            children: [
+              Text(
+                'फोटो / Images',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: InventoryColors.ink,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 12),
           Row(
@@ -455,7 +517,7 @@ class _ImagePlaceholder extends StatelessWidget {
 class _MovementHistory extends StatelessWidget {
   const _MovementHistory({required this.movements});
 
-  final List<Map<String, dynamic>> movements;
+  final List<InventoryMovement> movements;
 
   @override
   Widget build(BuildContext context) {
@@ -486,19 +548,92 @@ class _MovementHistory extends StatelessWidget {
   }
 }
 
+class _BottomActions extends StatelessWidget {
+  const _BottomActions({
+    required this.item,
+    required this.onReserve,
+    required this.onMarkSold,
+  });
+
+  final InventoryItem item;
+  final VoidCallback onReserve;
+  final VoidCallback onMarkSold;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<InventoryDetailBloc, InventoryDetailState>(
+      builder: (context, state) {
+        final isLoading = state is InventoryDetailLoading;
+        final canAct = item.status == InventoryStatus.available && !isLoading;
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: InventoryColors.line)),
+          ),
+          child: SafeArea(
+            child: isLoading
+                ? const Center(
+                    child: SizedBox(
+                      height: 40,
+                      child: CircularProgressIndicator(
+                          color: InventoryColors.navy),
+                    ),
+                  )
+                : Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: canAct ? onReserve : null,
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: InventoryColors.orange,
+                            side: const BorderSide(
+                                color: InventoryColors.orange),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('राखीव / Reserve'),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: canAct ? onMarkSold : null,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: InventoryColors.green,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            padding:
+                                const EdgeInsets.symmetric(vertical: 14),
+                          ),
+                          child: const Text('विकले / Mark Sold'),
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _MovementRow extends StatelessWidget {
   const _MovementRow({required this.movement});
 
-  final Map<String, dynamic> movement;
+  final InventoryMovement movement;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
       decoration: const BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: InventoryColors.line),
-        ),
+        border: Border(bottom: BorderSide(color: InventoryColors.line)),
       ),
       child: Row(
         children: [
@@ -516,7 +651,7 @@ class _MovementRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  movement['action'] as String,
+                  movement.action,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
@@ -525,7 +660,7 @@ class _MovementRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${movement['date']} • ${movement['user']} • ${movement['reference']}',
+                  '${movement.date} • ${movement.user} • ${movement.reference}',
                   style: const TextStyle(
                     fontSize: 11,
                     color: InventoryColors.muted,

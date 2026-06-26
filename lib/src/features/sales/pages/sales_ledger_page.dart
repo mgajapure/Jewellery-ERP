@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/sale_order.dart';
+import '../presentation/bloc/sales_ledger_bloc.dart';
 import '../theme/sales_colors.dart';
-import 'sales_dashboard_page.dart';
 
 /// SCR-057 Sales Ledger
-///
-/// Complete sales history with filters and totals.
 class SalesLedgerPage extends StatefulWidget {
   const SalesLedgerPage({super.key});
 
@@ -19,143 +20,195 @@ class SalesLedgerPage extends StatefulWidget {
 }
 
 class _SalesLedgerPageState extends State<SalesLedgerPage> {
-  String _filter = 'सर्व / All';
+  final _searchCtrl = TextEditingController();
 
-  final List<String> _filters = const [
-    'सर्व / All',
-    'पूर्ण / Completed',
-    'परत / Returned',
-    'रद्द / Cancelled',
-  ];
-
-  final List<Map<String, dynamic>> _transactions = const [
-    {
-      'date': '22 Jun 2026',
-      'invoice': 'INV-2026-000102',
-      'customer': 'Ramesh Patil',
-      'items': '2',
-      'tax': '₹5,010',
-      'amount': '₹1,72,010',
-      'status': 'Completed',
-    },
-    {
-      'date': '21 Jun 2026',
-      'invoice': 'INV-2026-000101',
-      'customer': 'Meena Jadhav',
-      'items': '1',
-      'tax': '₹1,260',
-      'amount': '₹43,260',
-      'status': 'Completed',
-    },
-    {
-      'date': '20 Jun 2026',
-      'invoice': 'INV-2026-000100',
-      'customer': 'Amol Deshmukh',
-      'items': '3',
-      'tax': '₹8,250',
-      'amount': '₹2,83,250',
-      'status': 'Returned',
-    },
-    {
-      'date': '19 Jun 2026',
-      'invoice': 'INV-2026-000099',
-      'customer': 'Suresh Patil',
-      'items': '1',
-      'tax': '₹3,750',
-      'amount': '₹1,28,750',
-      'status': 'Completed',
-    },
+  static const _filters = [
+    ('', 'सर्व / All'),
+    ('COMPLETED', 'पूर्ण / Completed'),
+    ('RETURNED', 'परत / Returned'),
+    ('CANCELLED', 'रद्द / Cancelled'),
   ];
 
   @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: SalesColors.screenBg,
-      body: SafeArea(
-        child: Column(
-          children: [
-            AppHeader(
-              titleMr: 'विक्री खाते',
-              titleEn: 'Sales Ledger',
-              showBackButton: true,
-              backFallbackRoute: SalesDashboardPage.routeName,
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.download_outlined,
-                      color: SalesColors.ink),
-                  tooltip: 'एक्सपोर्ट / Export',
-                  onPressed: () {
-                    // TODO: export ledger.
+    return BlocProvider(
+      create: (_) =>
+          GetIt.instance<SalesLedgerBloc>()..add(SalesLedgerStarted()),
+      child: Builder(builder: (context) {
+        return Scaffold(
+          backgroundColor: SalesColors.screenBg,
+          body: SafeArea(
+            child: Column(
+              children: [
+                AppHeader(
+                  titleMr: 'विक्री खाते',
+                  titleEn: 'Sales Ledger',
+                  showBackButton: true,
+                  backFallbackRoute: 'sales-dashboard',
+                  actions: [
+                    IconButton(
+                      icon: const Icon(Icons.download_outlined,
+                          color: SalesColors.ink),
+                      tooltip: 'एक्सपोर्ट / Export',
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                                'एक्सपोर्ट लवकरच / Export coming soon'),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                  child: _SearchBar(
+                    controller: _searchCtrl,
+                    onChanged: (q) => context
+                        .read<SalesLedgerBloc>()
+                        .add(SalesLedgerSearchChanged(query: q)),
+                  ),
+                ),
+                BlocBuilder<SalesLedgerBloc, SalesLedgerState>(
+                  buildWhen: (prev, curr) =>
+                      (prev is SalesLedgerLoaded && curr is SalesLedgerLoaded &&
+                          prev.filter != curr.filter) ||
+                      prev.runtimeType != curr.runtimeType,
+                  builder: (context, state) {
+                    final selected =
+                        state is SalesLedgerLoaded ? state.filter : '';
+                    return _FilterChips(
+                      filters: _filters,
+                      selected: selected,
+                      onSelected: (f) => context
+                          .read<SalesLedgerBloc>()
+                          .add(SalesLedgerFilterChanged(filter: f)),
+                    );
+                  },
+                ),
+                const SizedBox(height: 8),
+                BlocBuilder<SalesLedgerBloc, SalesLedgerState>(
+                  builder: (context, state) {
+                    if (state is SalesLedgerLoading ||
+                        state is SalesLedgerInitial) {
+                      return const Expanded(
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: SalesColors.navy,
+                          ),
+                        ),
+                      );
+                    }
+                    if (state is SalesLedgerError) {
+                      return Expanded(
+                        child: _ErrorView(
+                          message: state.message,
+                          onRetry: () => context
+                              .read<SalesLedgerBloc>()
+                              .add(SalesLedgerRefreshed()),
+                        ),
+                      );
+                    }
+                    if (state is SalesLedgerLoaded) {
+                      return Expanded(
+                        child: _LedgerBody(
+                          state: state,
+                          onRefresh: () async => context
+                              .read<SalesLedgerBloc>()
+                              .add(SalesLedgerRefreshed()),
+                        ),
+                      );
+                    }
+                    return const SizedBox.shrink();
                   },
                 ),
               ],
             ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: _SearchBar(),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _LedgerBody extends StatelessWidget {
+  const _LedgerBody({required this.state, required this.onRefresh});
+
+  final SalesLedgerLoaded state;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+
+    return RefreshIndicator(
+      color: SalesColors.navy,
+      onRefresh: onRefresh,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: _SummaryCard(
+              total: '₹${amtFmt.format(state.totalRevenue)}',
             ),
-            _FilterChips(
-              filters: _filters,
-              selected: _filter,
-              onSelected: (filter) => setState(() => _filter = filter),
-            ),
-            const SizedBox(height: 8),
-            _SummaryCard(total: '₹6,27,270'),
-            const SizedBox(height: 8),
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                children: _transactions
-                    .map((tx) => _TransactionCard(
-                          date: tx['date'] as String,
-                          invoice: tx['invoice'] as String,
-                          customer: tx['customer'] as String,
-                          items: tx['items'] as String,
-                          tax: tx['tax'] as String,
-                          amount: tx['amount'] as String,
-                          status: tx['status'] as String,
-                        ))
-                    .toList(),
-              ),
-            ),
-          ],
-        ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: state.orders.isEmpty
+                ? const _EmptyView()
+                : ListView.builder(
+                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                    itemCount: state.orders.length,
+                    itemBuilder: (context, i) =>
+                        _TransactionCard(order: state.orders[i]),
+                  ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _SearchBar extends StatelessWidget {
+  const _SearchBar({required this.controller, required this.onChanged});
+
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: SalesColors.line),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x10000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
-      ),
-      child: const Row(
-        children: [
-          Icon(Icons.search, color: SalesColors.muted, size: 22),
-          SizedBox(width: 12),
-          Text(
-            'इन्व्हॉईस / ग्राहक शोधा',
-            style: TextStyle(
-              color: SalesColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          Spacer(),
-        ],
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: 'इन्व्हॉईस / ग्राहक शोधा',
+        hintStyle: const TextStyle(color: SalesColors.muted, fontSize: 14),
+        prefixIcon:
+            const Icon(Icons.search, color: SalesColors.muted, size: 22),
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: SalesColors.line),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: SalesColors.line),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: SalesColors.navy, width: 1.5),
+        ),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
       ),
     );
   }
@@ -168,7 +221,7 @@ class _FilterChips extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<String> filters;
+  final List<(String, String)> filters;
   final String selected;
   final ValueChanged<String> onSelected;
 
@@ -182,11 +235,11 @@ class _FilterChips extends StatelessWidget {
         itemCount: filters.length,
         separatorBuilder: (_, __) => const SizedBox(width: 10),
         itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = filter == selected;
+          final (value, label) = filters[index];
+          final isSelected = value == selected;
           return ChoiceChip(
             label: Text(
-              filter,
+              label,
               style: TextStyle(
                 color: isSelected ? SalesColors.gold : SalesColors.ink,
                 fontSize: 11,
@@ -194,7 +247,7 @@ class _FilterChips extends StatelessWidget {
               ),
             ),
             selected: isSelected,
-            onSelected: (_) => onSelected(filter),
+            onSelected: (_) => onSelected(value),
             selectedColor: SalesColors.navy,
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
@@ -217,108 +270,86 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: SalesColors.navy,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'एकूण उत्पन्न / Total Revenue',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white70,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  total,
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.15),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: const Text(
-                'This Month',
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: SalesColors.navy,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'एकूण उत्पन्न / Total Revenue',
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white,
+                  color: Colors.white70,
                   fontWeight: FontWeight.w600,
                 ),
               ),
+              const SizedBox(height: 4),
+              Text(
+                total,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
+          Container(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(20),
             ),
-          ],
-        ),
+            child: const Text(
+              'This Month',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
 
 class _TransactionCard extends StatelessWidget {
-  const _TransactionCard({
-    required this.date,
-    required this.invoice,
-    required this.customer,
-    required this.items,
-    required this.tax,
-    required this.amount,
-    required this.status,
-  });
+  const _TransactionCard({required this.order});
 
-  final String date;
-  final String invoice;
-  final String customer;
-  final String items;
-  final String tax;
-  final String amount;
-  final String status;
+  final SaleOrder order;
 
   Color get _statusColor {
-    switch (status) {
-      case 'Returned':
+    switch (order.status) {
+      case SaleStatus.returned:
         return SalesColors.red;
-      case 'Cancelled':
+      case SaleStatus.cancelled:
         return SalesColors.muted;
       default:
         return SalesColors.green;
     }
   }
 
-  String get _statusText {
-    switch (status) {
-      case 'Completed':
-        return 'पूर्ण / Completed';
-      case 'Returned':
-        return 'परत / Returned';
-      case 'Cancelled':
-        return 'रद्द / Cancelled';
-      default:
-        return status;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final dateFmt = DateFormat('dd MMM yyyy');
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
+
     return InkWell(
-      onTap: () => context.goNamed('sales-details'),
+      onTap: () => context.goNamed(
+        'sales-details',
+        pathParameters: {'id': order.invoiceNo},
+        extra: order,
+      ),
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -342,7 +373,7 @@ class _TransactionCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  invoice,
+                  order.invoiceNo,
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w900,
@@ -350,7 +381,7 @@ class _TransactionCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  date,
+                  dateFmt.format(order.date),
                   style: const TextStyle(
                     fontSize: 12,
                     color: SalesColors.muted,
@@ -359,24 +390,22 @@ class _TransactionCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Text(
-              customer,
+              order.customerName,
               style: const TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w900,
                 color: SalesColors.ink,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 10),
             Row(
               children: [
-                _Tag(text: '$items Items'),
-                const SizedBox(width: 8),
-                _Tag(text: tax),
+                _Tag(text: '${order.items.length} Items'),
                 const SizedBox(width: 8),
                 _Tag(
-                  text: _statusText,
+                  text: '${order.status.labelMr} / ${order.status.labelEn}',
                   color: _statusColor,
                 ),
               ],
@@ -385,12 +414,29 @@ class _TransactionCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const _SummaryItem(
-                  labelMr: 'रक्कम',
-                  labelEn: 'Amount',
+                const Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'रक्कम',
+                      style: TextStyle(
+                        color: SalesColors.muted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    Text(
+                      'Amount',
+                      style: TextStyle(
+                        color: SalesColors.muted,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
                 Text(
-                  amount,
+                  '₹${amtFmt.format(order.totalAmount)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w900,
@@ -402,38 +448,6 @@ class _TransactionCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _SummaryItem extends StatelessWidget {
-  const _SummaryItem({required this.labelMr, required this.labelEn});
-
-  final String labelMr;
-  final String labelEn;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          labelMr,
-          style: const TextStyle(
-            color: SalesColors.muted,
-            fontSize: 10,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        Text(
-          labelEn,
-          style: const TextStyle(
-            color: SalesColors.muted,
-            fontSize: 9,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -460,6 +474,66 @@ class _Tag extends StatelessWidget {
           fontSize: 11,
           fontWeight: FontWeight.w700,
           color: color ?? SalesColors.navy,
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  const _EmptyView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.receipt_long_outlined, size: 48, color: SalesColors.muted),
+          SizedBox(height: 12),
+          Text(
+            'कोणतेही व्यवहार नाहीत\nNo transactions found',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: SalesColors.muted, fontSize: 14),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.wifi_off_outlined,
+                size: 48, color: SalesColors.muted),
+            const SizedBox(height: 16),
+            Text(message,
+                textAlign: TextAlign.center,
+                style: const TextStyle(color: SalesColors.muted)),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: SalesColors.navy,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+              ),
+              child: const Text('पुन्हा प्रयत्न / Retry'),
+            ),
+          ],
         ),
       ),
     );

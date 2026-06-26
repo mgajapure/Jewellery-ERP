@@ -1,3 +1,11 @@
+export 'data/models/inventory_item_model.dart';
+export 'data/repositories/inventory_repository_impl.dart';
+export 'domain/entities/inventory_item.dart';
+export 'domain/repositories/inventory_repository.dart';
 export 'pages/inventory_details_page.dart';
 export 'pages/inventory_list_page.dart';
+export 'presentation/bloc/inventory_list_bloc.dart';
+export 'presentation/bloc/inventory_detail_bloc.dart';
+export 'presentation/bloc/add_inventory_bloc.dart';
+export 'pages/add_inventory_item_page.dart';
 export 'theme/inventory_colors.dart';

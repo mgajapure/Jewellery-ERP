@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/widgets/app_bottom_nav.dart';
+import '../../core/widgets/bilingual_text.dart';
 import '../compliance/compliance.dart';
 import '../customer/customer.dart';
 import '../girvi/girvi.dart';
@@ -29,6 +30,24 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: _screenBg,
+      bottomNavigationBar: AppBottomNav(
+        currentIndex: 0,
+        onTap: (index) {
+          switch (index) {
+            case 0:
+              break;
+            case 1:
+              context.goNamed(GirviListPage.routeName);
+              break;
+            case 2:
+              context.goNamed(CustomerListPage.routeName);
+              break;
+            case 3:
+              context.goNamed(MorePage.routeName);
+              break;
+          }
+        },
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -40,13 +59,16 @@ class DashboardPage extends StatelessWidget {
                   const _GoldRateCard(),
                   const SizedBox(height: 16),
                   const _SectionHeader(
-                    title: 'मुख्य आकडेवारी / Key Metrics',
-                    trailing: 'आज / Today',
+                    en: 'Key Metrics',
+                    mr: 'मुख्य आकडेवारी',
+                    hi: 'मुख्य संख्याएं',
+                    trailingEn: 'Today',
+                    trailingMr: 'आज',
                   ),
                   const SizedBox(height: 10),
                   const _MetricGrid(),
                   const SizedBox(height: 18),
-                  const _SectionHeader(title: 'जलद कृती / Quick Actions'),
+                  const _SectionHeader(en: 'Quick Actions', mr: 'जलद कृती', hi: 'त्वरित क्रियाएं'),
                   const SizedBox(height: 12),
                   _QuickActions(
                     onNewGirviTap: () =>
@@ -65,32 +87,19 @@ class DashboardPage extends StatelessWidget {
                         context.goNamed(SalesDashboardPage.routeName),
                   ),
                   const SizedBox(height: 22),
-                  const _SectionHeader(
-                    title: 'अलीकडील पेमेंट्स / Recent Payments',
-                    trailing: 'सर्व पहा / View All',
+                  _SectionHeader(
+                    en: 'Recent Payments',
+                    mr: 'अलीकडील पेमेंट्स',
+                    hi: 'हाल के भुगतान',
+                    trailingEn: 'View All',
+                    trailingMr: 'सर्व पहा',
+                    onTrailingTap: () =>
+                        context.goNamed(GirviListPage.routeName),
                   ),
                   const SizedBox(height: 12),
                   const _RecentPaymentsList(),
                 ],
               ),
-            ),
-            AppBottomNav(
-              currentIndex: 0,
-              onTap: (index) {
-                switch (index) {
-                  case 0:
-                    break;
-                  case 1:
-                    context.goNamed(GirviListPage.routeName);
-                    break;
-                  case 2:
-                    context.goNamed(CustomerListPage.routeName);
-                    break;
-                  case 3:
-                    context.goNamed(MorePage.routeName);
-                    break;
-                }
-              },
             ),
           ],
         ),
@@ -114,13 +123,18 @@ class _DashboardHeader extends StatelessWidget {
             tooltip: 'Menu',
           ),
           const Spacer(),
-          const Text(
-            'डॅशबोर्ड / Dashboard',
+          const BilingualText(
+            en: 'Dashboard',
+            mr: 'डॅशबोर्ड',
+            hi: 'डैशबोर्ड',
             style: TextStyle(
               color: _ink,
               fontSize: 16,
               fontWeight: FontWeight.w800,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
           ),
           const Spacer(),
           Stack(
@@ -182,27 +196,26 @@ class _GoldRateCard extends StatelessWidget {
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: const [
-              Expanded(
+            children: [
+              const Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'आजचा सोनाचा दर (24K)',
+                    BilingualText(
+                      en: 'Gold Rate Today (24K)',
+                      mr: 'आजचा सोनाचा दर (24K)',
+                      hi: 'आज का सोने का भाव (24K)',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 5),
-                    Text(
-                      'Gold Rate Today (24K)',
-                      style: TextStyle(color: Colors.white, fontSize: 13),
-                    ),
                     SizedBox(height: 9),
-                    Text(
-                      'प्रति 10 ग्रॅम / per 10g',
+                    BilingualText(
+                      en: 'per 10g',
+                      mr: 'प्रति 10 ग्रॅम',
+                      hi: 'प्रति 10 ग्राम',
                       style: TextStyle(color: Colors.white70, fontSize: 12),
                     ),
                   ],
@@ -255,35 +268,57 @@ class _GoldRateCard extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, this.trailing});
+  const _SectionHeader({
+    required this.en,
+    this.mr,
+    this.hi,
+    this.trailingEn,
+    this.trailingMr,
+    this.onTrailingTap,
+  });
 
-  final String title;
-  final String? trailing;
+  final String en;
+  final String? mr;
+  final String? hi;
+  final String? trailingEn;
+  final String? trailingMr;
+  final VoidCallback? onTrailingTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
         Expanded(
-          child: Text(
-            title,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          child: BilingualText(
+            en: en,
+            mr: mr,
+            hi: hi,
             style: const TextStyle(
               color: _ink,
               fontSize: 14,
               fontWeight: FontWeight.w900,
             ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (trailing != null) ...[
+        if (trailingEn != null) ...[
           const SizedBox(width: 12),
-          Text(
-            trailing!,
-            style: const TextStyle(
-              color: _muted,
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
+          GestureDetector(
+            onTap: onTrailingTap,
+            child: BilingualText(
+              en: trailingEn!,
+              mr: trailingMr,
+              style: TextStyle(
+                color: onTrailingTap != null ? _navy : _muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
+                decoration: onTrailingTap != null
+                    ? TextDecoration.underline
+                    : TextDecoration.none,
+                decorationColor: _navy,
+              ),
+              textAlign: TextAlign.end,
             ),
           ),
         ],
@@ -308,24 +343,28 @@ class _MetricGrid extends StatelessWidget {
         _MetricTile(
           titleMr: 'एकूण सक्रिय गिरवी',
           titleEn: 'Active Girvi',
+          titleHi: 'कुल सक्रिय गिरवी',
           value: '128',
           delta: '+12 आज / today',
         ),
         _MetricTile(
           titleMr: 'एकूण डिस्बर्समेंट',
           titleEn: 'Total Disbursed',
+          titleHi: 'ऋण एक्सपोजर',
           value: '₹2.45 Cr',
           delta: '+₹18.6L आज / today',
         ),
         _MetricTile(
           titleMr: 'आजचे व्याज',
           titleEn: 'Interest Due Today',
+          titleHi: 'आज का संग्रह',
           value: '₹48,760',
           delta: '+₹3,250 आज / today',
         ),
         _MetricTile(
           titleMr: 'ओव्हरड्यू खाती',
           titleEn: 'Overdue Accounts',
+          titleHi: 'अतिदेय खाते',
           value: '21',
           valueColor: _red,
           delta: '+2 आज / today',
@@ -339,6 +378,7 @@ class _MetricTile extends StatelessWidget {
   const _MetricTile({
     required this.titleMr,
     required this.titleEn,
+    this.titleHi,
     required this.value,
     required this.delta,
     this.valueColor = _ink,
@@ -346,6 +386,7 @@ class _MetricTile extends StatelessWidget {
 
   final String titleMr;
   final String titleEn;
+  final String? titleHi;
   final String value;
   final String delta;
   final Color valueColor;
@@ -369,26 +410,17 @@ class _MetricTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            titleMr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
+          BilingualText(
+            en: titleEn,
+            mr: titleMr,
+            hi: titleHi,
             style: const TextStyle(
               color: _ink,
               fontSize: 12,
               fontWeight: FontWeight.w800,
             ),
-          ),
-          const SizedBox(height: 3),
-          Text(
-            titleEn,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: _ink,
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
           ),
           const Spacer(),
           Text(
@@ -439,82 +471,23 @@ class _QuickActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: [
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.add,
-              titleMr: 'नवीन गिरवी',
-              titleEn: 'New Girvi',
-              filled: true,
-              onTap: onNewGirviTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.search,
-              titleMr: 'ग्राहक शोधा',
-              titleEn: 'Search Customer',
-              onTap: onSearchCustomerTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.account_balance,
-              titleMr: 'तिजोरी शोध',
-              titleEn: 'Vault Search',
-              onTap: onVaultSearchTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.calculate_outlined,
-              titleMr: 'व्याज गणना',
-              titleEn: 'Interest Calc',
-              onTap: onInterestCalcTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.verified_user_outlined,
-              titleMr: 'अनुपालन',
-              titleEn: 'Compliance',
-              onTap: onComplianceTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.shopping_bag_outlined,
-              titleMr: 'खरेदी',
-              titleEn: 'Purchase',
-              onTap: onPurchaseTap,
-            ),
-          ),
-          const SizedBox(width: 10),
-          SizedBox(
-            width: 76,
-            child: _QuickAction(
-              icon: Icons.point_of_sale_outlined,
-              titleMr: 'विक्री',
-              titleEn: 'Sales',
-              onTap: onSalesTap,
-            ),
-          ),
-        ],
-      ),
+    final actions = [
+      _QuickAction(icon: Icons.add, titleMr: 'नवीन गिरवी', titleEn: 'New Girvi', titleHi: 'नई गिरवी', filled: true, onTap: onNewGirviTap),
+      _QuickAction(icon: Icons.search, titleMr: 'ग्राहक शोधा', titleEn: 'Customer', titleHi: 'ग्राहक', onTap: onSearchCustomerTap),
+      _QuickAction(icon: Icons.account_balance, titleMr: 'तिजोरी', titleEn: 'Vault', titleHi: 'तिजोरी', onTap: onVaultSearchTap),
+      _QuickAction(icon: Icons.calculate_outlined, titleMr: 'व्याज', titleEn: 'Interest', titleHi: 'ब्याज', onTap: onInterestCalcTap),
+      _QuickAction(icon: Icons.verified_user_outlined, titleMr: 'अनुपालन', titleEn: 'Compliance', titleHi: 'अनुपालन', onTap: onComplianceTap),
+      _QuickAction(icon: Icons.shopping_bag_outlined, titleMr: 'खरेदी', titleEn: 'Purchase', titleHi: 'खरीद', onTap: onPurchaseTap),
+      _QuickAction(icon: Icons.point_of_sale_outlined, titleMr: 'विक्री', titleEn: 'Sales', titleHi: 'बिक्री', onTap: onSalesTap),
+    ];
+    return GridView.count(
+      crossAxisCount: 4,
+      crossAxisSpacing: 10,
+      mainAxisSpacing: 14,
+      childAspectRatio: 0.82,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: actions,
     );
   }
 }
@@ -524,6 +497,7 @@ class _QuickAction extends StatelessWidget {
     required this.icon,
     required this.titleMr,
     required this.titleEn,
+    this.titleHi,
     this.filled = false,
     this.onTap,
   });
@@ -531,6 +505,7 @@ class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String titleMr;
   final String titleEn;
+  final String? titleHi;
   final bool filled;
   final VoidCallback? onTap;
 
@@ -559,29 +534,18 @@ class _QuickAction extends StatelessWidget {
             child: Icon(icon, color: filled ? Colors.white : _ink, size: 27),
           ),
           const SizedBox(height: 8),
-          Text(
-            titleMr,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
+          BilingualText(
+            en: titleEn,
+            mr: titleMr,
+            hi: titleHi,
             style: const TextStyle(
               color: _ink,
               fontSize: 10,
               fontWeight: FontWeight.w800,
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            titleEn,
-            maxLines: 2,
+            maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: _ink,
-              fontSize: 10,
-              fontWeight: FontWeight.w500,
-              height: 1.1,
-            ),
           ),
         ],
       ),
@@ -612,30 +576,30 @@ class _RecentPaymentsList extends StatelessWidget {
           _PaymentTransactionTile(
             customerName: 'सुरेश पाटील',
             customerSubtitle: 'Suresh Patil',
-            paymentType: 'व्याज पेमेंट / Interest Payment',
+            paymentTypeMr: 'व्याज पेमेंट',
+            paymentTypeEn: 'Interest Payment',
             amount: '₹12,500',
             time: '10:45 AM',
-            status: 'पूर्ण / Paid',
             icon: Icons.south_west,
           ),
           _ListDivider(),
           _PaymentTransactionTile(
             customerName: 'मीना जाधव',
             customerSubtitle: 'Meena Jadhav',
-            paymentType: 'मुद्दल पेमेंट / Principal Payment',
+            paymentTypeMr: 'मुद्दल पेमेंट',
+            paymentTypeEn: 'Principal Payment',
             amount: '₹35,000',
             time: '09:20 AM',
-            status: 'पूर्ण / Paid',
             icon: Icons.south_west,
           ),
           _ListDivider(),
           _PaymentTransactionTile(
             customerName: 'अमोल देशमुख',
             customerSubtitle: 'Amol Deshmukh',
-            paymentType: 'आंशिक पेमेंट / Partial Payment',
+            paymentTypeMr: 'आंशिक पेमेंट',
+            paymentTypeEn: 'Partial Payment',
             amount: '₹8,760',
             time: 'काल / Yesterday',
-            status: 'पूर्ण / Paid',
             icon: Icons.south_west,
           ),
         ],
@@ -648,19 +612,19 @@ class _PaymentTransactionTile extends StatelessWidget {
   const _PaymentTransactionTile({
     required this.customerName,
     required this.customerSubtitle,
-    required this.paymentType,
+    required this.paymentTypeMr,
+    required this.paymentTypeEn,
     required this.amount,
     required this.time,
-    required this.status,
     required this.icon,
   });
 
   final String customerName;
   final String customerSubtitle;
-  final String paymentType;
+  final String paymentTypeMr;
+  final String paymentTypeEn;
   final String amount;
   final String time;
-  final String status;
   final IconData icon;
 
   @override
@@ -705,15 +669,16 @@ class _PaymentTransactionTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 5),
-                Text(
-                  paymentType,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
+                BilingualText(
+                  en: paymentTypeEn,
+                  mr: paymentTypeMr,
                   style: const TextStyle(
                     color: _ink,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),
@@ -740,9 +705,11 @@ class _PaymentTransactionTile extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 5),
-              Text(
-                status,
-                style: const TextStyle(
+              const BilingualText(
+                en: 'Paid',
+                mr: 'पूर्ण',
+                hi: 'भुगतान',
+                style: TextStyle(
                   color: _green,
                   fontSize: 10,
                   fontWeight: FontWeight.w800,

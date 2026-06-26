@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../../compliance/compliance.dart';
 import '../../inventory/inventory.dart';
 import '../../interest/interest.dart';
@@ -27,6 +28,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'स्टॉक',
       'titleEn': 'Inventory',
+      'titleHi': 'स्टॉक',
       'icon': Icons.inventory_2_outlined,
       'route': InventoryListPage.routeName,
       'color': 0xFF061C49,
@@ -34,6 +36,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'तिजोरी',
       'titleEn': 'Vault',
+      'titleHi': 'तिजोरी',
       'icon': Icons.account_balance_outlined,
       'route': VaultSearchPage.routeName,
       'color': 0xFF2563EB,
@@ -41,6 +44,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'व्याज',
       'titleEn': 'Interest',
+      'titleHi': 'ब्याज',
       'icon': Icons.calculate_outlined,
       'route': InterestCalculatorPage.routeName,
       'color': 0xFF07934A,
@@ -48,6 +52,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'अनुपालन',
       'titleEn': 'Compliance',
+      'titleHi': 'अनुपालन',
       'icon': Icons.verified_user_outlined,
       'route': ComplianceDashboardPage.routeName,
       'color': 0xFFE7A726,
@@ -55,6 +60,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'खरेदी',
       'titleEn': 'Purchase',
+      'titleHi': 'खरीद',
       'icon': Icons.shopping_bag_outlined,
       'route': PurchaseDashboardPage.routeName,
       'color': 0xFF061C49,
@@ -62,6 +68,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'विक्री',
       'titleEn': 'Sales',
+      'titleHi': 'बिक्री',
       'icon': Icons.point_of_sale_outlined,
       'route': SalesDashboardPage.routeName,
       'color': 0xFF061C49,
@@ -69,6 +76,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'बचत योजना',
       'titleEn': 'Savings',
+      'titleHi': 'बचत योजना',
       'icon': Icons.savings_outlined,
       'route': SavingsDashboardPage.routeName,
       'color': 0xFF07934A,
@@ -76,6 +84,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'अहवाल',
       'titleEn': 'Reports',
+      'titleHi': 'रिपोर्ट',
       'icon': Icons.bar_chart_outlined,
       'route': ReportsDashboardPage.routeName,
       'color': 0xFF2563EB,
@@ -83,6 +92,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'कर्मचारी',
       'titleEn': 'Staff',
+      'titleHi': 'कर्मचारी',
       'icon': Icons.badge_outlined,
       'route': StaffDashboardPage.routeName,
       'color': 0xFFF59E0B,
@@ -90,6 +100,7 @@ class MorePage extends StatelessWidget {
     {
       'titleMr': 'सेटिंग्ज',
       'titleEn': 'Settings',
+      'titleHi': 'सेटिंग्स',
       'icon': Icons.settings_outlined,
       'route': SettingsDashboardPage.routeName,
       'color': 0xFF5E6880,
@@ -110,30 +121,16 @@ class MorePage extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'अधिक मॉड्यूल्स / More Modules',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF071A49),
+                child: GridView.count(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 12,
+                  mainAxisSpacing: 12,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: _modules.map((module) => _ModuleCard(module: module)).toList(),
                 ),
               ),
-              const SizedBox(height: 16),
-              GridView.count(
-                crossAxisCount: 2,
-                crossAxisSpacing: 12,
-                mainAxisSpacing: 12,
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                children: _modules.map((module) => _ModuleCard(module: module)).toList(),
-              ),
-            ],
-          ),
-        ),
-      ),
+            ),
     ],
   ),
 ),
@@ -201,26 +198,15 @@ class _ModuleCard extends StatelessWidget {
                 size: 24,
               ),
             ),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  module['titleMr'] as String,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF071A49),
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  module['titleEn'] as String,
-                  style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF5E6880),
-                  ),
-                ),
-              ],
+            BilingualText(
+              en: module['titleEn'] as String,
+              mr: module['titleMr'] as String,
+              hi: module['titleHi'] as String?,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF071A49),
+              ),
             ),
           ],
         ),

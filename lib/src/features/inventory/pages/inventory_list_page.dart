@@ -1,98 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
-import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_header.dart';
+import '../domain/entities/inventory_item.dart';
+import '../presentation/bloc/inventory_list_bloc.dart';
 import '../theme/inventory_colors.dart';
+import 'add_inventory_item_page.dart';
+import 'inventory_details_page.dart';
 
 /// SCR-048 Inventory List
-///
-/// View and manage jewellery stock available for retail sales.
-class InventoryListPage extends StatefulWidget {
+class InventoryListPage extends StatelessWidget {
   const InventoryListPage({super.key});
 
   static const routeName = 'inventory-list';
 
   @override
-  State<InventoryListPage> createState() => _InventoryListPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) =>
+          GetIt.instance<InventoryListBloc>()..add(InventoryListStarted()),
+      child: const _InventoryListScaffold(),
+    );
+  }
 }
 
-class _InventoryListPageState extends State<InventoryListPage> {
-  String _filter = 'All';
+class _InventoryListScaffold extends StatefulWidget {
+  const _InventoryListScaffold();
 
-  final List<String> _filters = const [
-    'सर्व / All',
-    'उपलब्ध / Available',
-    'राखीव / Reserved',
-    'विकले / Sold',
-    'कमी स्टॉक / Low Stock',
+  @override
+  State<_InventoryListScaffold> createState() => _InventoryListScaffoldState();
+}
+
+class _InventoryListScaffoldState extends State<_InventoryListScaffold> {
+  final _searchCtrl = TextEditingController();
+
+  static const _filters = [
+    ('', 'सर्व / All'),
+    ('AVAILABLE', 'उपलब्ध / Available'),
+    ('RESERVED', 'राखीव / Reserved'),
+    ('SOLD', 'विकले / Sold'),
+    ('LOW_STOCK', 'कमी स्टॉक / Low Stock'),
+    ('DAMAGED', 'खराब / Damaged'),
   ];
 
-  final List<Map<String, dynamic>> _items = const [
-    {
-      'barcode': 'INV-2026-000001',
-      'name': '22K Gold Necklace',
-      'category': 'Gold Jewellery',
-      'weight': '15.50',
-      'purity': '22K',
-      'price': '₹98,500',
-      'status': 'Available',
-    },
-    {
-      'barcode': 'INV-2026-000002',
-      'name': 'Diamond Ring',
-      'category': 'Diamond',
-      'weight': '4.20',
-      'purity': '18K',
-      'price': '₹65,000',
-      'status': 'Reserved',
-    },
-    {
-      'barcode': 'INV-2026-000003',
-      'name': 'Silver Payal',
-      'category': 'Silver Jewellery',
-      'weight': '25.00',
-      'purity': '925',
-      'price': '₹12,000',
-      'status': 'Available',
-    },
-    {
-      'barcode': 'INV-2026-000004',
-      'name': 'Gold Coin 10g',
-      'category': 'Bullion',
-      'weight': '10.00',
-      'purity': '24K',
-      'price': '₹72,000',
-      'status': 'Sold',
-    },
-    {
-      'barcode': 'INV-2026-000005',
-      'name': 'Platinum Band',
-      'category': 'Platinum',
-      'weight': '6.50',
-      'purity': '950',
-      'price': '₹45,000',
-      'status': 'Low Stock',
-    },
-  ];
-
-  List<Map<String, dynamic>> get _filteredItems {
-    if (_filter == 'सर्व / All') return _items;
-    return _items.where((item) {
-      final status = item['status'] as String;
-      switch (_filter) {
-        case 'उपलब्ध / Available':
-          return status == 'Available';
-        case 'राखीव / Reserved':
-          return status == 'Reserved';
-        case 'विकले / Sold':
-          return status == 'Sold';
-        case 'कमी स्टॉक / Low Stock':
-          return status == 'Low Stock';
-        default:
-          return true;
-      }
-    }).toList();
+  @override
+  void dispose() {
+    _searchCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -109,34 +66,61 @@ class _InventoryListPageState extends State<InventoryListPage> {
               backFallbackRoute: 'more',
               actions: [
                 IconButton(
-                  icon: const Icon(Icons.add_circle, color: InventoryColors.ink),
+                  icon: const Icon(Icons.add_circle,
+                      color: InventoryColors.navy),
                   tooltip: 'नवीन वस्तू / New Item',
-                  onPressed: () {
-                    // TODO: navigate to create inventory item.
-                  },
+                  onPressed: () =>
+                      context.goNamed(AddInventoryItemPage.routeName),
                 ),
               ],
             ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
               child: _SearchBar(
-                onScanTap: () {
-                  // TODO: open barcode scanner.
-                },
+                controller: _searchCtrl,
+                onChanged: (q) => context
+                    .read<InventoryListBloc>()
+                    .add(InventoryListSearchChanged(query: q)),
               ),
             ),
-            _FilterChips(
-              filters: _filters,
-              selected: _filter,
-              onSelected: (filter) => setState(() => _filter = filter),
+            BlocBuilder<InventoryListBloc, InventoryListState>(
+              builder: (context, state) {
+                final current =
+                    state is InventoryListLoaded ? state.filter : '';
+                return _FilterChips(
+                  filters: _filters,
+                  selected: current,
+                  onSelected: (f) => context
+                      .read<InventoryListBloc>()
+                      .add(InventoryListFilterChanged(filter: f)),
+                );
+              },
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 4),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-                children: _filteredItems
-                    .map((item) => _InventoryCard(item: item))
-                    .toList(),
+              child: BlocBuilder<InventoryListBloc, InventoryListState>(
+                builder: (context, state) {
+                  if (state is InventoryListLoading ||
+                      state is InventoryListInitial) {
+                    return const Center(
+                      child: CircularProgressIndicator(
+                        color: InventoryColors.navy,
+                      ),
+                    );
+                  }
+                  if (state is InventoryListError) {
+                    return _ErrorView(
+                      message: state.message,
+                      onRetry: () => context
+                          .read<InventoryListBloc>()
+                          .add(InventoryListRefreshed()),
+                    );
+                  }
+                  if (state is InventoryListLoaded) {
+                    return _LoadedView(state: state);
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ],
@@ -147,14 +131,15 @@ class _InventoryListPageState extends State<InventoryListPage> {
 }
 
 class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.onScanTap});
+  const _SearchBar({required this.controller, required this.onChanged});
 
-  final VoidCallback onScanTap;
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -162,29 +147,33 @@ class _SearchBar extends StatelessWidget {
         boxShadow: const [
           BoxShadow(
             color: Color(0x10000000),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            blurRadius: 8,
+            offset: Offset(0, 3),
           ),
         ],
       ),
       child: Row(
         children: [
-          const Icon(Icons.search, color: InventoryColors.muted, size: 22),
-          const SizedBox(width: 12),
-          const Text(
-            'बारकोड, नाव, श्रेणी किंवा टॅग शोधा',
-            style: TextStyle(
-              color: InventoryColors.muted,
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
+          const Icon(Icons.search, color: InventoryColors.muted, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+            child: TextField(
+              controller: controller,
+              onChanged: onChanged,
+              decoration: const InputDecoration(
+                hintText: 'बारकोड, नाव, श्रेणी शोधा / Search...',
+                hintStyle: TextStyle(
+                  color: InventoryColors.muted,
+                  fontSize: 13,
+                ),
+                border: InputBorder.none,
+                isDense: true,
+                contentPadding: EdgeInsets.symmetric(vertical: 10),
+              ),
             ),
           ),
-          const Spacer(),
-          Icon(
-            Icons.qr_code_scanner,
-            color: InventoryColors.muted,
-            size: 22,
-          ),
+          const Icon(Icons.qr_code_scanner,
+              color: InventoryColors.muted, size: 20),
         ],
       ),
     );
@@ -198,7 +187,7 @@ class _FilterChips extends StatelessWidget {
     required this.onSelected,
   });
 
-  final List<String> filters;
+  final List<(String, String)> filters;
   final String selected;
   final ValueChanged<String> onSelected;
 
@@ -208,15 +197,15 @@ class _FilterChips extends StatelessWidget {
       height: 40,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: filters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final filter = filters[index];
-          final isSelected = filter == selected;
+          final (value, label) = filters[index];
+          final isSelected = value == selected;
           return ChoiceChip(
             label: Text(
-              filter,
+              label,
               style: TextStyle(
                 color: isSelected ? InventoryColors.gold : InventoryColors.ink,
                 fontSize: 11,
@@ -224,13 +213,15 @@ class _FilterChips extends StatelessWidget {
               ),
             ),
             selected: isSelected,
-            onSelected: (_) => onSelected(filter),
+            onSelected: (_) => onSelected(value),
             selectedColor: InventoryColors.navy,
             backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20),
               side: BorderSide(
-                color: isSelected ? InventoryColors.navy : InventoryColors.line,
+                color: isSelected
+                    ? InventoryColors.navy
+                    : InventoryColors.line,
               ),
             ),
           );
@@ -240,45 +231,152 @@ class _FilterChips extends StatelessWidget {
   }
 }
 
-class _InventoryCard extends StatelessWidget {
-  const _InventoryCard({required this.item});
+class _LoadedView extends StatelessWidget {
+  const _LoadedView({required this.state});
 
-  final Map<String, dynamic> item;
+  final InventoryListLoaded state;
+
+  @override
+  Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0', 'en_IN');
+    return RefreshIndicator(
+      color: InventoryColors.navy,
+      onRefresh: () async {
+        context.read<InventoryListBloc>().add(InventoryListRefreshed());
+      },
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 20),
+        children: [
+          _SummaryRow(
+            totalItems: state.items.length,
+            available: state.availableCount,
+            totalValue: state.totalValue,
+            amtFmt: amtFmt,
+          ),
+          const SizedBox(height: 12),
+          if (state.items.isEmpty)
+            const _EmptyView()
+          else
+            ...state.items.map(
+              (item) => _InventoryCard(
+                item: item,
+                onTap: () => context.goNamed(
+                  InventoryDetailsPage.routeName,
+                  pathParameters: {'id': item.id},
+                  extra: item,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.totalItems,
+    required this.available,
+    required this.totalValue,
+    required this.amtFmt,
+  });
+
+  final int totalItems;
+  final int available;
+  final double totalValue;
+  final NumberFormat amtFmt;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: InventoryColors.navy,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: [
+          _StatCell(
+            label: 'एकूण / Total',
+            value: totalItems.toString(),
+          ),
+          Container(width: 1, height: 36, color: Colors.white24),
+          _StatCell(
+            label: 'उपलब्ध / Available',
+            value: available.toString(),
+          ),
+          Container(width: 1, height: 36, color: Colors.white24),
+          _StatCell(
+            label: 'एकूण मूल्य / Value',
+            value: '₹${amtFmt.format(totalValue)}',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatCell extends StatelessWidget {
+  const _StatCell({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w800,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 9,
+              color: Colors.white60,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InventoryCard extends StatelessWidget {
+  const _InventoryCard({required this.item, required this.onTap});
+
+  final InventoryItem item;
+  final VoidCallback onTap;
 
   Color get _statusColor {
-    switch (item['status'] as String) {
-      case 'Available':
+    switch (item.status) {
+      case InventoryStatus.available:
         return InventoryColors.green;
-      case 'Reserved':
+      case InventoryStatus.reserved:
         return InventoryColors.orange;
-      case 'Sold':
+      case InventoryStatus.sold:
         return InventoryColors.red;
-      case 'Low Stock':
+      case InventoryStatus.lowStock:
         return InventoryColors.blue;
-      default:
+      case InventoryStatus.damaged:
         return InventoryColors.muted;
-    }
-  }
-
-  String get _statusText {
-    switch (item['status'] as String) {
-      case 'Available':
-        return 'उपलब्ध / Available';
-      case 'Reserved':
-        return 'राखीव / Reserved';
-      case 'Sold':
-        return 'विकले / Sold';
-      case 'Low Stock':
-        return 'कमी स्टॉक / Low Stock';
-      default:
-        return item['status'] as String;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final amtFmt = NumberFormat('#,##,##0.00', 'en_IN');
     return InkWell(
-      onTap: () => context.goNamed('inventory-details'),
+      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -289,9 +387,9 @@ class _InventoryCard extends StatelessWidget {
           border: Border.all(color: InventoryColors.line),
           boxShadow: const [
             BoxShadow(
-              color: Color(0x10000000),
-              blurRadius: 10,
-              offset: Offset(0, 4),
+              color: Color(0x0A000000),
+              blurRadius: 8,
+              offset: Offset(0, 3),
             ),
           ],
         ),
@@ -305,22 +403,22 @@ class _InventoryCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        item['barcode'] as String,
+                        item.barcode,
                         style: const TextStyle(
                           color: InventoryColors.navy,
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
-                      const SizedBox(height: 6),
+                      const SizedBox(height: 4),
                       Text(
-                        item['name'] as String,
+                        item.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           color: InventoryColors.ink,
                           fontSize: 15,
-                          fontWeight: FontWeight.w900,
+                          fontWeight: FontWeight.w800,
                         ),
                       ),
                     ],
@@ -336,7 +434,7 @@ class _InventoryCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    _statusText,
+                    '${item.status.labelMr} / ${item.status.labelEn}',
                     style: TextStyle(
                       color: _statusColor,
                       fontSize: 10,
@@ -346,36 +444,37 @@ class _InventoryCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
             Row(
               children: [
                 Expanded(
                   child: _SummaryItem(
                     labelMr: 'वजन',
                     labelEn: 'Weight',
-                    value: '${item['weight']} g',
+                    value: '${item.grossWeight.toStringAsFixed(2)} g',
                   ),
                 ),
-                Container(width: 1, height: 30, color: InventoryColors.line),
+                Container(
+                    width: 1, height: 30, color: InventoryColors.line),
                 Expanded(
                   child: _SummaryItem(
                     labelMr: 'शुद्धता',
                     labelEn: 'Purity',
-                    value: item['purity'] as String,
+                    value: item.purity,
                   ),
                 ),
               ],
             ),
-            const Divider(height: 22, color: InventoryColors.line),
+            const Divider(height: 20, color: InventoryColors.line),
             Row(
               children: [
                 _MetaChip(
                   icon: Icons.category_outlined,
-                  label: item['category'] as String,
+                  label: item.category,
                 ),
                 const Spacer(),
                 Text(
-                  item['price'] as String,
+                  '₹${amtFmt.format(item.sellingPrice)}',
                   style: const TextStyle(
                     color: InventoryColors.ink,
                     fontSize: 16,
@@ -409,34 +508,27 @@ class _SummaryItem extends StatelessWidget {
       children: [
         Text(
           labelMr,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: InventoryColors.muted,
             fontSize: 10,
             fontWeight: FontWeight.w700,
           ),
         ),
-        const SizedBox(height: 1),
         Text(
           labelEn,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: InventoryColors.muted,
             fontSize: 9,
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 5),
+        const SizedBox(height: 4),
         Text(
           value,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
           style: const TextStyle(
             color: InventoryColors.ink,
-            fontSize: 16,
-            fontWeight: FontWeight.w900,
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
           ),
         ),
       ],
@@ -466,6 +558,76 @@ class _MetaChip extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _EmptyView extends StatelessWidget {
+  const _EmptyView();
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: 48),
+        child: Column(
+          children: [
+            Icon(Icons.inventory_2_outlined,
+                size: 56, color: InventoryColors.muted),
+            SizedBox(height: 12),
+            Text(
+              'कोणती वस्तू आढळली नाही\nNo items found',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: InventoryColors.muted,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorView extends StatelessWidget {
+  const _ErrorView({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.error_outline,
+                size: 48, color: InventoryColors.red),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: InventoryColors.ink),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: onRetry,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: InventoryColors.navy,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child: const Text('पुन्हा प्रयत्न / Retry'),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -39,7 +39,8 @@ class CustomerListPage extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
                 children: const [
                   _CustomerTile(
-                    name: 'Ramesh Mahajan',
+                    nameEn: 'Ramesh Mahajan',
+                    nameMr: 'रमेश महाजन',
                     mobile: '98765 43210',
                     customerId: 'CUS-000101',
                     active: true,
@@ -48,7 +49,8 @@ class CustomerListPage extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   _CustomerTile(
-                    name: 'Suresh More',
+                    nameEn: 'Suresh More',
+                    nameMr: 'सुरेश मोरे',
                     mobile: '87654 32109',
                     customerId: 'CUS-000102',
                     active: true,
@@ -57,7 +59,8 @@ class CustomerListPage extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   _CustomerTile(
-                    name: 'Priya Patil',
+                    nameEn: 'Priya Patil',
+                    nameMr: 'प्रिया पाटील',
                     mobile: '77788 99001',
                     customerId: 'CUS-000103',
                     active: true,
@@ -66,7 +69,8 @@ class CustomerListPage extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   _CustomerTile(
-                    name: 'Vikram Jadhav',
+                    nameEn: 'Vikram Jadhav',
+                    nameMr: 'विक्रम जाधव',
                     mobile: '90909 12345',
                     customerId: 'CUS-000104',
                     active: false,
@@ -75,7 +79,8 @@ class CustomerListPage extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   _CustomerTile(
-                    name: 'Anil Kadam',
+                    nameEn: 'Anil Kadam',
+                    nameMr: 'अनिल कदम',
                     mobile: '70203 45678',
                     customerId: 'CUS-000105',
                     active: true,
@@ -84,7 +89,8 @@ class CustomerListPage extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   _CustomerTile(
-                    name: 'Meena Deshmukh',
+                    nameEn: 'Meena Deshmukh',
+                    nameMr: 'मीना देशमुख',
                     mobile: '98220 33445',
                     customerId: 'CUS-000106',
                     active: true,
@@ -237,16 +243,16 @@ class _FilterChips extends StatefulWidget {
 
 class _FilterChipsState extends State<_FilterChips> {
   final List<_FilterChipData> _filters = const [
-    _FilterChipData(mr: 'सर्व', en: 'All', count: 156),
-    _FilterChipData(mr: 'सक्रिय', en: 'Active', count: 112),
-    _FilterChipData(mr: 'निष्क्रिय', en: 'Inactive', count: 44),
+    _FilterChipData(mr: 'सर्व', hi: 'सभी', en: 'All', count: 156),
+    _FilterChipData(mr: 'सक्रिय', hi: 'सक्रिय', en: 'Active', count: 112),
+    _FilterChipData(mr: 'निष्क्रिय', hi: 'निष्क्रिय', en: 'Inactive', count: 44),
   ];
   int _selected = 0;
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 56,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -259,8 +265,7 @@ class _FilterChipsState extends State<_FilterChips> {
             label: BilingualText(
               en: '${filter.en} (${filter.count})',
               mr: '${filter.mr} (${filter.count})',
-              hi: '${filter.mr} (${filter.count})',
-              compact: true,
+              hi: '${filter.hi} (${filter.count})',
               style: TextStyle(
                 color: selected ? Colors.white : CustomerColors.ink,
                 fontSize: 12,
@@ -289,18 +294,21 @@ class _FilterChipsState extends State<_FilterChips> {
 class _FilterChipData {
   const _FilterChipData({
     required this.mr,
+    required this.hi,
     required this.en,
     required this.count,
   });
 
   final String mr;
+  final String hi;
   final String en;
   final int count;
 }
 
 class _CustomerTile extends StatelessWidget {
   const _CustomerTile({
-    required this.name,
+    required this.nameEn,
+    required this.nameMr,
     required this.mobile,
     required this.customerId,
     required this.active,
@@ -308,7 +316,8 @@ class _CustomerTile extends StatelessWidget {
     required this.initialsColor,
   });
 
-  final String name;
+  final String nameEn;
+  final String nameMr;
   final String mobile;
   final String customerId;
   final bool active;
@@ -340,7 +349,7 @@ class _CustomerTile extends StatelessWidget {
         child: Row(
           children: [
             _InitialsAvatar(
-              name: name,
+              name: nameEn,
               backgroundColor: avatarColor,
               foregroundColor: initialsColor,
             ),
@@ -352,8 +361,10 @@ class _CustomerTile extends StatelessWidget {
                   Row(
                     children: [
                       Expanded(
-                        child: Text(
-                          name,
+                        child: BilingualText(
+                          en: nameEn,
+                          mr: nameMr,
+                          hi: nameMr,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
@@ -380,7 +391,6 @@ class _CustomerTile extends StatelessWidget {
                           en: active ? 'Active' : 'Inactive',
                           mr: active ? 'सक्रिय' : 'निष्क्रिय',
                           hi: active ? 'सक्रिय' : 'निष्क्रिय',
-                          compact: true,
                           style: TextStyle(
                             color: active
                                 ? CustomerColors.green

@@ -12,6 +12,7 @@ class CustomerListBloc extends Bloc<CustomerListEvent, CustomerListState> {
       : _repository = repository,
         super(const CustomerListInitial()) {
     on<LoadCustomerList>(_onLoad);
+    on<PreloadCustomerList>(_onPreload);
     on<FilterCustomerByStatus>(_onFilter);
     on<SearchCustomerList>(_onSearch);
     on<RefreshCustomerList>(_onRefresh);
@@ -22,6 +23,15 @@ class CustomerListBloc extends Bloc<CustomerListEvent, CustomerListState> {
   List<Customer> _allCustomers = [];
   bool? _activeFilter;
   String _searchQuery = '';
+
+  void _onPreload(
+    PreloadCustomerList event,
+    Emitter<CustomerListState> emit,
+  ) {
+    _allCustomers = event.customers;
+    _searchQuery = '';
+    emit(_buildLoaded());
+  }
 
   Future<void> _onLoad(
     LoadCustomerList event,
@@ -80,26 +90,17 @@ class CustomerListBloc extends Bloc<CustomerListEvent, CustomerListState> {
       }
       return;
     }
-    // Search via API (may return richer results from backend)
+    // Use client-side filtering when data is already in memory.
+    if (_allCustomers.isNotEmpty) {
+      emit(_buildLoaded());
+      return;
+    }
+    // Fallback: search via API when no local data is available.
     final result = await _repository.searchCustomers(event.query);
     result.when(
       success: (list) {
-        final activeCount = _allCustomers.isEmpty
-            ? list.where((c) => c.isActive).length
-            : _allCustomers.where((c) => c.isActive).length;
-        final inactiveCount = _allCustomers.isEmpty
-            ? list.where((c) => !c.isActive).length
-            : _allCustomers.where((c) => !c.isActive).length;
-        emit(
-          CustomerListLoaded(
-            displayList: list,
-            totalCount: _allCustomers.isEmpty ? list.length : _allCustomers.length,
-            activeCount: activeCount,
-            inactiveCount: inactiveCount,
-            activeFilter: _activeFilter,
-            searchQuery: _searchQuery,
-          ),
-        );
+        _allCustomers = list;
+        emit(_buildLoaded());
       },
       failure: (error) => emit(CustomerListError(error.message)),
     );

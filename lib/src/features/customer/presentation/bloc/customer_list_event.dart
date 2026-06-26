@@ -1,5 +1,7 @@
 import 'package:equatable/equatable.dart';
 
+import '../../domain/entities/customer.dart';
+
 sealed class CustomerListEvent extends Equatable {
   const CustomerListEvent();
 
@@ -9,6 +11,15 @@ sealed class CustomerListEvent extends Equatable {
 
 class LoadCustomerList extends CustomerListEvent {
   const LoadCustomerList();
+}
+
+class PreloadCustomerList extends CustomerListEvent {
+  const PreloadCustomerList(this.customers);
+
+  final List<Customer> customers;
+
+  @override
+  List<Object?> get props => [customers];
 }
 
 class FilterCustomerByStatus extends CustomerListEvent {

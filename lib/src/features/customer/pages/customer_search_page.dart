@@ -15,6 +15,7 @@ import '../presentation/bloc/customer_list_bloc.dart';
 import '../presentation/bloc/customer_list_event.dart';
 import '../presentation/bloc/customer_list_state.dart';
 import '../theme/customer_colors.dart';
+import 'customer_demo_data.dart';
 import 'customer_details_page.dart';
 import 'customer_list_page.dart';
 
@@ -26,7 +27,8 @@ class CustomerSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => getIt<CustomerListBloc>(),
+      create: (_) => getIt<CustomerListBloc>()
+        ..add(PreloadCustomerList(kDemoCustomers.values.toList())),
       child: const _CustomerSearchView(),
     );
   }
@@ -547,6 +549,7 @@ class _SearchResultCard extends StatelessWidget {
       onTap: () => context.pushNamed(
         CustomerDetailsPage.routeName,
         pathParameters: {'id': customer.id},
+        extra: customer,
       ),
       borderRadius: BorderRadius.circular(12),
       child: Container(

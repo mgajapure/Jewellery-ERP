@@ -1,8 +1,8 @@
-name: Deploy Web to Netlify
+name: Deploy Web to Cloudflare Pages
 
 on:
   push:
-    branches: [claude/**]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -25,15 +25,11 @@ jobs:
       - name: Build web
         run: flutter build web --no-tree-shake-icons --release
 
-      - name: Install Netlify CLI
-        run: npm install -g netlify-cli
-
-      - name: Deploy to Netlify
-        run: |
-          netlify deploy \
-            --prod \
-            --dir=build/web \
-            --message "Deploy from ${{ github.ref_name }} @ ${{ github.sha }}"
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: jewellery-erp
+          directory: build/web
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

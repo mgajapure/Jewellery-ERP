@@ -335,8 +335,11 @@ class _QrScannerViewState extends State<_QrScannerView> {
                   color: Colors.black54,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Text(
-                  'QR कोड फ्रेममध्ये धरा / Hold QR code in frame',
+                child: const BilingualText(
+                  en: 'Hold QR code in frame',
+                  mr: 'QR कोड फ्रेममध्ये धरा',
+                  hi: 'QR कोड फ्रेम में रखें',
+                  compact: true,
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 12,

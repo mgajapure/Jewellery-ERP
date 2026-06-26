@@ -74,7 +74,7 @@ class DashboardPage extends StatelessWidget {
                     onNewGirviTap: () =>
                         context.goNamed(CreateGirviWizardPage.routeName),
                     onSearchCustomerTap: () =>
-                        context.goNamed(CustomerSearchPage.routeName),
+                        context.goNamed(CustomerListPage.routeName),
                     onVaultSearchTap: () =>
                         context.goNamed(VaultSearchPage.routeName),
                     onInterestCalcTap: () =>

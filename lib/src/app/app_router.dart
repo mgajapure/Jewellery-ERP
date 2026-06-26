@@ -69,11 +69,6 @@ final appRouter = GoRouter(
       builder: (context, state) => const CustomerListPage(),
     ),
     GoRoute(
-      path: '/customers/search',
-      name: CustomerSearchPage.routeName,
-      builder: (context, state) => const CustomerSearchPage(),
-    ),
-    GoRoute(
       path: '/customers/create',
       name: CreateCustomerPage.routeName,
       builder: (context, state) => const CreateCustomerPage(),

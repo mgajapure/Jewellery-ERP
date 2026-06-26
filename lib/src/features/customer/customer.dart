@@ -18,5 +18,4 @@ export 'presentation/bloc/customer_list_state.dart';
 export 'pages/create_customer_page.dart';
 export 'pages/customer_details_page.dart';
 export 'pages/customer_list_page.dart';
-export 'pages/customer_search_page.dart';
 export 'pages/edit_customer_page.dart';

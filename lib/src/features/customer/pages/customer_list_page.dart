@@ -11,8 +11,6 @@ import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_demo_data.dart';
 import 'customer_details_page.dart';
-import 'customer_search_page.dart';
-
 /// SCR-010 Customer List / Search
 /// Displays a searchable, filterable list of customers with pagination.
 class CustomerListPage extends StatelessWidget {
@@ -30,9 +28,7 @@ class CustomerListPage extends StatelessWidget {
             const _CustomerListHeader(),
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-              child: _SearchBar(
-                onTap: () => context.goNamed(CustomerSearchPage.routeName),
-              ),
+              child: const _SearchBar(),
             ),
             const _FilterChips(),
             const SizedBox(height: 8),
@@ -193,14 +189,11 @@ class _CustomerListHeader extends StatelessWidget {
 }
 
 class _SearchBar extends StatelessWidget {
-  const _SearchBar({required this.onTap});
-
-  final VoidCallback onTap;
+  const _SearchBar();
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),

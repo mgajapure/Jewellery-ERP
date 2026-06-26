@@ -6,6 +6,7 @@ import 'package:jewellery_erp/src/features/more/more.dart';
 
 import '../../../core/widgets/app_bottom_nav.dart';
 import '../../../core/widgets/bilingual_text.dart';
+import '../domain/entities/customer.dart';
 import '../theme/customer_colors.dart';
 import 'create_customer_page.dart';
 import 'customer_details_page.dart';
@@ -37,65 +38,71 @@ class CustomerListPage extends StatelessWidget {
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-                children: const [
+                children: [
                   _CustomerTile(
                     nameEn: 'Ramesh Mahajan',
                     nameMr: 'रमेश महाजन',
                     mobile: '98765 43210',
                     customerId: 'CUS-000101',
                     active: true,
-                    avatarColor: Color(0xFFFFF7E9),
-                    initialsColor: Color(0xFFE7A726),
+                    avatarColor: const Color(0xFFFFF7E9),
+                    initialsColor: const Color(0xFFE7A726),
+                    customer: _demoCustomer('CUS-000101', 'रमेश महाजन', 'Ramesh Mahajan', '98765 43210', true),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _CustomerTile(
                     nameEn: 'Suresh More',
                     nameMr: 'सुरेश मोरे',
                     mobile: '87654 32109',
                     customerId: 'CUS-000102',
                     active: true,
-                    avatarColor: Color(0xFFF0F4FF),
-                    initialsColor: Color(0xFF5E72E4),
+                    avatarColor: const Color(0xFFF0F4FF),
+                    initialsColor: const Color(0xFF5E72E4),
+                    customer: _demoCustomer('CUS-000102', 'सुरेश मोरे', 'Suresh More', '87654 32109', true),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _CustomerTile(
                     nameEn: 'Priya Patil',
                     nameMr: 'प्रिया पाटील',
                     mobile: '77788 99001',
                     customerId: 'CUS-000103',
                     active: true,
-                    avatarColor: Color(0xFFE6F7EF),
-                    initialsColor: Color(0xFF07934A),
+                    avatarColor: const Color(0xFFE6F7EF),
+                    initialsColor: const Color(0xFF07934A),
+                    customer: _demoCustomer('CUS-000103', 'प्रिया पाटील', 'Priya Patil', '77788 99001', true),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _CustomerTile(
                     nameEn: 'Vikram Jadhav',
                     nameMr: 'विक्रम जाधव',
                     mobile: '90909 12345',
                     customerId: 'CUS-000104',
                     active: false,
-                    avatarColor: Color(0xFFFFEBEE),
-                    initialsColor: Color(0xFFE21B2D),
+                    avatarColor: const Color(0xFFFFEBEE),
+                    initialsColor: const Color(0xFFE21B2D),
+                    customer: _demoCustomer('CUS-000104', 'विक्रम जाधव', 'Vikram Jadhav', '90909 12345', false),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _CustomerTile(
                     nameEn: 'Anil Kadam',
                     nameMr: 'अनिल कदम',
                     mobile: '70203 45678',
                     customerId: 'CUS-000105',
                     active: true,
-                    avatarColor: Color(0xFFFFF3E0),
-                    initialsColor: Color(0xFFEF6C00),
+                    avatarColor: const Color(0xFFFFF3E0),
+                    initialsColor: const Color(0xFFEF6C00),
+                    customer: _demoCustomer('CUS-000105', 'अनिल कदम', 'Anil Kadam', '70203 45678', true),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   _CustomerTile(
                     nameEn: 'Meena Deshmukh',
                     nameMr: 'मीना देशमुख',
                     mobile: '98220 33445',
                     customerId: 'CUS-000106',
                     active: true,
-                    avatarColor: Color(0xFFF3E5F5),
-                    initialsColor: Color(0xFF8E24AA),
+                    avatarColor: const Color(0xFFF3E5F5),
+                    initialsColor: const Color(0xFF8E24AA),
+                    customer: _demoCustomer('CUS-000106', 'मीना देशमुख', 'Meena Deshmukh', '98220 33445', true),
                   ),
                 ],
               ),
@@ -123,6 +130,32 @@ class CustomerListPage extends StatelessWidget {
       ),
     );
   }
+}
+
+Customer _demoCustomer(
+  String id,
+  String name,
+  String nameEn,
+  String mobile,
+  bool isActive,
+) {
+  final now = DateTime(2025, 1, 1);
+  return Customer(
+    id: id,
+    tenantId: 'demo',
+    digitalCustomerId: id,
+    name: name,
+    nameEn: nameEn,
+    mobile: mobile,
+    address: 'Demo Address, Pune, Maharashtra - 411001',
+    riskCategory: RiskCategory.low,
+    isActive: isActive,
+    activeGirvi: 0,
+    outstanding: 0,
+    createdAt: now,
+    updatedAt: now,
+    version: 1,
+  );
 }
 
 class _CustomerListHeader extends StatelessWidget {
@@ -314,6 +347,7 @@ class _CustomerTile extends StatelessWidget {
     required this.active,
     required this.avatarColor,
     required this.initialsColor,
+    required this.customer,
   });
 
   final String nameEn;
@@ -323,6 +357,7 @@ class _CustomerTile extends StatelessWidget {
   final bool active;
   final Color avatarColor;
   final Color initialsColor;
+  final Customer customer;
 
   @override
   Widget build(BuildContext context) {
@@ -330,6 +365,7 @@ class _CustomerTile extends StatelessWidget {
       onTap: () => context.goNamed(
         CustomerDetailsPage.routeName,
         pathParameters: {'id': customerId},
+        extra: customer,
       ),
       borderRadius: BorderRadius.circular(12),
       child: Container(

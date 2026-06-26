@@ -18,6 +18,15 @@ class LoadCustomerDetail extends CustomerDetailEvent {
   List<Object?> get props => [id];
 }
 
+class PreloadCustomerDetail extends CustomerDetailEvent {
+  const PreloadCustomerDetail(this.customer);
+
+  final Customer customer;
+
+  @override
+  List<Object?> get props => [customer];
+}
+
 class CreateCustomer extends CustomerDetailEvent {
   const CreateCustomer(this.request);
 

@@ -12,6 +12,7 @@ class CustomerDetailBloc
       : _repository = repository,
         super(const CustomerDetailInitial()) {
     on<LoadCustomerDetail>(_onLoad);
+    on<PreloadCustomerDetail>((event, emit) => emit(CustomerDetailLoaded(event.customer)));
     on<CreateCustomer>(_onCreate);
     on<UpdateCustomer>(_onUpdate);
   }

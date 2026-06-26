@@ -71,9 +71,17 @@ class CustomerDetailsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final id = GoRouterState.of(context).pathParameters['id'] ?? '';
+    final preloaded = GoRouterState.of(context).extra as Customer?;
     return BlocProvider(
-      create: (_) =>
-          getIt<CustomerDetailBloc>()..add(LoadCustomerDetail(id)),
+      create: (_) {
+        final bloc = getIt<CustomerDetailBloc>();
+        if (preloaded != null) {
+          bloc.add(PreloadCustomerDetail(preloaded));
+        } else {
+          bloc.add(LoadCustomerDetail(id));
+        }
+        return bloc;
+      },
       child: _CustomerDetailsView(customerId: id),
     );
   }

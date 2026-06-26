@@ -1,8 +1,8 @@
-name: Deploy Web to Netlify
+name: Deploy Web to Cloudflare Pages
 
 on:
   push:
-    branches: [claude/**]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -25,15 +25,11 @@ jobs:
       - name: Build web
         run: flutter build web --no-tree-shake-icons --release
 
-      - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/pages-action@v1
         with:
-          publish-dir: build/web
-          production-branch: claude/current-branch-inquiry-j0bcmz
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "Deploy from ${{ github.ref_name }} @ ${{ github.sha }}"
-          enable-pull-request-comment: false
-          enable-commit-comment: false
-        env:
-          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
-          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          projectName: jewellery-erp
+          directory: build/web
+          gitHubToken: ${{ secrets.GITHUB_TOKEN }}

@@ -25,7 +25,7 @@ class CustomerRepositoryImpl implements CustomerRepository {
       final queryParams = <String, dynamic>{};
       if (activeOnly != null) queryParams['active'] = activeOnly;
       if (searchQuery != null && searchQuery.isNotEmpty) {
-        queryParams['q'] = searchQuery;
+        queryParams['search'] = searchQuery;
       }
       final response = await _apiClient.get(
         ApiEndpoints.customers,
@@ -63,8 +63,8 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<Result<List<Customer>>> searchCustomers(String query) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.customerSearch,
-        queryParameters: {'q': query},
+        ApiEndpoints.customers,
+        queryParameters: {'search': query},
       );
       final data = response.data as Map<String, dynamic>;
       final list = (data['data'] as List<dynamic>)
@@ -88,8 +88,10 @@ class CustomerRepositoryImpl implements CustomerRepository {
           'mobile': request.mobile,
           if (request.alternateMobile != null)
             'alternateMobile': request.alternateMobile,
-          'address':
-              '${request.address}, ${request.city}, ${request.state} - ${request.pincode}',
+          'address': request.address,
+          'city': request.city,
+          'state': request.state,
+          'pincode': request.pincode,
           if (request.gender != null) 'gender': request.gender,
           if (request.dateOfBirth != null) 'dateOfBirth': request.dateOfBirth,
           if (request.aadhaarNumber != null)
@@ -113,14 +115,16 @@ class CustomerRepositoryImpl implements CustomerRepository {
   Future<Result<Customer>> updateCustomer(
       UpdateCustomerRequest request) async {
     try {
-      final response = await _apiClient.put(
+      final response = await _apiClient.patch(
         ApiEndpoints.customerById(request.id),
         data: {
           'name': request.name,
           if (request.alternateMobile != null)
             'alternateMobile': request.alternateMobile,
-          'address':
-              '${request.address}, ${request.city}, ${request.state} - ${request.pincode}',
+          'address': request.address,
+          'city': request.city,
+          'state': request.state,
+          'pincode': request.pincode,
           if (request.gender != null) 'gender': request.gender,
           if (request.dateOfBirth != null) 'dateOfBirth': request.dateOfBirth,
           if (request.panNumber != null) 'panNumber': request.panNumber,

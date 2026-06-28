@@ -59,7 +59,7 @@ Stack: NestJS + TypeScript. Run it locally or point at a deployed instance for r
 **Switching to the real backend** (three steps in `api_client.dart`):
 
 1. **Remove the mock interceptor** — delete `dio.interceptors.add(MockInterceptor())` from `_buildDio()`.
-2. **Set the real base URL** — change `baseUrl` from `'https://api.example.com'` to the backend's URL (e.g. `'http://localhost:3000'` for local NestJS dev or the deployed domain).
+2. **Set the real base URL** — `baseUrl` is currently `'https://api.example.com/api/v1'` (note the `/api/v1` suffix — all `ApiEndpoints` constants are relative paths without this prefix). Change the host portion to the backend's address (e.g. `'http://localhost:3000/api/v1'` for local NestJS dev or `'https://your-domain.com/api/v1'` for the deployed instance).
 3. **Inject the Bearer token** — `_secureStorage` is already declared in `ApiClient` for this purpose; add an interceptor that reads `accessToken` from `SecureStorage` and sets `options.headers['Authorization'] = 'Bearer $token'` in `onRequest`.
 
 All endpoint paths are declared as string constants in `ApiEndpoints` (`lib/src/core/api/api_endpoints.dart`) and already match the backend route contract — no changes needed there when switching.

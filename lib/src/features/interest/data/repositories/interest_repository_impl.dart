@@ -19,7 +19,7 @@ class InterestRepositoryImpl implements InterestRepository {
   @override
   Future<Result<InterestLedger>> getLedger(String girviId) async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.interestLedger(girviId));
+      final response = await _apiClient.get(ApiEndpoints.girviInterest(girviId));
       final data = (response.data as Map<String, dynamic>)['data']
           as Map<String, dynamic>;
       return Result.success(InterestLedgerModel.fromJson(data));

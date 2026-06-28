@@ -28,18 +28,35 @@ class AuthRepositoryImpl implements AuthRepository {
   static const _kStaffName = 'auth.staffName';
   static const _kRole = 'auth.role';
   static const _kExpiresAt = 'auth.expiresAt';
+  static const _kDeviceId = 'auth.deviceId';
+
+  Future<String> _getDeviceId() async {
+    final stored = await _secureStorage.read(_kDeviceId);
+    if (stored != null) return stored;
+    final generated =
+        'dev-${DateTime.now().millisecondsSinceEpoch}-${Object().hashCode.abs()}';
+    await _secureStorage.write(_kDeviceId, generated);
+    return generated;
+  }
 
   @override
   Future<Result<String>> requestOtp(String mobile) async {
     try {
-      final response = await _apiClient.post(
-        ApiEndpoints.requestOtp,
-        data: {'mobile': mobile},
+      final tenantId = await _secureStorage.read(_kTenantId) ?? '';
+      final deviceId = await _getDeviceId();
+      await _apiClient.post(
+        ApiEndpoints.sendOtp,
+        data: {
+          'mobile': mobile,
+          'tenantId': tenantId,
+          'deviceFingerprint': deviceId,
+          'deviceName': 'Jewellery ERP App',
+          'platform': 'android',
+        },
       );
-      final body = response.data as Map<String, dynamic>;
-      final requestId =
-          (body['data'] as Map<String, dynamic>)['requestId'] as String;
-      return Result.success(requestId);
+      // Real backend returns a success message, not a requestId.
+      // Return mobile as the identifier so OtpBloc can display masking.
+      return Result.success(mobile);
     } on DioException catch (e) {
       return Result.failure(_mapError(e));
     } catch (e) {
@@ -54,12 +71,28 @@ class AuthRepositoryImpl implements AuthRepository {
     required String mobile,
   }) async {
     try {
+      final tenantId = await _secureStorage.read(_kTenantId) ?? '';
+      final deviceId = await _getDeviceId();
       final response = await _apiClient.post(
         ApiEndpoints.verifyOtp,
-        data: {'requestId': requestId, 'otp': otp, 'mobile': mobile},
+        data: {
+          'mobile': mobile,
+          'tenantId': tenantId,
+          'otp': otp,
+          'deviceFingerprint': deviceId,
+        },
       );
       final body = response.data as Map<String, dynamic>;
+      final data = body['data'] as Map<String, dynamic>;
 
+      // Real backend: deviceStatus PENDING means awaiting admin approval.
+      if (data['deviceStatus'] == 'PENDING') {
+        return Result.failure(
+          const AuthException(message: '__registration_pending__'),
+        );
+      }
+
+      // Legacy mock fallback: success=false with pending=true flag.
       if (body['success'] == false) {
         if (body['pending'] == true) {
           return Result.failure(
@@ -73,9 +106,7 @@ class AuthRepositoryImpl implements AuthRepository {
         );
       }
 
-      final session = AuthSessionModel.fromJson(
-        body['data'] as Map<String, dynamic>,
-      ).toEntity();
+      final session = AuthSessionModel.fromJson(data).toEntity();
       await _saveSession(session);
       return Result.success(session);
     } on DioException catch (e) {
@@ -96,9 +127,20 @@ class AuthRepositoryImpl implements AuthRepository {
         ApiEndpoints.refreshToken,
         data: {'refreshToken': stored.refreshToken},
       );
-      final session = AuthSessionModel.fromJson(
-        (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>,
-      ).toEntity();
+      final data =
+          (response.data as Map<String, dynamic>)['data'] as Map<String, dynamic>;
+      // Real backend only returns new tokens; user info is preserved from storage.
+      final session = AuthSession(
+        accessToken: data['accessToken'] as String,
+        refreshToken: data['refreshToken'] as String,
+        staffId: stored.staffId,
+        tenantId: stored.tenantId,
+        staffName: stored.staffName,
+        role: stored.role,
+        expiresAt: data['expiresAt'] != null
+            ? DateTime.parse(data['expiresAt'] as String)
+            : DateTime.now().add(const Duration(hours: 24)),
+      );
       await _saveSession(session);
       return Result.success(session);
     } on DioException catch (e) {

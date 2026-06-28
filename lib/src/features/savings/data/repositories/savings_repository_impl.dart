@@ -18,8 +18,9 @@ class SavingsRepositoryImpl implements SavingsRepository {
   @override
   Future<Result<SavingsDashboardStats>> getDashboardStats() async {
     try {
+      // No dedicated savings dashboard in the real backend; use general dashboard.
       final response =
-          await apiClient.get(ApiEndpoints.savingsDashboard);
+          await apiClient.get(ApiEndpoints.dashboardSummary);
       final data = _dataMap(response.data);
       return Result.success(SavingsDashboardStatsModel.fromJson(data));
     } on DioException catch (e) {

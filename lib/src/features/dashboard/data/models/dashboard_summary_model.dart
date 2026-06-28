@@ -75,13 +75,29 @@ class DashboardSummaryModel {
 
   factory DashboardSummaryModel.fromJson(Map<String, dynamic> json) =>
       DashboardSummaryModel(
-        activeGirvi: (json['activeGirvi'] as num).toInt(),
-        dueToday: (json['dueToday'] as num).toInt(),
-        overdue: (json['overdue'] as num).toInt(),
-        collectionsToday: (json['collectionsToday'] as num).toDouble(),
-        loanExposure: (json['loanExposure'] as num).toDouble(),
-        goldRatePerGram: (json['goldRatePerGram'] as num).toDouble(),
-        goldRateChange: (json['goldRateChange'] as num? ?? 0).toDouble(),
+        // Support both real backend field names and legacy mock field names.
+        activeGirvi: (json['totalActiveLoans'] as num? ??
+                json['activeGirvi'] as num? ??
+                0)
+            .toInt(),
+        dueToday: (json['dueToday'] as num? ?? 0).toInt(),
+        overdue: (json['overdueLoans'] as num? ??
+                json['overdue'] as num? ??
+                0)
+            .toInt(),
+        collectionsToday: (json['todayCollections'] as num? ??
+                json['todaySales'] as num? ??
+                json['collectionsToday'] as num? ??
+                0)
+            .toDouble(),
+        loanExposure: (json['totalLoanAmount'] as num? ??
+                json['loanExposure'] as num? ??
+                0)
+            .toDouble(),
+        goldRatePerGram:
+            (json['goldRatePerGram'] as num? ?? 0).toDouble(),
+        goldRateChange:
+            (json['goldRateChange'] as num? ?? 0).toDouble(),
         goldRateChangePct:
             (json['goldRateChangePct'] as num? ?? 0).toDouble(),
         goldRateSource: json['goldRateSource'] as String? ?? 'MCX',
@@ -90,10 +106,13 @@ class DashboardSummaryModel {
             : DateTime.now(),
         recentPayments: (json['recentPayments'] as List<dynamic>? ?? [])
             .map((e) =>
-                RecentPaymentModel.fromJson(e as Map<String, dynamic>).toEntity())
+                RecentPaymentModel.fromJson(e as Map<String, dynamic>)
+                    .toEntity())
             .toList(),
-        newGirviToday: (json['newGirviToday'] as num? ?? 0).toInt(),
-        disbursedToday: (json['disbursedToday'] as num? ?? 0).toDouble(),
+        newGirviToday:
+            (json['newGirviToday'] as num? ?? 0).toInt(),
+        disbursedToday:
+            (json['disbursedToday'] as num? ?? 0).toDouble(),
       );
 
   final int activeGirvi;

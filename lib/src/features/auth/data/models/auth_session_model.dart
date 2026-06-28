@@ -12,14 +12,21 @@ class AuthSessionModel {
   });
 
   factory AuthSessionModel.fromJson(Map<String, dynamic> json) {
+    // Real backend nests user info under 'user'; mock uses flat structure.
+    final user = json['user'] as Map<String, dynamic>?;
     return AuthSessionModel(
       accessToken: json['accessToken'] as String,
       refreshToken: json['refreshToken'] as String,
-      staffId: json['staffId'] as String,
-      tenantId: json['tenantId'] as String,
-      staffName: json['staffName'] as String,
-      role: _parseRole(json['role'] as String? ?? 'STAFF'),
-      expiresAt: DateTime.parse(json['expiresAt'] as String),
+      staffId: user?['id'] as String? ?? json['staffId'] as String? ?? '',
+      tenantId:
+          user?['tenantId'] as String? ?? json['tenantId'] as String? ?? '',
+      staffName: user?['name'] as String? ?? json['staffName'] as String? ?? '',
+      role: _parseRole(
+        user?['role'] as String? ?? json['role'] as String? ?? 'STAFF',
+      ),
+      expiresAt: json['expiresAt'] != null
+          ? DateTime.parse(json['expiresAt'] as String)
+          : DateTime.now().add(const Duration(hours: 24)),
     );
   }
 

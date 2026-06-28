@@ -23,7 +23,8 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   @override
   Future<Result<PurchaseDashboardStats>> getDashboardStats() async {
     try {
-      final response = await _apiClient.get(ApiEndpoints.purchaseDashboard);
+      // No dedicated purchase dashboard endpoint; use the general dashboard.
+      final response = await _apiClient.get(ApiEndpoints.dashboardSummary);
       final data = _dataMap(response.data);
       return Result.success(PurchaseDashboardStatsModel.fromJson(data));
     } on DioException catch (e) {
@@ -40,10 +41,10 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   }) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.purchaseLedger,
+        ApiEndpoints.purchaseOrders,
         queryParameters: {
-          if (filter != null && filter.isNotEmpty) 'filter': filter,
-          if (query != null && query.isNotEmpty) 'q': query,
+          if (filter != null && filter.isNotEmpty) 'status': filter,
+          if (query != null && query.isNotEmpty) 'search': query,
         },
       );
       final list = _dataList(response.data);
@@ -63,7 +64,7 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   Future<Result<PurchaseEntry>> getDetails(String purchaseId) async {
     try {
       final response =
-          await _apiClient.get(ApiEndpoints.purchaseById(purchaseId));
+          await _apiClient.get(ApiEndpoints.purchaseOrderById(purchaseId));
       final data = _dataMap(response.data);
       return Result.success(PurchaseEntryModel.fromJson(data));
     } on DioException catch (e) {
@@ -89,21 +90,26 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
     required PaymentMode paymentMode,
   }) async {
     try {
+      // Real backend uses a vendor+PO model. Map available fields to PO format.
       final response = await _apiClient.post(
-        ApiEndpoints.purchases,
+        ApiEndpoints.purchaseOrders,
         data: {
-          'supplierName': supplierName,
-          'supplierMobile': supplierMobile,
+          'vendorName': supplierName,
+          'vendorMobile': supplierMobile,
           'billNo': billNo,
-          'purchaseType': purchaseType.name.toUpperCase(),
-          'metalType': metalType.name.toUpperCase(),
-          'itemName': itemName,
-          'grossWeight': grossWeight,
-          'netWeight': netWeight,
-          'purity': purity,
-          'rate': rate,
-          'amount': amount,
+          'items': [
+            {
+              'description': itemName,
+              'metalType': metalType.name.toUpperCase(),
+              'purity': purity.toString(),
+              'estimatedWeight': grossWeight,
+              'netWeight': netWeight,
+              'quantity': 1,
+              'unitPrice': rate,
+            },
+          ],
           'paymentMode': paymentMode.name.toUpperCase(),
+          'totalAmount': amount,
         },
       );
       final data = _dataMap(response.data);
@@ -122,10 +128,10 @@ class PurchaseRepositoryImpl implements PurchaseRepository {
   }) async {
     try {
       final response = await _apiClient.get(
-        ApiEndpoints.suppliers,
+        ApiEndpoints.purchaseVendors,
         queryParameters: {
           if (filter != null && filter.isNotEmpty) 'filter': filter,
-          if (query != null && query.isNotEmpty) 'q': query,
+          if (query != null && query.isNotEmpty) 'search': query,
         },
       );
       final list = _dataList(response.data);

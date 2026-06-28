@@ -64,21 +64,8 @@ class GirviRepositoryImpl implements GirviRepository {
 
   @override
   Future<Result<List<Girvi>>> getDueGirvi() async {
-    try {
-      final response = await _apiClient.get(ApiEndpoints.girviDue);
-      final data = response.data as Map<String, dynamic>;
-      final list = (data['data'] as List<dynamic>)
-          .map(
-            (e) =>
-                GirviModel.fromJson(e as Map<String, dynamic>).toEntity(),
-          )
-          .toList();
-      return Result.success(list);
-    } on DioException catch (e) {
-      return Result.failure(_mapDioError(e));
-    } catch (e) {
-      return Result.failure(ServerException(message: e.toString()));
-    }
+    // No dedicated "due" endpoint in the real backend; use overdue list.
+    return getOverdueGirvi();
   }
 
   @override
@@ -106,13 +93,17 @@ class GirviRepositoryImpl implements GirviRepository {
     PaymentRequest request,
   ) async {
     try {
+      // Map legacy paymentType to the split principal/interest/penalty model.
+      final isPrincipal = request.paymentType == PaymentType.principal;
+      final isInterest = request.paymentType == PaymentType.interest;
       await _apiClient.post(
         ApiEndpoints.girviPayment(girviId),
         data: {
-          'amount': request.amount,
-          'paymentType': request.paymentType.name,
-          if (request.referenceNumber != null)
-            'referenceNumber': request.referenceNumber,
+          'principalPaid': isPrincipal ? request.amount : 0.0,
+          'interestPaid': isInterest ? request.amount : 0.0,
+          'penaltyPaid': 0.0,
+          'paymentMode':
+              request.referenceNumber != null ? 'NEFT' : 'CASH',
           if (request.notes != null) 'notes': request.notes,
         },
       );
@@ -130,8 +121,8 @@ class GirviRepositoryImpl implements GirviRepository {
     RenewalRequest request,
   ) async {
     try {
-      final response = await _apiClient.post(
-        ApiEndpoints.girviRenewal(girviId),
+      final response = await _apiClient.patch(
+        ApiEndpoints.girviRenew(girviId),
         data: {
           'newLoanAmount': request.newLoanAmount,
           'interestRate': request.interestRate,
@@ -154,7 +145,7 @@ class GirviRepositoryImpl implements GirviRepository {
   @override
   Future<Result<void>> redeemGirvi(String girviId) async {
     try {
-      await _apiClient.post(ApiEndpoints.girviRedemption(girviId));
+      await _apiClient.patch(ApiEndpoints.girviRedeem(girviId));
       return const Result.success(null);
     } on DioException catch (e) {
       return Result.failure(_mapDioError(e));
@@ -168,48 +159,39 @@ class GirviRepositoryImpl implements GirviRepository {
     String girviId,
     AuctionRequest request,
   ) async {
-    try {
-      await _apiClient.post(
-        ApiEndpoints.girviAuction(girviId),
-        data: {
-          'saleAmount': request.saleAmount,
-          'buyerName': request.buyerName,
-          if (request.buyerMobile != null) 'buyerMobile': request.buyerMobile,
-        },
-      );
-      return const Result.success(null);
-    } on DioException catch (e) {
-      return Result.failure(_mapDioError(e));
-    } catch (e) {
-      return Result.failure(ServerException(message: e.toString()));
-    }
+    // Auction is not supported by the real backend API.
+    return const Result.failure(
+      ServerException(message: 'Auction endpoint is not available.'),
+    );
   }
 
   @override
   Future<Result<Girvi>> createGirvi(CreateGirviRequest request) async {
     try {
+      // Calculate tenureMonths from startDate/dueDate (real API requires tenureMonths).
+      final tenureMonths =
+          ((request.dueDate.difference(request.startDate).inDays) / 30)
+              .round()
+              .clamp(1, 12);
       final response = await _apiClient.post(
         ApiEndpoints.girvi,
         data: {
           'customerId': request.customerId,
-          'loanAmount': request.loanAmount,
           'interestRate': request.interestRate,
-          'interestType': request.interestType.name,
-          'startDate': request.startDate.toIso8601String(),
-          'dueDate': request.dueDate.toIso8601String(),
-          'penaltyRate': request.penaltyRate,
-          if (request.vaultLocation != null) 'vaultLocation': request.vaultLocation,
-          'items': request.items.map((item) => {
-            'itemType': item.itemType,
-            'description': item.description,
-            'quantity': item.quantity,
-            'grossWeightG': item.grossWeightG,
-            'stoneWeightG': item.stoneWeightG,
-            'netWeightG': item.netWeightG,
-            'purity': item.purity,
-            'metalType': item.metalType.name,
-            'photoPaths': item.photoPaths,
-          }).toList(),
+          'interestType': request.interestType.name.toUpperCase(),
+          'tenureMonths': tenureMonths,
+          'items': request.items
+              .map((item) => {
+                    'itemName': item.itemType,
+                    'description': item.description,
+                    'metalType': item.metalType.name.toUpperCase(),
+                    'purity': item.purity,
+                    'grossWeight': item.grossWeightG,
+                    'netWeight': item.netWeightG,
+                    'stoneWeight': item.stoneWeightG,
+                    'photoUrls': item.photoPaths,
+                  })
+              .toList(),
         },
       );
       final data = response.data as Map<String, dynamic>;

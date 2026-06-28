@@ -20,7 +20,8 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<Result<SalesDashboardStats>> getDashboardStats() async {
     try {
-      final response = await apiClient.get(ApiEndpoints.salesDashboard);
+      // No dedicated sales dashboard endpoint; use the general dashboard.
+      final response = await apiClient.get(ApiEndpoints.dashboardSummary);
       final data = _dataMap(response.data);
       return Result.success(SalesDashboardStatsModel.fromJson(data));
     } on DioException catch (e) {
@@ -35,10 +36,10 @@ class SalesRepositoryImpl implements SalesRepository {
   }) async {
     try {
       final response = await apiClient.get(
-        ApiEndpoints.salesLedger,
+        ApiEndpoints.sales,
         queryParameters: {
           if (filter != null && filter.isNotEmpty) 'filter': filter,
-          if (query != null && query.isNotEmpty) 'q': query,
+          if (query != null && query.isNotEmpty) 'search': query,
         },
       );
       final list = _dataList(response.data);
@@ -53,8 +54,7 @@ class SalesRepositoryImpl implements SalesRepository {
   @override
   Future<Result<SaleOrder>> getDetails(String invoiceNo) async {
     try {
-      final response =
-          await apiClient.get(ApiEndpoints.saleById(invoiceNo));
+      final response = await apiClient.get(ApiEndpoints.saleById(invoiceNo));
       final data = _dataMap(response.data);
       return Result.success(SaleOrderModel.fromJson(data));
     } on DioException catch (e) {
@@ -72,14 +72,19 @@ class SalesRepositoryImpl implements SalesRepository {
     required SalePaymentMode paymentMode,
   }) async {
     try {
+      // Real backend expects items[] with detail fields, not itemIds[].
+      // Map each itemId as an inventoryItemId with quantity 1.
       final response = await apiClient.post(
         ApiEndpoints.sales,
         data: {
-          'customerId': customerId,
-          'customerName': customerName,
-          'customerMobile': customerMobile,
-          'itemIds': itemIds,
-          'discount': discount,
+          if (customerId.isNotEmpty) 'customerId': customerId,
+          'items': itemIds
+              .map((id) => {
+                    'inventoryItemId': id,
+                    'quantity': 1,
+                  })
+              .toList(),
+          'discountAmount': discount,
           'paymentMode': _encodePaymentMode(paymentMode),
         },
       );
@@ -98,28 +103,16 @@ class SalesRepositoryImpl implements SalesRepository {
     required String returnType,
     required String inventoryStatus,
   }) async {
-    try {
-      await apiClient.post(
-        ApiEndpoints.salesReturn,
-        data: {
-          'invoiceNo': invoiceNo,
-          'itemIds': itemIds,
-          'reason': reason,
-          'returnType': returnType,
-          'inventoryStatus': inventoryStatus,
-        },
-      );
-      return const Result.success(true);
-    } on DioException catch (e) {
-      return Result.failure(_mapDio(e));
-    }
+    // Sales return is not supported by the real backend API.
+    return const Result.failure(
+      ServerException(message: 'Sales return is not available in this version.'),
+    );
   }
 
   @override
   Future<Result<SaleOrder>> lookupInvoice(String invoiceNo) async {
     try {
-      final response =
-          await apiClient.get(ApiEndpoints.saleById(invoiceNo));
+      final response = await apiClient.get(ApiEndpoints.saleById(invoiceNo));
       final data = _dataMap(response.data);
       return Result.success(SaleOrderModel.fromJson(data));
     } on DioException catch (e) {
@@ -131,7 +124,7 @@ class SalesRepositoryImpl implements SalesRepository {
   Future<Result<SaleItem>> getCartItem(String barcode) async {
     try {
       final response =
-          await apiClient.get(ApiEndpoints.inventoryItemByBarcode(barcode));
+          await apiClient.get(ApiEndpoints.inventoryBySku(barcode));
       final data = _dataMap(response.data);
       return Result.success(SaleItemModel.fromJson(data));
     } on DioException catch (e) {
@@ -163,11 +156,11 @@ class SalesRepositoryImpl implements SalesRepository {
       case SalePaymentMode.upi:
         return 'UPI';
       case SalePaymentMode.bankTransfer:
-        return 'BANK_TRANSFER';
+        return 'NEFT';
       case SalePaymentMode.card:
         return 'CARD';
       case SalePaymentMode.splitPayment:
-        return 'SPLIT_PAYMENT';
+        return 'CASH';
       case SalePaymentMode.cash:
         return 'CASH';
     }

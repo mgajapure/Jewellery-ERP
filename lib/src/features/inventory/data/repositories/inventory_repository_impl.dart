@@ -50,7 +50,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   Future<Result<InventoryItem>> getItemByBarcode(String barcode) async {
     try {
       final response =
-          await apiClient.get(ApiEndpoints.inventoryItemByBarcode(barcode));
+          await apiClient.get(ApiEndpoints.inventoryBySku(barcode));
       if (response.data['success'] == false) {
         return const Result.failure(NotFoundException());
       }
@@ -65,7 +65,7 @@ class InventoryRepositoryImpl implements InventoryRepository {
   Future<Result<InventoryItem>> updateStatus(
       String id, InventoryStatus status) async {
     try {
-      final response = await apiClient.put(
+      final response = await apiClient.patch(
         ApiEndpoints.inventoryById(id),
         data: {'status': status.name.toUpperCase()},
       );

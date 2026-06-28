@@ -20,8 +20,9 @@ class ReportsRepositoryImpl implements ReportsRepository {
     String? period,
   }) async {
     try {
+      // No dedicated reports dashboard in the real backend; use general dashboard.
       final response = await apiClient.get(
-        ApiEndpoints.reportsDashboard,
+        ApiEndpoints.dashboardSummary,
         queryParameters: {
           if (period != null) 'period': period,
         },

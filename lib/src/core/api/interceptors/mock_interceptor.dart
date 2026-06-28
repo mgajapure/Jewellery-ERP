@@ -38,12 +38,10 @@ class MockInterceptor extends Interceptor {
     // POST endpoints — return success acknowledgement
     if (method == 'POST') {
       // Auth — request OTP
-      if (path == ApiEndpoints.requestOtp) {
+      if (path == ApiEndpoints.sendOtp) {
         return {
           'success': true,
-          'data': {
-            'requestId': 'otp-req-${DateTime.now().millisecondsSinceEpoch}',
-          },
+          'data': {'message': 'OTP sent successfully'},
         };
       }
 
@@ -53,9 +51,18 @@ class MockInterceptor extends Interceptor {
         final otp = (_extractBody(options)?['otp'] as String?) ?? '';
         if (otp == '000000') {
           return {
-            'success': false,
-            'pending': true,
-            'message': 'Device registration is pending admin approval.',
+            'success': true,
+            'data': {
+              'accessToken': 'mock-pending-token',
+              'refreshToken': 'mock-pending-refresh',
+              'user': {
+                'id': 'staff-001',
+                'name': 'रमेश पाटील / Ramesh Patil',
+                'role': 'STAFF',
+                'tenantId': 'tenant-001',
+              },
+              'deviceStatus': 'PENDING',
+            },
           };
         }
         return {
@@ -64,18 +71,21 @@ class MockInterceptor extends Interceptor {
             'accessToken':
                 'mock-access-${DateTime.now().millisecondsSinceEpoch}',
             'refreshToken': 'mock-refresh-token',
-            'staffId': 'staff-001',
-            'tenantId': 'tenant-001',
-            'staffName': 'रमेश पाटील / Ramesh Patil',
-            'role': 'STAFF',
+            'user': {
+              'id': 'staff-001',
+              'name': 'रमेश पाटील / Ramesh Patil',
+              'role': 'STAFF',
+              'tenantId': 'tenant-001',
+            },
+            'deviceStatus': 'APPROVED',
             'expiresAt': DateTime.now()
-                .add(const Duration(hours: 8))
+                .add(const Duration(hours: 24))
                 .toIso8601String(),
           },
         };
       }
 
-      // Auth — refresh token → return a refreshed session
+      // Auth — refresh token → return new tokens only (user info preserved from storage)
       if (path == ApiEndpoints.refreshToken) {
         return {
           'success': true,
@@ -83,12 +93,8 @@ class MockInterceptor extends Interceptor {
             'accessToken':
                 'mock-access-refreshed-${DateTime.now().millisecondsSinceEpoch}',
             'refreshToken': 'mock-refresh-token-2',
-            'staffId': 'staff-001',
-            'tenantId': 'tenant-001',
-            'staffName': 'रमेश पाटील / Ramesh Patil',
-            'role': 'STAFF',
             'expiresAt': DateTime.now()
-                .add(const Duration(hours: 8))
+                .add(const Duration(hours: 24))
                 .toIso8601String(),
           },
         };
@@ -99,8 +105,8 @@ class MockInterceptor extends Interceptor {
         return {'success': true};
       }
 
-      // Purchase — create new purchase entry
-      if (path == ApiEndpoints.purchases) {
+      // Purchase — create new purchase order
+      if (path == ApiEndpoints.purchaseOrders) {
         final body = _extractBody(options) ?? {};
         final now = DateTime.now();
         final id =
@@ -167,8 +173,8 @@ class MockInterceptor extends Interceptor {
         return {'success': true, 'data': order};
       }
 
-      // Sales return
-      if (path == ApiEndpoints.salesReturn) {
+      // Sales return (mock-only path, not in real backend)
+      if (path == '/sales/return') {
         return {'success': true, 'message': 'Return processed.'};
       }
 
@@ -214,8 +220,8 @@ class MockInterceptor extends Interceptor {
         };
       }
 
-      // Compliance — generate form
-      if (path == ApiEndpoints.complianceGenerate) {
+      // Compliance — generate form (mock-only path, not in real backend)
+      if (path == '/compliance/generate') {
         final body = _extractBody(options) ?? {};
         final formType = body['form'] as String? ?? '';
         return {
@@ -272,47 +278,63 @@ class MockInterceptor extends Interceptor {
         final serialNo = (_girviList.length + 522).toString().padLeft(6, '0');
         final items = (body['items'] as List<dynamic>?)?.map((item) {
           final m = item as Map<String, dynamic>;
-          final gross = (m['grossWeightG'] as num?)?.toDouble() ?? 0.0;
-          final stone = (m['stoneWeightG'] as num?)?.toDouble() ?? 0.0;
-          final net = (m['netWeightG'] as num?)?.toDouble() ?? (gross - stone);
+          // Support both old (grossWeightG) and new (grossWeight) field names.
+          final gross = (m['grossWeight'] as num? ??
+                  m['grossWeightG'] as num?)?.toDouble() ?? 0.0;
+          final stone = (m['stoneWeight'] as num? ??
+                  m['stoneWeightG'] as num?)?.toDouble() ?? 0.0;
+          final net = (m['netWeight'] as num? ??
+                  m['netWeightG'] as num?)?.toDouble() ?? (gross - stone);
           final purity = m['purity'] as String? ?? '22K';
           final purityFactor = purity == '24K' ? 1.0 : purity == '22K' ? 22/24 : purity == '20K' ? 20/24 : 18/24;
           final valuation = net * purityFactor * 7185.0;
           return {
             'id': 'item-${now.millisecondsSinceEpoch}-${_girviList.length}',
             'description': m['description'] ?? '',
-            'itemType': m['itemType'] ?? 'Ring',
+            'itemName': m['itemName'] ?? m['itemType'] ?? 'Ring',
+            'itemType': m['itemName'] ?? m['itemType'] ?? 'Ring',
             'quantity': m['quantity'] ?? 1,
+            'grossWeight': gross,
             'grossWeightG': gross,
+            'stoneWeight': stone,
             'stoneWeightG': stone,
+            'netWeight': net,
             'netWeightG': net,
             'purity': purity,
-            'metalType': m['metalType'] ?? 'gold',
+            'metalType': m['metalType'] ?? 'GOLD',
             'valuationAmount': valuation,
-            'photoUrls': [],
+            'photoUrls': m['photoUrls'] ?? [],
           };
         }).toList() ?? [];
-        final dueDate = body['dueDate'] as String? ?? now.add(const Duration(days: 30)).toIso8601String();
+        final tenureMonths = (body['tenureMonths'] as num?)?.toInt() ?? 12;
+        final dueDate = body['dueDate'] as String? ??
+            now
+                .add(Duration(days: tenureMonths * 30))
+                .toIso8601String();
         final loanAmount = (body['loanAmount'] as num?)?.toDouble() ?? 0.0;
         final newGirvi = {
           'id': newId,
+          'girviNumber': 'MLJ-G-${now.year}-$serialNo',
           'serialId': 'GRV-${now.year}-$serialNo',
           'tenantId': 'tenant-001',
           'customerId': body['customerId'] ?? 'cust-001',
           'customerName': 'सुरेश पाटील',
           'customerNameEn': 'Suresh Patil',
           'customerMobile': '+91 98765 43210',
-          'status': 'active',
+          'status': 'CREATED',
+          'principalAmount': loanAmount,
           'loanAmount': loanAmount,
           'outstandingAmount': loanAmount,
           'accruedInterest': 0.0,
           'penaltyAmount': 0.0,
-          'interestRate': (body['interestRate'] as num?)?.toDouble() ?? 18.0,
-          'interestType': body['interestType'] ?? 'simple',
-          'penaltyRate': (body['penaltyRate'] as num?)?.toDouble() ?? 2.0,
+          'interestRate': (body['interestRate'] as num?)?.toDouble() ?? 1.5,
+          'interestType': body['interestType'] ?? 'SIMPLE',
+          'tenureMonths': tenureMonths,
           'startDate': body['startDate'] ?? now.toIso8601String(),
           'dueDate': dueDate,
-          'daysLeft': 30,
+          'daysLeft': tenureMonths * 30,
+          'mcxRateLocked': 7185.0,
+          'ltvPercent': 75.0,
           'vaultLocation': body['vaultLocation'] ?? 'VA-A/SF-02/TR-05/SL-18',
           'kfsDocUrl': null,
           'createdAt': now.toIso8601String(),
@@ -325,28 +347,12 @@ class MockInterceptor extends Interceptor {
         return {'success': true, 'data': newGirvi};
       }
 
-      final postPaths = [
-        RegExp(r'^/girvi/[^/]+/payment$'),
-        RegExp(r'^/girvi/[^/]+/redemption$'),
-        RegExp(r'^/girvi/[^/]+/auction$'),
-      ];
-      for (final pattern in postPaths) {
-        if (pattern.hasMatch(path)) {
-          return {'success': true, 'message': 'Operation completed.'};
-        }
-      }
-      // Renewal returns updated girvi
-      if (RegExp(r'^/girvi/[^/]+/renewal$').hasMatch(path)) {
-        final id = path.split('/')[2];
-        final girvi = _girviList.firstWhere(
-          (g) => g['id'] == id || g['serialId'] == id,
-          orElse: () => _girviList.first,
-        );
-        return {'success': true, 'data': girvi};
+      if (RegExp(r'^/girvi/[^/]+/payment$').hasMatch(path)) {
+        return {'success': true, 'message': 'Payment recorded.'};
       }
     }
 
-    if (method == 'PUT') {
+    if (method == 'PUT' || method == 'PATCH') {
       // Customer — update
       if (path.startsWith('/customers/') && path.split('/').length == 3) {
         final id = path.split('/')[2];
@@ -358,6 +364,9 @@ class MockInterceptor extends Interceptor {
             ..['alternateMobile'] =
                 body['alternateMobile'] ?? _customers[idx]['alternateMobile']
             ..['address'] = body['address'] ?? _customers[idx]['address']
+            ..['city'] = body['city'] ?? _customers[idx]['city']
+            ..['state'] = body['state'] ?? _customers[idx]['state']
+            ..['pincode'] = body['pincode'] ?? _customers[idx]['pincode']
             ..['panNumber'] = body['panNumber'] ?? _customers[idx]['panNumber']
             ..['dateOfBirth'] =
                 body['dateOfBirth'] ?? _customers[idx]['dateOfBirth']
@@ -367,30 +376,50 @@ class MockInterceptor extends Interceptor {
         return {'success': false, 'message': 'Customer not found.'};
       }
 
-      // Inventory — update status
+      // Inventory — update status or details
       if (path.startsWith('/inventory/') && path.split('/').length == 3) {
         final id = path.split('/')[2];
         final body = _extractBody(options) ?? {};
-        final newStatus = body['status'] as String? ?? 'AVAILABLE';
+        final newStatus = body['status'] as String?;
         final idx = _inventoryItems.indexWhere((i) => i['id'] == id);
         if (idx != -1) {
-          _inventoryItems[idx] = Map<String, dynamic>.from(_inventoryItems[idx])
-            ..['status'] = newStatus;
+          _inventoryItems[idx] = Map<String, dynamic>.from(_inventoryItems[idx]);
+          if (newStatus != null) _inventoryItems[idx]['status'] = newStatus;
           return {'success': true, 'data': _inventoryItems[idx]};
         }
         return {'success': false, 'message': 'Item not found.'};
       }
+
+      // Girvi — renew
+      if (RegExp(r'^/girvi/[^/]+/renew$').hasMatch(path)) {
+        final id = path.split('/')[2];
+        final girvi = _girviList.firstWhere(
+          (g) => g['id'] == id || g['serialId'] == id,
+          orElse: () => _girviList.first,
+        );
+        return {'success': true, 'data': girvi};
+      }
+
+      // Girvi — redeem / disburse
+      if (RegExp(r'^/girvi/[^/]+/(redeem|disburse)$').hasMatch(path)) {
+        return {'success': true, 'message': 'Operation completed.'};
+      }
+
+      // Purchase order — approve
+      if (RegExp(r'^/purchase/orders/[^/]+/approve$').hasMatch(path)) {
+        return {'success': true, 'message': 'Purchase order approved.'};
+      }
     }
 
     switch (path) {
-      case ApiEndpoints.savingsDashboard:
+      case '/savings/dashboard':
         return {'success': true, 'data': _savingsDashboard};
 
-      case ApiEndpoints.reportsDashboard:
+      case '/reports/dashboard':
         final p = (query['period'] as String? ?? 'month');
         return {'success': true, 'data': _reportsDashboard(p)};
 
-      case ApiEndpoints.complianceDashboard:
+      case '/compliance/dashboard':
         return {'success': true, 'data': _complianceDashboard};
 
       case ApiEndpoints.complianceForm9:
@@ -419,33 +448,42 @@ class MockInterceptor extends Interceptor {
         return {'success': true, 'data': filtered};
 
       case ApiEndpoints.inventory:
-        final invFilter = (query['filter'] as String? ?? '').toUpperCase();
-        final invQ = (query['q'] as String? ?? '').toLowerCase();
+        final invFilter = (query['filter'] as String? ??
+                query['metalType'] as String? ??
+                '')
+            .toUpperCase();
+        final invQ =
+            (query['search'] as String? ?? query['q'] as String? ?? '')
+                .toLowerCase();
         var inventoryList = _inventoryItems.toList();
         if (invFilter.isNotEmpty) {
           inventoryList = inventoryList
-              .where((i) => i['status'] == invFilter)
+              .where((i) =>
+                  (i['status'] as String? ?? '').toUpperCase() == invFilter ||
+                  (i['metalType'] as String? ?? '').toUpperCase() == invFilter)
               .toList();
         }
         if (invQ.isNotEmpty) {
           inventoryList = inventoryList.where((i) {
             return (i['name'] as String).toLowerCase().contains(invQ) ||
-                (i['barcode'] as String).toLowerCase().contains(invQ) ||
-                (i['category'] as String).toLowerCase().contains(invQ);
+                (i['barcode'] as String? ?? '').toLowerCase().contains(invQ) ||
+                (i['category'] as String? ?? '').toLowerCase().contains(invQ);
           }).toList();
         }
         return {'success': true, 'data': inventoryList};
 
-      case ApiEndpoints.salesDashboard:
+      case '/sales/dashboard':
         return {'success': true, 'data': _salesDashboardStats};
 
-      case ApiEndpoints.salesLedger:
+      case ApiEndpoints.sales:
+      case '/sales/ledger':
         final sFilter = (query['filter'] as String? ?? '').toUpperCase();
-        final sQ = (query['q'] as String? ?? '').toLowerCase();
+        final sQ =
+            (query['search'] as String? ?? query['q'] as String? ?? '')
+                .toLowerCase();
         var orders = _salesLedger.toList();
         if (sFilter.isNotEmpty) {
-          orders =
-              orders.where((o) => o['status'] == sFilter).toList();
+          orders = orders.where((o) => o['status'] == sFilter).toList();
         }
         if (sQ.isNotEmpty) {
           orders = orders.where((o) {
@@ -457,12 +495,18 @@ class MockInterceptor extends Interceptor {
         }
         return {'success': true, 'data': orders};
 
-      case ApiEndpoints.purchaseDashboard:
+      case '/purchase/dashboard':
         return {'success': true, 'data': _purchaseDashboardStats};
 
-      case ApiEndpoints.purchaseLedger:
-        final payFilter = (query['filter'] as String? ?? '').toUpperCase();
-        final searchQ = (query['q'] as String? ?? '').toLowerCase();
+      case ApiEndpoints.purchaseOrders:
+      case '/purchase/ledger':
+        final payFilter = (query['filter'] as String? ??
+                query['status'] as String? ??
+                '')
+            .toUpperCase();
+        final searchQ =
+            (query['q'] as String? ?? query['search'] as String? ?? '')
+                .toLowerCase();
         var ledger = _purchaseLedger.toList();
         if (payFilter.isNotEmpty) {
           ledger = ledger.where((e) {
@@ -482,9 +526,11 @@ class MockInterceptor extends Interceptor {
         }
         return {'success': true, 'data': ledger};
 
-      case ApiEndpoints.suppliers:
+      case ApiEndpoints.purchaseVendors:
         final suppFilter = (query['filter'] as String? ?? '').toUpperCase();
-        final suppQ = (query['q'] as String? ?? '').toLowerCase();
+        final suppQ =
+            (query['search'] as String? ?? query['q'] as String? ?? '')
+                .toLowerCase();
         var suppList = _suppliers.toList();
         if (suppFilter.isNotEmpty) {
           suppList = suppList
@@ -557,16 +603,18 @@ class MockInterceptor extends Interceptor {
         };
 
       case ApiEndpoints.customers:
+        final custSearch =
+            (query['search'] as String? ?? query['q'] as String? ?? '')
+                .toLowerCase();
+        if (custSearch.isNotEmpty) {
+          final filtered = _customers.where((c) {
+            final name = (c['name'] as String? ?? '').toLowerCase();
+            final mobile = (c['mobile'] as String? ?? '').toLowerCase();
+            return name.contains(custSearch) || mobile.contains(custSearch);
+          }).toList();
+          return {'success': true, 'data': filtered};
+        }
         return {'success': true, 'data': _customers};
-
-      case ApiEndpoints.customerSearch:
-        final q = (query['q'] as String? ?? '').toLowerCase();
-        final filtered = _customers.where((c) {
-          final name = (c['name'] as String? ?? '').toLowerCase();
-          final mobile = (c['mobile'] as String? ?? '').toLowerCase();
-          return name.contains(q) || mobile.contains(q);
-        }).toList();
-        return {'success': true, 'data': filtered};
 
       case ApiEndpoints.girvi:
         final statusFilter = query['status'] as String?;
@@ -590,7 +638,7 @@ class MockInterceptor extends Interceptor {
         }
         return {'success': true, 'data': list};
 
-      case ApiEndpoints.girviDue:
+      case '/girvi/due':
         final due = _girviList
             .where(
               (g) =>
@@ -655,10 +703,12 @@ class MockInterceptor extends Interceptor {
           return {'success': false, 'message': 'Item not found.'};
         }
 
-        if (path.startsWith('/inventory/barcode/')) {
-          final barcode = path.split('/').last;
+        if (path.startsWith('/inventory/sku/')) {
+          final sku = path.split('/').last;
           final item = _inventoryItems.firstWhere(
-            (i) => i['barcode'] == barcode,
+            (i) =>
+                i['barcode'] == sku ||
+                (i['sku'] as String? ?? '') == sku,
             orElse: () => <String, dynamic>{},
           );
           if (item.isNotEmpty) {
@@ -667,10 +717,10 @@ class MockInterceptor extends Interceptor {
           return {'success': false, 'message': 'Item not found.'};
         }
 
-        if (path.startsWith('/purchases/')) {
+        if (path.startsWith('/purchase/orders/')) {
           final segments = path.split('/');
-          if (segments.length == 3) {
-            final id = segments[2];
+          if (segments.length == 4) {
+            final id = segments[3];
             final entry = _purchaseLedger.firstWhere(
               (e) => e['id'] == id,
               orElse: () => _purchaseLedger.first,
@@ -679,7 +729,7 @@ class MockInterceptor extends Interceptor {
           }
         }
 
-        if (path.startsWith('/interest/ledger/')) {
+        if (RegExp(r'^/girvi/[^/]+/interest$').hasMatch(path)) {
           return {'success': true, 'data': _interestLedger};
         }
 

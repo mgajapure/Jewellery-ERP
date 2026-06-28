@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project overview
 
-Flutter mobile/web ERP for Indian jewellery shops. The primary business entity is **Girvi** (gold pledge/pawn loan). The app runs fully offline against a local mock backend; no real server exists yet.
+Flutter mobile/web ERP for Indian jewellery shops. The primary business entity is **Girvi** (gold pledge/pawn loan). The app ships with a local mock backend for offline development; the real NestJS backend is available for live integration (see **Backend** section below).
 
 ## Commands
 
@@ -49,11 +49,20 @@ theme/              # feature-specific color constants (*_colors.dart)
 
 All BLoCs and repositories are resolved through `getIt`. The root `main.dart` calls `configureDependencies()` before `runApp`.
 
-### Mock backend
+### Backend
 
-`ApiClient` (`lib/src/core/api/api_client.dart`) wraps Dio and attaches `MockInterceptor`. **All API calls currently resolve locally** — `MockInterceptor` (`lib/src/core/api/interceptors/mock_interceptor.dart`) intercepts every request and returns hardcoded data. When a real backend is available: remove the `MockInterceptor` from `_buildDio()` and update `baseUrl`.
+**Real backend (NestJS):** `https://github.com/mgajapure/jewellery-erp-backend.git` — `main` branch.  
+Stack: NestJS + TypeScript. Run it locally or point at a deployed instance for real-time data.
 
-All endpoints are declared as string constants in `ApiEndpoints` (`lib/src/core/api/api_endpoints.dart`).
+**Mock backend (local dev):** `ApiClient` (`lib/src/core/api/api_client.dart`) wraps Dio and attaches `MockInterceptor`. All API calls currently resolve locally — `MockInterceptor` (`lib/src/core/api/interceptors/mock_interceptor.dart`) intercepts every request and returns hardcoded in-memory data.
+
+**Switching to the real backend** (three steps in `api_client.dart`):
+
+1. **Remove the mock interceptor** — delete `dio.interceptors.add(MockInterceptor())` from `_buildDio()`.
+2. **Set the real base URL** — change `baseUrl` from `'https://api.example.com'` to the backend's URL (e.g. `'http://localhost:3000'` for local NestJS dev or the deployed domain).
+3. **Inject the Bearer token** — `_secureStorage` is already declared in `ApiClient` for this purpose; add an interceptor that reads `accessToken` from `SecureStorage` and sets `options.headers['Authorization'] = 'Bearer $token'` in `onRequest`.
+
+All endpoint paths are declared as string constants in `ApiEndpoints` (`lib/src/core/api/api_endpoints.dart`) and already match the backend route contract — no changes needed there when switching.
 
 ### Result type
 

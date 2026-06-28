@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../presentation/bloc/barcode_sale_bloc.dart';
 import '../theme/sales_colors.dart';
 
@@ -230,7 +231,7 @@ class _BarcodeSaleScaffoldState extends State<_BarcodeSaleScaffold> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text('चेकआउट / Checkout'),
+                              : BilingualText(en: 'Checkout', mr: 'चेकआउट', compact: true),
                         ),
                       ),
                     ],

@@ -17,6 +17,7 @@ import '../widgets/auth_top_bar.dart';
 import '../widgets/otp_boxes.dart';
 import '../widgets/primary_auth_button.dart';
 import 'mobile_number_page.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import 'registration_pending_page.dart';
 import '../../dashboard/dashboard_page.dart';
 
@@ -66,8 +67,8 @@ class _OtpViewState extends State<_OtpView> {
     final otp = _otp;
     if (otp.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('कृपया 6 अंकी OTP टाका.\nEnter the full 6-digit OTP.'),
+        SnackBar(
+          content: BilingualText(en: 'Please enter the full 6-digit OTP.', mr: 'कृपया 6 अंकी OTP टाका.', compact: true),
         ),
       );
       return;

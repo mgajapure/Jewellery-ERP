@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../presentation/bloc/add_inventory_bloc.dart';
 import '../theme/inventory_colors.dart';
 
@@ -106,8 +107,7 @@ class _AddInventoryScaffoldState extends State<_AddInventoryScaffold> {
         if (state is AddInventorySuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content:
-                  Text('वस्तू यशस्वीरीत्या जोडली! / Item added successfully!'),
+              content: BilingualText(en: 'Item added successfully!', mr: 'वस्तू यशस्वीरीत्या जोडली!', compact: true),
               backgroundColor: InventoryColors.green,
             ),
           );

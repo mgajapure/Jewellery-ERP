@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
 import '../../../core/widgets/bilingual_text.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/interest_calculation.dart';
 import '../presentation/bloc/calculator_bloc.dart';
 import '../presentation/bloc/calculator_event.dart';
@@ -213,7 +214,7 @@ class _CalculatorViewState extends State<_CalculatorView> {
                           onPressed: () => context.goNamed('interest-ledger'),
                           icon:
                               const Icon(Icons.receipt_long_outlined, size: 18),
-                          label: const Text('Ledger'),
+                          label: BilingualText(en: 'Ledger', mr: 'खातेवही', compact: true),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: InterestColors.navy,
                             side:

@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/sale_order.dart';
 import '../theme/sales_colors.dart';
 
@@ -119,14 +120,14 @@ class _InvoiceBody extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                    SnackBar(
+                      content: BilingualText(en: 'Print coming soon', mr: 'प्रिंट लवकरच', compact: true),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
                 icon: const Icon(Icons.print_outlined),
-                label: const Text('प्रिंट / Print'),
+                label: BilingualText(en: 'Print', mr: 'प्रिंट', compact: true),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: SalesColors.navy,
                   side: const BorderSide(color: SalesColors.navy),
@@ -146,7 +147,7 @@ class _InvoiceBody extends StatelessWidget {
                   extra: order,
                 ),
                 icon: const Icon(Icons.check),
-                label: const Text('विक्री निश्चित / Finalize'),
+                label: BilingualText(en: 'Finalize', mr: 'विक्री निश्चित', compact: true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: SalesColors.green,
                   foregroundColor: Colors.white,

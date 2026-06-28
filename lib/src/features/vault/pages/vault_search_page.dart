@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/vault_search_result.dart';
 import '../presentation/bloc/vault_search_bloc.dart';
 import '../presentation/bloc/vault_search_event.dart';
@@ -656,8 +657,8 @@ class _SearchResultCard extends StatelessWidget {
                   Clipboard.setData(
                       ClipboardData(text: result.coordinate));
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Coordinate copied'),
+                    SnackBar(
+                      content: BilingualText(en: 'Coordinate copied', mr: 'कोऑर्डिनेट कॉपी केले', compact: true),
                       duration: Duration(seconds: 1),
                     ),
                   );
@@ -679,7 +680,7 @@ class _SearchResultCard extends StatelessWidget {
                     // Navigate to Girvi details
                   },
                   icon: const Icon(Icons.visibility_outlined, size: 18),
-                  label: const Text('View Girvi'),
+                  label: BilingualText(en: 'View Girvi', mr: 'गिरवी पहा', compact: true),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: VaultColors.navy,
                     side: const BorderSide(color: VaultColors.navy),
@@ -696,7 +697,7 @@ class _SearchResultCard extends StatelessWidget {
                     // Navigate to Customer details
                   },
                   icon: const Icon(Icons.person_outline, size: 18),
-                  label: const Text('Customer'),
+                  label: BilingualText(en: 'Customer', mr: 'ग्राहक', compact: true),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: VaultColors.navy,
                     side: const BorderSide(color: VaultColors.navy),

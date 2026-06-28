@@ -5,6 +5,7 @@ import 'package:get_it/get_it.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/purchase_entry.dart';
 import '../presentation/bloc/new_purchase_bloc.dart';
 import '../theme/purchase_colors.dart';
@@ -91,7 +92,7 @@ class _NewPurchaseViewState extends State<_NewPurchaseView> {
         if (state is NewPurchaseSuccess) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('खरेदी नोंद यशस्वीरित्या जतन केली / Purchase saved'),
+              content: BilingualText(en: 'Purchase saved', mr: 'खरेदी नोंद यशस्वीरित्या जतन केली', compact: true),
               backgroundColor: PurchaseColors.green,
             ),
           );
@@ -302,7 +303,7 @@ class _NewPurchaseViewState extends State<_NewPurchaseView> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: const Text('रद्द / Cancel'),
+                            child: BilingualText(en: 'Cancel', mr: 'रद्द करा', compact: true),
                           ),
                         ),
                         const SizedBox(width: 12),
@@ -327,7 +328,7 @@ class _NewPurchaseViewState extends State<_NewPurchaseView> {
                                       color: Colors.white,
                                     ),
                                   )
-                                : const Text('जतन करा / Save'),
+                                : BilingualText(en: 'Save', mr: 'जतन करा', compact: true),
                           ),
                         ),
                       ],

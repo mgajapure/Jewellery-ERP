@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../../../shared/widgets/app_error_state.dart';
 import '../../../shared/widgets/app_loader.dart';
 import '../domain/entities/girvi.dart';
@@ -20,7 +21,7 @@ Future<void> _dialCall(BuildContext context, String mobile) async {
   if (!await launchUrl(uri) && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('डायलर उघडता आला नाही / Could not open dialer'),
+        content: BilingualText(en: 'Could not open dialer', mr: 'डायलर उघडता आला नाही', compact: true),
         behavior: SnackBarBehavior.floating,
       ),
     );

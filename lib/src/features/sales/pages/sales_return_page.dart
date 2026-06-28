@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 
 import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../presentation/bloc/sales_return_bloc.dart';
 import '../theme/sales_colors.dart';
 
@@ -22,8 +23,8 @@ class SalesReturnPage extends StatelessWidget {
         listener: (context, state) {
           if (state is SalesReturnSuccess) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('परतावा प्रक्रिया यशस्वी / Return processed.'),
+              SnackBar(
+                content: BilingualText(en: 'Return processed.', mr: 'परतावा प्रक्रिया यशस्वी', compact: true),
                 backgroundColor: SalesColors.green,
               ),
             );
@@ -127,7 +128,7 @@ class _SalesReturnScaffoldState extends State<_SalesReturnScaffold> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text('शोधा'),
+                                  : BilingualText(en: 'Search', mr: 'शोधा', compact: true),
                             ),
                           ],
                         ),
@@ -247,7 +248,7 @@ class _SalesReturnScaffoldState extends State<_SalesReturnScaffold> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                           ),
-                          child: const Text('रद्द / Cancel'),
+                          child: BilingualText(en: 'Cancel', mr: 'रद्द करा', compact: true),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -281,7 +282,7 @@ class _SalesReturnScaffoldState extends State<_SalesReturnScaffold> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text('परतावा / Return'),
+                              : BilingualText(en: 'Return', mr: 'परतावा', compact: true),
                         ),
                       ),
                     ],

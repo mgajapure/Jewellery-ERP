@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../presentation/bloc/generate_form_bloc.dart';
 import '../theme/compliance_colors.dart';
 import 'compliance_dashboard_page.dart';
@@ -181,7 +182,7 @@ class _Form6ScaffoldState extends State<_Form6Scaffold> {
                             icon: const Icon(
                                 Icons.visibility_outlined,
                                 size: 18),
-                            label: const Text('Preview'),
+                            label: BilingualText(en: 'Preview', mr: 'पूर्वावलोकन', compact: true),
                             style: OutlinedButton.styleFrom(
                               foregroundColor: ComplianceColors.navy,
                               side: const BorderSide(

@@ -13,6 +13,7 @@ import '../widgets/auth_footer.dart';
 import '../widgets/auth_info_notice.dart';
 import '../widgets/auth_round_icon.dart';
 import '../widgets/auth_top_bar.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../widgets/mobile_number_input.dart';
 import '../widgets/primary_auth_button.dart';
 import 'otp_verification_page.dart';
@@ -52,8 +53,8 @@ class _MobileViewState extends State<_MobileView> {
     final mobile = _controller.text.trim();
     if (mobile.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('कृपया 10 अंकी मोबाईल क्रमांक टाका.\nEnter a valid 10-digit mobile number.'),
+        SnackBar(
+          content: BilingualText(en: 'Please enter a valid 10-digit mobile number.', mr: 'कृपया 10 अंकी मोबाईल क्रमांक टाका.', compact: true),
         ),
       );
       return;
@@ -193,7 +194,7 @@ class _NeedHelp extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('ठीक आहे / OK'),
+            child: BilingualText(en: 'OK', mr: 'ठीक आहे', compact: true),
           ),
         ],
       ),

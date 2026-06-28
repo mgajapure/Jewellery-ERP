@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/supplier.dart';
 import '../presentation/bloc/supplier_bloc.dart';
 import '../theme/purchase_colors.dart';
@@ -462,7 +463,7 @@ class _ErrorView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('पुन्हा प्रयत्न / Retry'),
+              child: BilingualText(en: 'Retry', mr: 'पुन्हा प्रयत्न', compact: true),
             ),
           ],
         ),
@@ -721,7 +722,7 @@ class _SupplierDetailSheet extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: () => Navigator.pop(context),
                   icon: const Icon(Icons.close, size: 18),
-                  label: const Text('बंद करा / Close'),
+                  label: BilingualText(en: 'Close', mr: 'बंद करा', compact: true),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: PurchaseColors.muted,
                     side: const BorderSide(color: PurchaseColors.line),
@@ -738,15 +739,15 @@ class _SupplierDetailSheet extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
+                      SnackBar(
                         content:
-                            Text('खरेदी इतिहास लवकरच / Purchase history coming soon'),
+                            BilingualText(en: 'Purchase history coming soon', mr: 'खरेदी इतिहास लवकरच', compact: true),
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
                   icon: const Icon(Icons.history, size: 18),
-                  label: const Text('इतिहास / History'),
+                  label: BilingualText(en: 'History', mr: 'इतिहास', compact: true),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: PurchaseColors.navy,
                     foregroundColor: Colors.white,

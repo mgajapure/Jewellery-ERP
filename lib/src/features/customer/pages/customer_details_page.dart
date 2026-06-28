@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/widgets/bilingual_text.dart';
+
 import '../../../core/di/injection.dart';
 import '../../../core/navigation/app_navigation.dart';
 import '../../../core/widgets/bilingual_text.dart';
@@ -32,7 +34,7 @@ Future<void> _launchCall(BuildContext context, String mobile) async {
   if (!await launchUrl(uri) && context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('डायलर उघडता आला नाही / Could not open dialer'),
+        content: BilingualText(en: 'Could not open dialer', mr: 'डायलर उघडता आला नाही', compact: true),
         behavior: SnackBarBehavior.floating,
       ),
     );
@@ -45,7 +47,7 @@ Future<void> _launchWhatsApp(BuildContext context, String mobile) async {
       context.mounted) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('WhatsApp उघडता आला नाही / Could not open WhatsApp'),
+        content: BilingualText(en: 'Could not open WhatsApp', mr: 'WhatsApp उघडता आला नाही', compact: true),
         behavior: SnackBarBehavior.floating,
       ),
     );

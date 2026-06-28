@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../../inventory/domain/entities/inventory_item.dart';
 import '../../inventory/presentation/bloc/inventory_list_bloc.dart';
 import '../domain/entities/sale_order.dart';
@@ -323,7 +324,7 @@ class _TotalPanel extends StatelessWidget {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('इन्व्हॉईस पूर्वावलोकन / Preview Invoice'),
+                  : BilingualText(en: 'Preview Invoice', mr: 'इन्व्हॉईस पूर्वावलोकन', compact: true),
             ),
           ),
         ],

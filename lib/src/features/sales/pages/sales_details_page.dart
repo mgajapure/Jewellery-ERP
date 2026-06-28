@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/sale_order.dart';
 import '../theme/sales_colors.dart';
 
@@ -147,14 +148,14 @@ class _DetailsBody extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                    SnackBar(
+                      content: BilingualText(en: 'Print coming soon', mr: 'प्रिंट लवकरच', compact: true),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
                 icon: const Icon(Icons.print_outlined),
-                label: const Text('प्रिंट / Print'),
+                label: BilingualText(en: 'Print', mr: 'प्रिंट', compact: true),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: SalesColors.navy,
                   side: const BorderSide(color: SalesColors.navy),
@@ -170,7 +171,7 @@ class _DetailsBody extends StatelessWidget {
               child: ElevatedButton.icon(
                 onPressed: () => context.goNamed('sales-return'),
                 icon: const Icon(Icons.assignment_return_outlined),
-                label: const Text('परतावा / Return'),
+                label: BilingualText(en: 'Return', mr: 'परतावा', compact: true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: SalesColors.red,
                   foregroundColor: Colors.white,

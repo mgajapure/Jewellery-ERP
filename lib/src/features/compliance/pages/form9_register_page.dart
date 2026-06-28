@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/compliance_entities.dart';
 import '../presentation/bloc/form9_bloc.dart';
 import '../theme/compliance_colors.dart';
@@ -138,8 +139,7 @@ class _Form9ScaffoldState extends State<_Form9Scaffold> {
                                 context.read<Form9Bloc>().add(Form9Started()),
                             style: ElevatedButton.styleFrom(
                                 backgroundColor: ComplianceColors.navy),
-                            child: const Text('पुन्हा प्रयत्न / Retry',
-                                style: TextStyle(color: Colors.white)),
+                            child: BilingualText(en: 'Retry', mr: 'पुन्हा प्रयत्न', compact: true),
                           ),
                         ],
                       ),
@@ -232,7 +232,7 @@ class _FilterBar extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: onPreview,
               icon: const Icon(Icons.refresh, size: 18),
-              label: const Text('Preview'),
+              label: BilingualText(en: 'Preview', mr: 'पूर्वावलोकन', compact: true),
               style: ElevatedButton.styleFrom(
                 backgroundColor: ComplianceColors.navy,
                 foregroundColor: Colors.white,

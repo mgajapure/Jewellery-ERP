@@ -6,6 +6,7 @@ import '../../../core/l10n/app_l10n_provider.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../theme/settings_colors.dart';
 
 class SettingsDashboardPage extends StatefulWidget {
@@ -664,9 +665,7 @@ class _EditFieldSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () => context.pop(),
-              child: const Text('जतन करा / Save',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700)),
+              child: BilingualText(en: 'Save', mr: 'जतन करा', compact: true),
             ),
           ),
         ],
@@ -731,9 +730,7 @@ class _EditRateSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () => context.pop(),
-              child: const Text('भाव अपडेट करा / Update Rate',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700)),
+              child: BilingualText(en: 'Update Rate', mr: 'भाव अपडेट करा', compact: true),
             ),
           ),
         ],

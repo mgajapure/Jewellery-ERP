@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/purchase_entry.dart';
 import '../theme/purchase_colors.dart';
 import 'purchase_ledger_page.dart';
@@ -129,14 +130,14 @@ class _DetailsBody extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('प्रिंट लवकरच / Print coming soon'),
+                    SnackBar(
+                      content: BilingualText(en: 'Print coming soon', mr: 'प्रिंट लवकरच', compact: true),
                       behavior: SnackBarBehavior.floating,
                     ),
                   );
                 },
                 icon: const Icon(Icons.print_outlined),
-                label: const Text('प्रिंट / Print'),
+                label: BilingualText(en: 'Print', mr: 'प्रिंट', compact: true),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: PurchaseColors.navy,
                   side: const BorderSide(color: PurchaseColors.navy),
@@ -160,7 +161,7 @@ class _DetailsBody extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.edit_outlined),
-                label: const Text('संपादन / Edit'),
+                label: BilingualText(en: 'Edit', mr: 'संपादन', compact: true),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: PurchaseColors.navy,
                   foregroundColor: Colors.white,

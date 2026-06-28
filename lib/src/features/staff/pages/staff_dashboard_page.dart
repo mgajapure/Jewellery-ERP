@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../theme/staff_colors.dart';
 
 class StaffDashboardPage extends StatefulWidget {
@@ -446,10 +447,10 @@ class _EmptyState extends StatelessWidget {
           const Icon(Icons.people_outline,
               size: 48, color: StaffColors.muted),
           const SizedBox(height: 12),
-          Text('कोणताही कर्मचारी सापडला नाही',
+          BilingualText(
+              en: 'No staff member found',
+              mr: 'कोणताही कर्मचारी सापडला नाही',
               style: AppTextStyles.bodyLarge.copyWith(color: AppColors.muted)),
-          const Text('No staff member found',
-              style: AppTextStyles.bodySmall),
         ],
       ),
     );
@@ -470,8 +471,7 @@ class _AddStaffSheet extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('नवीन कर्मचारी / Add Staff',
-                  style: AppTextStyles.sectionTitle),
+              BilingualText(en: 'Add Staff', mr: 'नवीन कर्मचारी', style: AppTextStyles.sectionTitle),
               const Spacer(),
               IconButton(
                 onPressed: () => context.pop(),
@@ -487,9 +487,9 @@ class _AddStaffSheet extends StatelessWidget {
               hint: '10-digit number',
               keyboardType: TextInputType.phone),
           const SizedBox(height: 12),
-          Text('भूमिका / Role',
+          BilingualText(en: 'Role', mr: 'भूमिका',
               style: AppTextStyles.bodySmall.copyWith(
-                  fontWeight: FontWeight.w600, color: AppColors.navy)),
+                  fontWeight: FontWeight.w600, color: AppColors.navy), compact: true),
           const SizedBox(height: 8),
           Wrap(
             spacing: 8,
@@ -509,9 +509,7 @@ class _AddStaffSheet extends StatelessWidget {
                     borderRadius: BorderRadius.circular(10)),
               ),
               onPressed: () => context.pop(),
-              child: const Text('जतन करा / Save',
-                  style: TextStyle(
-                      color: Colors.white, fontWeight: FontWeight.w700)),
+              child: BilingualText(en: 'Save', mr: 'जतन करा', compact: true),
             ),
           ),
         ],

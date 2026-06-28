@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../domain/entities/inventory_item.dart';
 import '../presentation/bloc/inventory_detail_bloc.dart';
 import '../theme/inventory_colors.dart';
@@ -70,7 +71,7 @@ class _InventoryDetailsScaffoldState
           setState(() => _item = state.item);
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('स्थिती अद्यतनित! / Status updated!'),
+              content: BilingualText(en: 'Status updated!', mr: 'स्थिती अद्यतनित!', compact: true),
               backgroundColor: InventoryColors.green,
             ),
           );
@@ -253,12 +254,12 @@ class _InventoryDetailsScaffoldState
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('बंद / Close'),
+            child: BilingualText(en: 'Close', mr: 'बंद करा', compact: true),
           ),
           ElevatedButton.icon(
             onPressed: () => Navigator.pop(context),
             icon: const Icon(Icons.print, size: 16),
-            label: const Text('प्रिंट / Print'),
+            label: BilingualText(en: 'Print', mr: 'प्रिंट', compact: true),
             style: ElevatedButton.styleFrom(
               backgroundColor: InventoryColors.navy,
               foregroundColor: Colors.white,
@@ -595,7 +596,7 @@ class _BottomActions extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: const Text('राखीव / Reserve'),
+                          child: BilingualText(en: 'Reserve', mr: 'राखीव', compact: true),
                         ),
                       ),
                       const SizedBox(width: 12),
@@ -611,7 +612,7 @@ class _BottomActions extends StatelessWidget {
                             padding:
                                 const EdgeInsets.symmetric(vertical: 14),
                           ),
-                          child: const Text('विकले / Mark Sold'),
+                          child: BilingualText(en: 'Mark Sold', mr: 'विकले', compact: true),
                         ),
                       ),
                     ],

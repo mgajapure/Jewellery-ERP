@@ -97,6 +97,40 @@ abstract class AppL10n {
   String get settingsDeveloper;
   String get settingsPrivacyPolicy;
   String get settingsContactSupport;
+
+  // Common buttons (extended)
+  String get btnOk;
+  String get btnRetry;
+  String get btnPreview;
+  String get btnPrint;
+  String get btnLedger;
+  String get btnReserve;
+  String get btnMarkSold;
+  String get btnCheckout;
+  String get btnFinalize;
+  String get btnReturn;
+  String get btnHistory;
+  String get btnViewGirvi;
+  String get btnUpdateRate;
+  String get btnPreviewInvoice;
+  String get btnCustomer;
+
+  // Validation messages
+  String get msgInvalidMobile;
+  String get msgInvalidOtp;
+
+  // Feedback / snackbar messages
+  String get msgPrintComingSoon;
+  String get msgPdfExportComingSoon;
+  String get msgCouldNotOpenDialer;
+  String get msgCouldNotOpenWhatsApp;
+  String get msgItemAddedSuccess;
+  String get msgStatusUpdated;
+  String get msgPurchaseSaved;
+  String get msgPurchaseHistoryComingSoon;
+  String get msgReturnProcessed;
+  String get msgCoordinateCopied;
+  String get msgNoStaffFound;
 }
 
 // ─── English ────────────────────────────────────────────────────────────────
@@ -244,6 +278,63 @@ class _EnStrings extends AppL10n {
   String get settingsPrivacyPolicy => 'Privacy Policy';
   @override
   String get settingsContactSupport => 'Contact Support';
+
+  @override
+  String get btnOk => 'OK';
+  @override
+  String get btnRetry => 'Retry';
+  @override
+  String get btnPreview => 'Preview';
+  @override
+  String get btnPrint => 'Print';
+  @override
+  String get btnLedger => 'Ledger';
+  @override
+  String get btnReserve => 'Reserve';
+  @override
+  String get btnMarkSold => 'Mark Sold';
+  @override
+  String get btnCheckout => 'Checkout';
+  @override
+  String get btnFinalize => 'Finalize';
+  @override
+  String get btnReturn => 'Return';
+  @override
+  String get btnHistory => 'History';
+  @override
+  String get btnViewGirvi => 'View Girvi';
+  @override
+  String get btnUpdateRate => 'Update Rate';
+  @override
+  String get btnPreviewInvoice => 'Preview Invoice';
+  @override
+  String get btnCustomer => 'Customer';
+  @override
+  String get msgInvalidMobile => 'Please enter a valid 10-digit mobile number.';
+  @override
+  String get msgInvalidOtp => 'Please enter the full 6-digit OTP.';
+  @override
+  String get msgPrintComingSoon => 'Print coming soon';
+  @override
+  String get msgPdfExportComingSoon => 'PDF export coming soon';
+  @override
+  String get msgCouldNotOpenDialer => 'Could not open dialer';
+  @override
+  String get msgCouldNotOpenWhatsApp => 'Could not open WhatsApp';
+  @override
+  String get msgItemAddedSuccess => 'Item added successfully!';
+  @override
+  String get msgStatusUpdated => 'Status updated!';
+  @override
+  String get msgPurchaseSaved => 'Purchase saved';
+  @override
+  String get msgPurchaseHistoryComingSoon => 'Purchase history coming soon';
+  @override
+  String get msgReturnProcessed => 'Return processed.';
+  @override
+  String get msgCoordinateCopied => 'Coordinate copied';
+  @override
+  String get msgNoStaffFound => 'No staff member found';
 }
 
 // ─── Marathi ────────────────────────────────────────────────────────────────
@@ -391,6 +482,63 @@ class _MrStrings extends AppL10n {
   String get settingsPrivacyPolicy => 'गोपनीयता धोरण';
   @override
   String get settingsContactSupport => 'सहाय्य';
+
+  @override
+  String get btnOk => 'ठीक आहे';
+  @override
+  String get btnRetry => 'पुन्हा प्रयत्न';
+  @override
+  String get btnPreview => 'पूर्वावलोकन';
+  @override
+  String get btnPrint => 'प्रिंट';
+  @override
+  String get btnLedger => 'खातेवही';
+  @override
+  String get btnReserve => 'राखीव';
+  @override
+  String get btnMarkSold => 'विकले';
+  @override
+  String get btnCheckout => 'चेकआउट';
+  @override
+  String get btnFinalize => 'निश्चित करा';
+  @override
+  String get btnReturn => 'परतावा';
+  @override
+  String get btnHistory => 'इतिहास';
+  @override
+  String get btnViewGirvi => 'गिरवी पहा';
+  @override
+  String get btnUpdateRate => 'भाव अपडेट करा';
+  @override
+  String get btnPreviewInvoice => 'इन्व्हॉईस पूर्वावलोकन';
+  @override
+  String get btnCustomer => 'ग्राहक';
+  @override
+  String get msgInvalidMobile => 'कृपया 10 अंकी मोबाईल क्रमांक टाका.';
+  @override
+  String get msgInvalidOtp => 'कृपया 6 अंकी OTP टाका.';
+  @override
+  String get msgPrintComingSoon => 'प्रिंट लवकरच';
+  @override
+  String get msgPdfExportComingSoon => 'PDF निर्यात लवकरच';
+  @override
+  String get msgCouldNotOpenDialer => 'डायलर उघडता आला नाही';
+  @override
+  String get msgCouldNotOpenWhatsApp => 'WhatsApp उघडता आला नाही';
+  @override
+  String get msgItemAddedSuccess => 'वस्तू यशस्वीरीत्या जोडली!';
+  @override
+  String get msgStatusUpdated => 'स्थिती अद्यतनित!';
+  @override
+  String get msgPurchaseSaved => 'खरेदी नोंद यशस्वीरित्या जतन केली';
+  @override
+  String get msgPurchaseHistoryComingSoon => 'खरेदी इतिहास लवकरच';
+  @override
+  String get msgReturnProcessed => 'परतावा प्रक्रिया यशस्वी';
+  @override
+  String get msgCoordinateCopied => 'कोऑर्डिनेट कॉपी केले';
+  @override
+  String get msgNoStaffFound => 'कोणताही कर्मचारी सापडला नाही';
 }
 
 // ─── Hindi ──────────────────────────────────────────────────────────────────
@@ -538,4 +686,61 @@ class _HiStrings extends AppL10n {
   String get settingsPrivacyPolicy => 'गोपनीयता नीति';
   @override
   String get settingsContactSupport => 'सहायता';
+
+  @override
+  String get btnOk => 'ठीक है';
+  @override
+  String get btnRetry => 'पुनः प्रयास';
+  @override
+  String get btnPreview => 'पूर्वावलोकन';
+  @override
+  String get btnPrint => 'प्रिंट';
+  @override
+  String get btnLedger => 'बहीखाता';
+  @override
+  String get btnReserve => 'आरक्षित';
+  @override
+  String get btnMarkSold => 'बेचा हुआ';
+  @override
+  String get btnCheckout => 'चेकआउट';
+  @override
+  String get btnFinalize => 'अंतिम करें';
+  @override
+  String get btnReturn => 'वापसी';
+  @override
+  String get btnHistory => 'इतिहास';
+  @override
+  String get btnViewGirvi => 'गिरवी देखें';
+  @override
+  String get btnUpdateRate => 'दर अपडेट करें';
+  @override
+  String get btnPreviewInvoice => 'इनवॉइस पूर्वावलोकन';
+  @override
+  String get btnCustomer => 'ग्राहक';
+  @override
+  String get msgInvalidMobile => 'कृपया 10 अंकी मोबाइल नंबर दर्ज करें.';
+  @override
+  String get msgInvalidOtp => 'कृपया पूरा 6 अंकी OTP दर्ज करें.';
+  @override
+  String get msgPrintComingSoon => 'प्रिंट जल्द आएगा';
+  @override
+  String get msgPdfExportComingSoon => 'PDF निर्यात जल्द आएगा';
+  @override
+  String get msgCouldNotOpenDialer => 'डायलर नहीं खुल सका';
+  @override
+  String get msgCouldNotOpenWhatsApp => 'WhatsApp नहीं खुल सका';
+  @override
+  String get msgItemAddedSuccess => 'वस्तु सफलतापूर्वक जोड़ी गई!';
+  @override
+  String get msgStatusUpdated => 'स्थिति अपडेट हुई!';
+  @override
+  String get msgPurchaseSaved => 'खरीद रिकॉर्ड सहेजा गया';
+  @override
+  String get msgPurchaseHistoryComingSoon => 'खरीद इतिहास जल्द आएगा';
+  @override
+  String get msgReturnProcessed => 'वापसी प्रक्रिया सफल';
+  @override
+  String get msgCoordinateCopied => 'कोऑर्डिनेट कॉपी हुआ';
+  @override
+  String get msgNoStaffFound => 'कोई कर्मचारी नहीं मिला';
 }

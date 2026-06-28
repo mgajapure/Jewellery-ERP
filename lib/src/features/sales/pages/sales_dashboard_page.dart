@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/widgets/app_header.dart';
+import '../../../core/widgets/bilingual_text.dart';
 import '../presentation/bloc/sales_dashboard_bloc.dart';
 import '../theme/sales_colors.dart';
 
@@ -363,7 +364,7 @@ class _ErrorView extends StatelessWidget {
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
-              child: const Text('पुन्हा प्रयत्न / Retry'),
+              child: BilingualText(en: 'Retry', mr: 'पुन्हा प्रयत्न', compact: true),
             ),
           ],
         ),
